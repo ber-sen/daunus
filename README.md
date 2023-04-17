@@ -8,7 +8,7 @@ useCases/hello/index.ts
 ```typescript
 import { z } from 'zod';
 import { tineInput, tineVar } from 'tinejs';
-import payload from 'tinejs-actions/payload';
+import payload from 'tinejs.payload';
 
 const schema = z.object({ name: z.string().nullable().optional() });
 
