@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import uuid4 from 'uuid4'
+
 import { isMapLike } from './helpers';
 import { resolvePayload } from './resolvePayload';
 import {
@@ -14,7 +16,7 @@ export const tineAction =
     run: (payload: P, { ctx }: { ctx: TineCtx }) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P> },
   ) =>
-  (payload: TinePayload<P>, actionCtx: { name: string }) => {
+  (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuid4()}) => {
     const action = {
       ...actionCtx,
       run: async (options?: { ctx: TineCtx }) => {
@@ -35,7 +37,7 @@ export const tineAction =
     return {
       ...action,
       noInput: () => action,
-      withInput: <I>(inputSchema: TineInput<I>) =>
+      withInput: <I>(inputSchema: TineInput<I> | z.ZodType<I>) =>
         ({
           inputSchema,
           input: (value: I) => ({
@@ -43,7 +45,7 @@ export const tineAction =
             run: async (options?: { ctx: TineCtx }) => {
               const ctx = options?.ctx || new Map();
 
-              ctx.set(inputSchema.name, inputSchema.parse(value));
+              ctx.set('name' in inputSchema ? inputSchema.name : inputSchema, inputSchema.parse(value));
 
               return action.run({ ctx });
             },
@@ -54,7 +56,7 @@ export const tineAction =
               const ctx = options?.ctx || new Map();
 
               ctx.set(
-                inputSchema.name,
+                'name' in inputSchema ? inputSchema.name : inputSchema,
                 isMapLike(value)
                   ? Object.fromEntries(value as any)
                   : inputSchema.parse(value),
