@@ -45,7 +45,7 @@ export const tineAction =
             run: async (options?: { ctx?: TineCtx }) => {
               const ctx = options?.ctx || new Map();
 
-              ctx.set('name' in inputSchema ? inputSchema.name : 'input', inputSchema.parse(value));
+              ctx.set('name' in inputSchema ? inputSchema.name : inputSchema, inputSchema.parse(value));
 
               return action.run({ ctx });
             },
@@ -56,7 +56,7 @@ export const tineAction =
               const ctx = options?.ctx || new Map();
 
               ctx.set(
-                'name' in inputSchema ? inputSchema.name : 'input',
+                'name' in inputSchema ? inputSchema.name : inputSchema,
                 isMapLike(value)
                   ? Object.fromEntries(value as any)
                   : inputSchema.parse(value),
