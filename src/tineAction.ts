@@ -13,13 +13,13 @@ import {
 
 export const tineAction =
   <P, D>(
-    run: (payload: P, { ctx }: { ctx: TineCtx }) => D | Promise<D>,
+    run: (payload: P, { ctx }: { ctx?: TineCtx }) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P> },
   ) =>
   (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuid4()}) => {
     const action = {
       ...actionCtx,
-      run: async (options?: { ctx: TineCtx }) => {
+      run: async (options?: { ctx?: TineCtx }) => {
         const ctx = options?.ctx || new Map();
 
         const parsedPayload = await parsePayload(ctx, payload, {
@@ -42,21 +42,21 @@ export const tineAction =
           inputSchema,
           input: (value: I) => ({
             ...action,
-            run: async (options?: { ctx: TineCtx }) => {
+            run: async (options?: { ctx?: TineCtx }) => {
               const ctx = options?.ctx || new Map();
 
-              ctx.set('name' in inputSchema ? inputSchema.name : inputSchema, inputSchema.parse(value));
+              ctx.set('name' in inputSchema ? inputSchema.name : 'input', inputSchema.parse(value));
 
               return action.run({ ctx });
             },
           }),
           rawInput: (value: unknown) => ({
             ...action,
-            run: async (options?: { ctx: TineCtx }) => {
+            run: async (options?: { ctx?: TineCtx }) => {
               const ctx = options?.ctx || new Map();
 
               ctx.set(
-                'name' in inputSchema ? inputSchema.name : inputSchema,
+                'name' in inputSchema ? inputSchema.name : 'input',
                 isMapLike(value)
                   ? Object.fromEntries(value as any)
                   : inputSchema.parse(value),

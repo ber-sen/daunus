@@ -22,7 +22,7 @@ export function tineVar(
   selector?: (value: any) => any | string,
 ) {
   const getValue = async (ctx: TineCtx) => {
-    const value = ctx.get('name' in arg ? arg.name : arg);
+    const value = ctx.get('name' in arg ? arg.name : 'input');
 
     if (value) {
       return value;
