@@ -13,7 +13,7 @@ export const resolvePayload = async <T>(
   }
 
   if (isArray(payload)) {
-    const result = payload;
+    const result = [];
 
     for (const key in payload) {
       const value = await resolvePayload(ctx, payload[key]);
@@ -21,11 +21,11 @@ export const resolvePayload = async <T>(
       payload[key] = value;
     }
 
-    return result;
+    return result as any;
   }
 
   if (isObject(payload)) {
-    const result = payload;
+    const result = {};
 
     for (const key of Object.keys(payload)) {
       const value = await resolvePayload(ctx, payload[key]);
@@ -33,7 +33,7 @@ export const resolvePayload = async <T>(
       result[key] = value;
     }
 
-    return result;
+    return result as any;
   }
 
   return payload;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import uuid4 from 'uuid4'
+import { v4 as uuidv4 } from 'uuid';
 
 import { isMapLike } from './helpers';
 import { resolvePayload } from './resolvePayload';
@@ -16,7 +16,7 @@ export const tineAction =
     run: (payload: P, { ctx }: { ctx?: TineCtx }) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P> },
   ) =>
-  (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuid4()}) => {
+  (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuidv4()}) => {
     const action = {
       ...actionCtx,
       run: async (options?: { ctx?: TineCtx }) => {
