@@ -2,20 +2,20 @@ import { z } from 'zod';
 import { TineAction, TineCtx, TineInput, TineVar } from './types';
 import { Path, TypeAtPath, get } from './get';
 
-export function tineVar<T>(
+export function tineVar<T, K extends Path<T>>(
   arg: TineInput<T> | z.ZodType<T> | TineAction<T>,
-  selector?: undefined,
-): TineVar<T>;
+  selector: K,
+): TineVar<TypeAtPath<T, K>>;
 
 export function tineVar<T, R>(
   arg: TineInput<T> | z.ZodType<T> | TineAction<T>,
   selector: (value: T) => R,
 ): TineVar<R>;
 
-export function tineVar<T, K extends Path<T>>(
+export function tineVar<T>(
   arg: TineInput<T> | z.ZodType<T> | TineAction<T>,
-  selector: K,
-): TineVar<TypeAtPath<T, K>>;
+  selector?: undefined,
+): TineVar<T>;
 
 export function tineVar(
   arg: TineInput<any> | TineAction<any>,
