@@ -18,7 +18,7 @@ export const resolvePayload = async <T>(
     for (const key in payload) {
       const value = await resolvePayload(ctx, payload[key]);
 
-      payload[key] = value;
+      result[key] = value;
     }
 
     return result as any;

@@ -16,28 +16,28 @@ export const tineAction =
     run: (payload: P, { ctx }: { ctx?: TineCtx }) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P> },
   ) =>
-  (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuidv4()}) => {
-    const action = {
-      ...actionCtx,
-      run: async (options?: { ctx?: TineCtx }) => {
-        const ctx = options?.ctx || new Map();
+    (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuidv4() }) => {
+      const action = {
+        ...actionCtx,
+        run: async (options?: { ctx?: TineCtx }) => {
+          const ctx = options?.ctx || new Map();
 
-        const parsedPayload = await parsePayload(ctx, payload, {
-          schema: args.schema,
-        });
+          const parsedPayload = await parsePayload(ctx, payload, {
+            schema: args.schema,
+          });
 
-        const value = await run(parsedPayload, { ctx });
+          const value = await run(parsedPayload, { ctx });
 
-        ctx.set(actionCtx.name, value);
+          ctx.set(actionCtx.name, value);
 
-        return value;
-      },
-    } satisfies TineAction<D>;
+          return value;
+        },
+      } satisfies TineAction<D>;
 
-    return {
-      ...action,
-      noInput: () => action,
-      withInput: <I>(inputSchema: TineInput<I> | z.ZodType<I>) =>
+      return {
+        ...action,
+        noInput: () => action,
+        withInput: <I>(inputSchema: TineInput<I> | z.ZodType<I>) =>
         ({
           inputSchema,
           input: (value: I) => ({
@@ -66,11 +66,11 @@ export const tineAction =
             },
           }),
         } as TineActionWithInput<D, I>),
-    } satisfies TineAction<D> & {
-      withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<D, I>;
-      noInput: () => TineAction<D>;
+      } satisfies TineAction<D> & {
+        withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<D, I>;
+        noInput: () => TineAction<D>;
+      };
     };
-  };
 
 export const parsePayload = async <T>(
   ctx: Map<string, any>,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
+import { tineInput } from './tineHelpers';
 import { resolvePayload } from './resolvePayload';
 import { tineVar } from './tineVar';
-import { tineInput } from './tineHelpers';
 
 describe('resolvePayload', () => {
   const input = tineInput(z.string(), { name: 'input' });

@@ -1,57 +1,69 @@
-// Thank you! Aleksei Tsikov
+type AnyObject<Key extends PropertyKey = PropertyKey, Value = any> = {
+  readonly [key in Key]: Value;
+};
 
-type FieldWithPossiblyUndefined<T, Key> =
-  | GetFieldType<Exclude<T, undefined>, Key>
-  | Extract<T, undefined>;
+type Paths<P extends string, T> = P | `${P}${NextPath<T>}`;
 
-type GetIndexedField<T, K> = K extends keyof T
-  ? T[K]
-  : K extends `${number}`
-  ? '0' extends keyof T
-    ? undefined
-    : number extends keyof T
-    ? T[number]
-    : undefined
-  : undefined;
+type Position = `[${number}]`;
 
-export type GetFieldType<T, P> = P extends `${infer Left}.${infer Right}`
-  ? Left extends keyof T
-    ? FieldWithPossiblyUndefined<T[Left], Right>
-    : Left extends `${infer FieldKey}[${infer IndexKey}]`
-    ? FieldKey extends keyof T
-      ? FieldWithPossiblyUndefined<
-          | GetIndexedField<Exclude<T[FieldKey], undefined>, IndexKey>
-          | Extract<T[FieldKey], undefined>,
-          Right
-        >
-      : undefined
-    : undefined
-  : P extends keyof T
-  ? T[P]
-  : P extends `${infer FieldKey}[${infer IndexKey}]`
-  ? FieldKey extends keyof T
-    ?
-        | GetIndexedField<Exclude<T[FieldKey], undefined>, IndexKey>
-        | Extract<T[FieldKey], undefined>
-    : undefined
-  : undefined;
+type NextPath<T> = T extends readonly (infer U)[]
+  ? Paths<Position, U>
+  : T extends AnyObject
+  ? {
+    [K in keyof T]-?: K extends string ? `.${Paths<K, T[K]>}` : never;
+  }[keyof T]
+  : never;
 
-export function get<
-  TData,
-  TPath extends string,
-  TDefault = GetFieldType<TData, TPath>,
->(
-  data: TData,
-  path: TPath,
-  defaultValue?: TDefault,
-): GetFieldType<TData, TPath> | TDefault {
+export type Path<T> = T extends readonly (infer U)[]
+  ? Paths<Position, U>
+  : T extends AnyObject
+  ? {
+    [K in keyof T]-?: K extends string ? Paths<K, T[K]> : never;
+  }[keyof T]
+  : never;
+
+type Accessor<T> = Position | Extract<keyof T, string>;
+
+type NextTypeAtPath<T, P extends string> = P extends `.${infer P2}`
+  ? P2 extends Path<T>
+  ? TypeAtPath<T, P2>
+  : never
+  : P extends Path<T>
+  ? TypeAtPath<T, P>
+  : never;
+
+type TypeAt<T, A extends string> = A extends Position
+  ? T extends readonly (infer U)[]
+  ? U
+  : never
+  : A extends keyof T
+  ? T[A]
+  : never;
+
+export type TypeAtPath<T, P extends Path<T>> = P extends Accessor<T>
+  ? TypeAt<Required<T>, P>
+  : P extends `${Accessor<T>}${infer P2}`
+  ? P extends `${infer A}${P2}`
+  ? NextTypeAtPath<TypeAt<Required<T>, A>, P2>
+  : never
+  : never;
+
+export function get<T, P extends Path<T>, U>(
+  object: T,
+  path: P,
+  placeholder: U,
+): TypeAtPath<T, P> | U;
+
+export function get<T, P extends Path<T>>(
+  object: T,
+  path: P,
+): TypeAtPath<T, P> | undefined;
+
+export function get(data: any, path: string, defaultValue?: any): any {
   const value = path
     .split(/[.[\]]/)
     .filter(Boolean)
-    .reduce<GetFieldType<TData, TPath>>(
-      (value, key) => (value as any)?.[key],
-      data as any,
-    );
+    .reduce<any>((value, key) => (value as any)?.[key], data as any);
 
-  return value !== undefined ? value : (defaultValue as TDefault);
+  return value !== undefined ? value : (defaultValue as any);
 }
