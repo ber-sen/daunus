@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { tineInput } from './tineHelpers';
 import { resolvePayload } from './resolvePayload';
 import { tineVar } from './tineVar';
-import { TineInput } from 'tinejs';
+import { TineInput } from './types';
 
 const getContext = <T>(input: TineInput<T>, value: object) => {
   const ctx = new Map();
@@ -13,9 +13,7 @@ const getContext = <T>(input: TineInput<T>, value: object) => {
 }
 
 describe('tineVar', () => {
-
   describe('string selector', () => {
-
     it('should return the value', async () => {
       const input = tineInput(z.object({ name: z.string() }), { name: 'input' });
 
@@ -45,7 +43,5 @@ describe('tineVar', () => {
 
       expect(res).toStrictEqual('Earth');
     });
-
   })
-
 });
