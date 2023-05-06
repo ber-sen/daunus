@@ -5,6 +5,7 @@ import { isMapLike } from './helpers';
 import { resolvePayload } from './resolvePayload';
 import {
   TineAction,
+  TineActionOptions,
   TineActionWithInput,
   TineCtx,
   TineInput,
@@ -13,9 +14,7 @@ import {
 
 export const tineAction =
   <P, D>(
-    run: (payload: P, { ctx, parsePayload }: {
-      ctx?: TineCtx; parsePayload?: <X>(ctx: Map<string, any>, payload: X) => Promise<X>
-    }) => D | Promise<D>,
+    run: (payload: P, { ctx, parsePayload }: TineActionOptions) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P>; skipParse?: boolean; },
   ) =>
     (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuidv4() }) => {
