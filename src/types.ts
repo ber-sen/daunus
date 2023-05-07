@@ -26,8 +26,9 @@ export type TineActionWithInput<T, I> = {
 };
 
 export type TineActionOptions = {
-  ctx: TineCtx; parsePayload: <X>(ctx: Map<string, any>, payload: X) => Promise<X>
-}
+  ctx: TineCtx;
+  parsePayload: <X>(ctx: Map<string, any>, payload: X) => Promise<X>;
+};
 
 // TODO: fix type of tine payload
 

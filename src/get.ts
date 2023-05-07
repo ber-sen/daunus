@@ -10,32 +10,32 @@ type NextPath<T> = T extends readonly (infer U)[]
   ? Paths<Position, U>
   : T extends AnyObject
   ? {
-    [K in keyof T]-?: K extends string ? `.${Paths<K, T[K]>}` : never;
-  }[keyof T]
+      [K in keyof T]-?: K extends string ? `.${Paths<K, T[K]>}` : never;
+    }[keyof T]
   : never;
 
 export type Path<T> = T extends readonly (infer U)[]
   ? Paths<Position, U>
   : T extends AnyObject
   ? {
-    [K in keyof T]-?: K extends string ? Paths<K, T[K]> : never;
-  }[keyof T]
+      [K in keyof T]-?: K extends string ? Paths<K, T[K]> : never;
+    }[keyof T]
   : never;
 
 type Accessor<T> = Position | Extract<keyof T, string>;
 
 type NextTypeAtPath<T, P extends string> = P extends `.${infer P2}`
   ? P2 extends Path<T>
-  ? TypeAtPath<T, P2>
-  : never
+    ? TypeAtPath<T, P2>
+    : never
   : P extends Path<T>
   ? TypeAtPath<T, P>
   : never;
 
 type TypeAt<T, A extends string> = A extends Position
   ? T extends readonly (infer U)[]
-  ? U
-  : never
+    ? U
+    : never
   : A extends keyof T
   ? T[A]
   : never;
@@ -44,8 +44,8 @@ export type TypeAtPath<T, P extends Path<T>> = P extends Accessor<T>
   ? TypeAt<Required<T>, P>
   : P extends `${Accessor<T>}${infer P2}`
   ? P extends `${infer A}${P2}`
-  ? NextTypeAtPath<TypeAt<Required<T>, A>, P2>
-  : never
+    ? NextTypeAtPath<TypeAt<Required<T>, A>, P2>
+    : never
   : never;
 
 export function get<T, P extends Path<T>, U>(

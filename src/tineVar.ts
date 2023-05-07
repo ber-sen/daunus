@@ -16,10 +16,7 @@ export function tineVar<T>(
   selector?: undefined,
 ): TineVar<T>;
 
-export function tineVar(
-  arg: TineInput<any> | TineAction<any>,
-  selector?: any,
-) {
+export function tineVar(arg: TineInput<any> | TineAction<any>, selector?: any) {
   const getValue = async (ctx: TineCtx) => {
     const value = ctx.get(arg.name);
 

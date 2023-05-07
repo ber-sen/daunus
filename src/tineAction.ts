@@ -14,34 +14,39 @@ import {
 
 export const tineAction =
   <P, D>(
-    run: (payload: P, { ctx, parsePayload }: TineActionOptions) => D | Promise<D>,
-    args: { action: string; schema?: z.Schema<P>; skipParse?: boolean; },
+    run: (
+      payload: P,
+      { ctx, parsePayload }: TineActionOptions,
+    ) => D | Promise<D>,
+    args: { action: string; schema?: z.Schema<P>; skipParse?: boolean },
   ) =>
-    (payload: TinePayload<P>, actionCtx?: { name?: string }) => {
-      const name: string = actionCtx?.name || uuidv4()
+  (payload: TinePayload<P>, actionCtx?: { name?: string }) => {
+    const name: string = actionCtx?.name || uuidv4();
 
-      const action = {
-        ...actionCtx,
-        name,
-        run: async (options?: { ctx?: TineCtx }) => {
-          const ctx = options?.ctx || new Map();
+    const action = {
+      ...actionCtx,
+      name,
+      run: async (options?: { ctx?: TineCtx }) => {
+        const ctx = options?.ctx || new Map();
 
-          const parsedPayload = args.skipParse ? payload : await parsePayload(ctx, payload, {
-            schema: args.schema,
-          });
+        const parsedPayload = args.skipParse
+          ? payload
+          : await parsePayload(ctx, payload, {
+              schema: args.schema,
+            });
 
-          const value = await run(parsedPayload, { ctx, parsePayload });
+        const value = await run(parsedPayload, { ctx, parsePayload });
 
-          ctx.set(name, value);
+        ctx.set(name, value);
 
-          return value;
-        },
-      } satisfies TineAction<D>;
+        return value;
+      },
+    } satisfies TineAction<D>;
 
-      return {
-        ...action,
-        noInput: () => action,
-        withInput: <I>(inputSchema: TineInput<I>) =>
+    return {
+      ...action,
+      noInput: () => action,
+      withInput: <I>(inputSchema: TineInput<I>) =>
         ({
           inputSchema,
           input: (value: I) => ({
@@ -70,11 +75,11 @@ export const tineAction =
             },
           }),
         } as TineActionWithInput<D, I>),
-      } satisfies TineAction<D> & {
-        withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<D, I>;
-        noInput: () => TineAction<D>;
-      };
+    } satisfies TineAction<D> & {
+      withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<D, I>;
+      noInput: () => TineAction<D>;
     };
+  };
 
 export const parsePayload = async <T>(
   ctx: Map<string, any>,
