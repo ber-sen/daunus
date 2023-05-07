@@ -18,9 +18,11 @@ export const tineAction =
     args: { action: string; schema?: z.Schema<P>; skipParse?: boolean; },
   ) =>
     (payload: TinePayload<P>, actionCtx?: { name?: string }) => {
+      const name: string = actionCtx?.name || uuidv4()
+
       const action = {
         ...actionCtx,
-        name: actionCtx?.name || uuidv4(),
+        name,
         run: async (options?: { ctx?: TineCtx }) => {
           const ctx = options?.ctx || new Map();
 
@@ -30,7 +32,7 @@ export const tineAction =
 
           const value = await run(parsedPayload, { ctx, parsePayload });
 
-          ctx.set(actionCtx.name, value);
+          ctx.set(name, value);
 
           return value;
         },
