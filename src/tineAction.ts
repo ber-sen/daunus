@@ -17,9 +17,10 @@ export const tineAction =
     run: (payload: P, { ctx, parsePayload }: TineActionOptions) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P>; skipParse?: boolean; },
   ) =>
-    (payload: TinePayload<P>, actionCtx: { name: string } = { name: uuidv4() }) => {
+    (payload: TinePayload<P>, actionCtx?: { name?: string }) => {
       const action = {
         ...actionCtx,
+        name: actionCtx.name || uuidv4(),
         run: async (options?: { ctx?: TineCtx }) => {
           const ctx = options?.ctx || new Map();
 
@@ -38,7 +39,7 @@ export const tineAction =
       return {
         ...action,
         noInput: () => action,
-        withInput: <I>(inputSchema: TineInput<I> | z.ZodType<I>) =>
+        withInput: <I>(inputSchema: TineInput<I>) =>
         ({
           inputSchema,
           input: (value: I) => ({
@@ -46,7 +47,7 @@ export const tineAction =
             run: async (options?: { ctx?: TineCtx }) => {
               const ctx = options?.ctx || new Map();
 
-              ctx.set('name' in inputSchema ? inputSchema.name : inputSchema, inputSchema.parse(value));
+              ctx.set(inputSchema.name, inputSchema.parse(value));
 
               return action.run({ ctx });
             },
@@ -57,7 +58,7 @@ export const tineAction =
               const ctx = options?.ctx || new Map();
 
               ctx.set(
-                'name' in inputSchema ? inputSchema.name : inputSchema,
+                inputSchema.name,
                 isMapLike(value)
                   ? Object.fromEntries(value as any)
                   : inputSchema.parse(value),
