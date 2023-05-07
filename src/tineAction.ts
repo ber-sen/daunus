@@ -20,7 +20,7 @@ export const tineAction =
     (payload: TinePayload<P>, actionCtx?: { name?: string }) => {
       const action = {
         ...actionCtx,
-        name: actionCtx.name || uuidv4(),
+        name: actionCtx?.name || uuidv4(),
         run: async (options?: { ctx?: TineCtx }) => {
           const ctx = options?.ctx || new Map();
 
