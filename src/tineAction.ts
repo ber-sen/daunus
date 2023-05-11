@@ -20,7 +20,7 @@ export const tineAction =
     ) => D | Promise<D>,
     args: { action: string; schema?: z.Schema<P>; skipParse?: boolean },
   ) =>
-  (payload: TinePayload<P>, actionCtx?: { name?: string }) => {
+  (payload?: TinePayload<P>, actionCtx?: { name?: string }) => {
     const name: string = actionCtx?.name || uuidv4();
 
     const action = {
@@ -29,11 +29,12 @@ export const tineAction =
       run: async (options?: { ctx?: TineCtx }) => {
         const ctx = options?.ctx || new Map();
 
-        const parsedPayload = args.skipParse
-          ? payload
-          : await parsePayload(ctx, payload, {
-              schema: args.schema,
-            });
+        const parsedPayload =
+          args.skipParse || !payload
+            ? payload
+            : await parsePayload(ctx, payload, {
+                schema: args.schema,
+              });
 
         const value = await run(parsedPayload, { ctx, parsePayload });
 
