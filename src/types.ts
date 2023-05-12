@@ -25,6 +25,11 @@ export type TineActionWithInput<T, I> = {
   rawInput: (value: unknown) => TineAction<T>;
 };
 
+export type TineActionWithOptions<T> = TineAction<T> & {
+  noInput: () => TineAction<T>;
+  withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<T, I>;
+};
+
 export type TineActionOptions = {
   ctx: TineCtx;
   parsePayload: <X>(ctx: Map<string, any>, payload: X) => Promise<X>;

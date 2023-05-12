@@ -6,7 +6,7 @@ import { resolvePayload } from './resolvePayload';
 import {
   TineAction,
   TineActionOptions,
-  TineActionWithInput,
+  TineActionWithOptions,
   TineCtx,
   TineInput,
   TinePayload,
@@ -45,35 +45,31 @@ export const tineAction =
     return {
       ...action,
       noInput: () => action,
-      withInput: <I>(inputSchema: TineInput<I>) =>
-        ({
-          inputSchema,
-          input: (value: I) => ({
-            ...action,
-            run: async (ctx: TineCtx = new Map()) => {
-              ctx.set(inputSchema.name, inputSchema.parse(value));
+      withInput: <I>(inputSchema: TineInput<I>) => ({
+        inputSchema,
+        input: (value: I) => ({
+          ...action,
+          run: async (ctx: TineCtx = new Map()) => {
+            ctx.set(inputSchema.name, inputSchema.parse(value));
 
-              return action.run(ctx);
-            },
-          }),
-          rawInput: (value: unknown) => ({
-            ...action,
-            run: async (ctx: TineCtx = new Map()) => {
-              ctx.set(
-                inputSchema.name,
-                isMapLike(value)
-                  ? Object.fromEntries(value as any)
-                  : inputSchema.parse(value),
-              );
+            return action.run(ctx);
+          },
+        }),
+        rawInput: (value: unknown) => ({
+          ...action,
+          run: async (ctx: TineCtx = new Map()) => {
+            ctx.set(
+              inputSchema.name,
+              isMapLike(value)
+                ? Object.fromEntries(value as any)
+                : inputSchema.parse(value),
+            );
 
-              return action.run(ctx);
-            },
-          }),
-        } as TineActionWithInput<D, I>),
-    } satisfies TineAction<D> & {
-      withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<D, I>;
-      noInput: () => TineAction<D>;
-    };
+            return action.run(ctx);
+          },
+        }),
+      }),
+    } satisfies TineActionWithOptions<D>;
   };
 
 export const parsePayload = async <T>(
