@@ -16,7 +16,7 @@ export type TineActionInfo = { id?: string; path?: string };
 
 export type TineAction<T> = {
   name: string;
-  run: (args?: { ctx?: TineCtx }) => Promise<T>;
+  run: (ctx?: TineCtx) => Promise<T>;
 };
 
 export type TineActionWithInput<T, I> = {

@@ -26,9 +26,7 @@ export const tineAction =
     const action = {
       ...actionCtx,
       name,
-      run: async (options?: { ctx?: TineCtx }) => {
-        const ctx = options?.ctx || new Map();
-
+      run: async (ctx: TineCtx = new Map()) => {
         const parsedPayload =
           args.skipParse || !payload
             ? payload
@@ -52,19 +50,15 @@ export const tineAction =
           inputSchema,
           input: (value: I) => ({
             ...action,
-            run: async (options?: { ctx?: TineCtx }) => {
-              const ctx = options?.ctx || new Map();
-
+            run: async (ctx: TineCtx = new Map()) => {
               ctx.set(inputSchema.name, inputSchema.parse(value));
 
-              return action.run({ ctx });
+              return action.run(ctx);
             },
           }),
           rawInput: (value: unknown) => ({
             ...action,
-            run: async (options?: { ctx?: TineCtx }) => {
-              const ctx = options?.ctx || new Map();
-
+            run: async (ctx: TineCtx = new Map()) => {
               ctx.set(
                 inputSchema.name,
                 isMapLike(value)
@@ -72,7 +66,7 @@ export const tineAction =
                   : inputSchema.parse(value),
               );
 
-              return action.run({ ctx });
+              return action.run(ctx);
             },
           }),
         } as TineActionWithInput<D, I>),

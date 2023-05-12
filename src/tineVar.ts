@@ -25,7 +25,7 @@ export function tineVar(arg: TineInput<any> | TineAction<any>, selector?: any) {
     }
 
     if ('run' in arg) {
-      return await arg.run({ ctx });
+      return await arg.run(ctx);
     }
   };
 
