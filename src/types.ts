@@ -35,14 +35,13 @@ export type TineActionOptions = {
   parsePayload: <X>(ctx: Map<string, any>, payload: X) => Promise<X>;
 };
 
-// TODO: fix type of tine payload
+export type TineInferReturn<
+  T extends TineAction<any> | TineActionWithInput<any, any>,
+> = T extends TineActionWithInput<any, any>
+  ? Awaited<ReturnType<ReturnType<T['input']>['run']>>
+  : T extends TineAction<any>
+  ? Awaited<ReturnType<T['run']>>
+  : never;
 
-// type Primitive = string | number | boolean | null | undefined;
-
-// export type TineVar<T> = {
-//   __value: (ctx: TineCtx) => Promise<T | undefined | ((ctx: TineCtx) => T)>;
-// };
-
-// export type TinePayload<T> = T extends Primitive
-//   ? TineVar<T> | T
-//   : { [K in keyof T]: TinePayload<T[K]> };
+export type TineInferInput<T extends TineActionWithInput<any, any>> =
+  T extends TineActionWithInput<any, any> ? Parameters<T['input']>[0] : never;
