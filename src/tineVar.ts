@@ -2,10 +2,23 @@ import { TineAction, TineCtx, TineInput, TineVar } from './types';
 import { Path, TypeAtPath, get } from './get';
 import { isArray } from './helpers';
 
+type ExtractTineType<T> = T extends readonly (
+  | TineInput<any>
+  | TineAction<any>
+)[]
+  ? {
+      [K in keyof T]: T[K] extends TineInput<infer X>
+        ? X
+        : T[K] extends TineAction<infer Y>
+        ? Y
+        : never;
+    }
+  : never;
+
 export function tineVar<
   T extends readonly (TineInput<any> | TineAction<any>)[],
   R,
->(arg: T, selector: (value: T) => R): TineVar<R>;
+>(arg: T, selector: (value: ExtractTineType<T>) => R): TineVar<R>;
 
 export function tineVar<T, K extends Path<T>>(
   arg: TineInput<T> | TineAction<T>,
