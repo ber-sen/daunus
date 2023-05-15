@@ -54,5 +54,27 @@ describe('tineVar', () => {
 
       expect(res).toStrictEqual('Earth');
     });
+
+    it('should work with array the value', async () => {
+      const input1 = tineInput(z.object({ firstName: z.string() }), {
+        name: 'input1',
+      });
+
+      const input2 = tineInput(z.object({ lastName: z.string() }), {
+        name: 'input2',
+      });
+
+      const ctx = new Map();
+
+      ctx.set(input1.name, 'test');
+      ctx.set(input2.name, 'test2');
+
+      const res = await resolvePayload(
+        ctx,
+        tineVar([input1, input2] as const, ([$1, $2]) => [$1, $2]),
+      );
+
+      expect(res).toStrictEqual(['test', 'test2']);
+    });
   });
 });

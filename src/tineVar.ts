@@ -1,5 +1,11 @@
 import { TineAction, TineCtx, TineInput, TineVar } from './types';
 import { Path, TypeAtPath, get } from './get';
+import { isArray } from './helpers';
+
+export function tineVar<
+  T extends readonly (TineInput<any> | TineAction<any>)[],
+  R,
+>(arg: T, selector: (value: T) => R): TineVar<R>;
 
 export function tineVar<T, K extends Path<T>>(
   arg: TineInput<T> | TineAction<T>,
@@ -16,8 +22,11 @@ export function tineVar<T>(
   selector?: undefined,
 ): TineVar<T>;
 
-export function tineVar(arg: TineInput<any> | TineAction<any>, selector?: any) {
-  const getValue = async (ctx: TineCtx) => {
+export function tineVar(arg: any, selector?: any) {
+  const getValue = async (
+    ctx: TineCtx,
+    arg: TineInput<any> | TineAction<any>,
+  ) => {
     const value = ctx.get(arg.name);
 
     if (value) {
@@ -29,9 +38,21 @@ export function tineVar(arg: TineInput<any> | TineAction<any>, selector?: any) {
     }
   };
 
+  if (isArray(arg)) {
+    return {
+      __value: async (ctx: TineCtx) => {
+        const values = await Promise.all(
+          arg.map((item) => getValue(ctx, item)),
+        );
+
+        return await selector(values);
+      },
+    };
+  }
+
   return {
     __value: async (ctx: TineCtx) => {
-      const value = await getValue(ctx);
+      const value = await getValue(ctx, arg);
 
       if (!value || !selector) {
         return value;
