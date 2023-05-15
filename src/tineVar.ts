@@ -15,11 +15,6 @@ type ExtractTineType<T> = T extends readonly (
     }
   : never;
 
-export function tineVar<
-  T extends readonly (TineInput<any> | TineAction<any>)[],
-  R,
->(arg: T, selector: (value: ExtractTineType<T>) => R): TineVar<R>;
-
 export function tineVar<T, K extends Path<T>>(
   arg: TineInput<T> | TineAction<T>,
   selector: K,
@@ -34,6 +29,11 @@ export function tineVar<T>(
   arg: TineInput<T> | TineAction<T>,
   selector?: undefined,
 ): TineVar<T>;
+
+export function tineVar<
+  T extends readonly (TineInput<any> | TineAction<any>)[],
+  R,
+>(arg: T, selector: (value: ExtractTineType<T>) => R): TineVar<R>;
 
 export function tineVar(arg: any, selector?: any) {
   const getValue = async (
