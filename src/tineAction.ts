@@ -18,7 +18,12 @@ export const tineAction =
       payload: P,
       { ctx, parsePayload }: TineActionOptions,
     ) => D | Promise<D>,
-    args: { action: string; schema?: z.Schema<P>; skipParse?: boolean },
+    args: {
+      action: string;
+      schema?: z.Schema<P>;
+      skipParse?: boolean;
+      parseResponse?: boolean;
+    },
   ) =>
   (payload?: TinePayload<P>, actionCtx?: { name?: string }) => {
     const name: string = actionCtx?.name || uuidv4();
@@ -36,9 +41,17 @@ export const tineAction =
 
         const value = await run(parsedPayload, { ctx, parsePayload });
 
-        ctx.set(name, value);
+        if (!args.parseResponse) {
+          ctx.set(name, value);
 
-        return value;
+          return value;
+        }
+
+        const parseValue = await parsePayload(ctx, value);
+
+        ctx.set(name, parseValue);
+
+        return parseValue;
       },
     } satisfies TineAction<D>;
 
