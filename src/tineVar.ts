@@ -22,7 +22,7 @@ export function tineVar<T, K extends Path<T>>(
 
 export function tineVar<T, R>(
   arg: TineInput<T> | TineAction<T>,
-  selector: (value: T) => R,
+  selector: (value: T) => R | Promise<R>,
 ): TineVar<R>;
 
 export function tineVar<T>(
@@ -33,7 +33,7 @@ export function tineVar<T>(
 export function tineVar<
   T extends readonly (TineInput<any> | TineAction<any>)[],
   R,
->(arg: T, selector: (value: ExtractTineType<T>) => R): TineVar<R>;
+>(arg: T, selector: (value: ExtractTineType<T>) => R | Promise<R>): TineVar<R>;
 
 export function tineVar(arg: any, selector?: any) {
   const getValue = async (

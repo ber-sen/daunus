@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { tineInput } from './tineHelpers';
 import { resolvePayload } from './resolvePayload';
 import { tineVar } from './tineVar';
+import { tineFn } from './tineFn';
 
 describe('resolvePayload', () => {
   const input = tineInput(z.string(), { name: 'input' });
@@ -23,6 +24,14 @@ describe('resolvePayload', () => {
 
   it('should resolve value of tineVar inside an object', async () => {
     const payload = { foo: tineVar(input) };
+
+    const res = await resolvePayload(ctx, payload);
+
+    expect(res).toStrictEqual({ foo: inputValue });
+  });
+
+  it('should resolve value of tineVar inside an another tineVar', async () => {
+    const payload = { foo: tineFn(() => tineVar(input)) };
 
     const res = await resolvePayload(ctx, payload);
 

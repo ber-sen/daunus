@@ -9,7 +9,7 @@ export const resolvePayload = async <T>(
   payload: TinePayload<T>,
 ): Promise<T> => {
   if (isTineVar(payload)) {
-    return await resolveTineVar(ctx, payload);
+    return resolvePayload(ctx, await resolveTineVar(ctx, payload));
   }
 
   if (isArray(payload)) {
