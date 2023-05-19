@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { tineInput } from './tineHelpers';
 import { resolvePayload } from './resolvePayload';
 import { tineVar } from './tineVar';
-import { TineInput } from './types';
+import { TineAction, TineInput } from './types';
 
-const getContext = <T>(input: TineInput<T>, value: object) => {
+const getContext = <T>(input: TineInput<T> | TineAction<T>, value: object) => {
   const ctx = new Map();
 
   ctx.set(input.name, value);
@@ -53,6 +53,19 @@ describe('tineVar', () => {
       );
 
       expect(res).toStrictEqual('Earth');
+    });
+
+    it("should return the value if it's fallacy", async () => {
+      const input = tineInput(z.string().nullable(), { name: 'input' });
+
+      const ctx = getContext(input, null);
+
+      const res = await resolvePayload(
+        ctx,
+        tineVar(input, (val) => Boolean(!val)),
+      );
+
+      expect(res).toStrictEqual(true);
     });
 
     it('should work with array the value', async () => {

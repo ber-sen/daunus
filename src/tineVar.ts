@@ -40,10 +40,8 @@ export function tineVar(arg: any, selector?: any) {
     ctx: TineCtx,
     arg: TineInput<any> | TineAction<any>,
   ) => {
-    const value = ctx.get(arg.name);
-
-    if (value) {
-      return value;
+    if (ctx.has(arg.name)) {
+      return ctx.get(arg.name);
     }
 
     if ('run' in arg) {
@@ -67,7 +65,7 @@ export function tineVar(arg: any, selector?: any) {
     __value: async (ctx: TineCtx) => {
       const value = await getValue(ctx, arg);
 
-      if (!value || !selector) {
+      if (!selector) {
         return value;
       }
 
