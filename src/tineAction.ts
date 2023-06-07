@@ -20,18 +20,31 @@ export const tineAction =
     ) => D | Promise<D>,
     args: {
       action: string;
+      name?: string;
       schema?: z.Schema<P>;
       skipParse?: boolean;
       parseResponse?: boolean;
     },
   ) =>
   (payload?: TinePayload<P>, actionCtx?: { name?: string }) => {
-    const name: string = actionCtx?.name || uuidv4();
+    const name: string = actionCtx?.name || args.name || uuidv4();
+
+    const init = (ctx: TineCtx) => {
+      if (!ctx.has('actions')) {
+        ctx.set('useCase', {
+          name,
+          id: uuidv4(),
+        });
+        ctx.set('actions', new Map());
+      }
+    };
 
     const action = {
       ...actionCtx,
       name,
       run: async (ctx: TineCtx = new Map()) => {
+        init(ctx);
+
         const parsedPayload =
           args.skipParse || !payload
             ? payload
@@ -63,6 +76,8 @@ export const tineAction =
         input: (value: I) => ({
           ...action,
           run: async (ctx: TineCtx = new Map()) => {
+            init(ctx);
+
             ctx.set(inputSchema.name, inputSchema.parse(value));
 
             return action.run(ctx);
@@ -71,6 +86,8 @@ export const tineAction =
         rawInput: (value: unknown) => ({
           ...action,
           run: async (ctx: TineCtx = new Map()) => {
+            init(ctx);
+
             ctx.set(
               inputSchema.name,
               isMapLike(value)

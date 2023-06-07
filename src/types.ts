@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export type TineVar<T> = T;
+//& ((ctx: TineCtx) => Promise<T>);
 
 export type TinePayload<T> = T;
 

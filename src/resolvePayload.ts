@@ -2,7 +2,7 @@ import { isArray, isObject, isTineVar } from './helpers';
 import { TineCtx, TinePayload, TineVar } from './types';
 
 export const resolveTineVar = (ctx: TineCtx, tineVar: TineVar<any>) =>
-  tineVar.__value(ctx);
+  tineVar(ctx);
 
 export const resolvePayload = async <T>(
   ctx: Map<string, unknown>,
