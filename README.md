@@ -7,11 +7,11 @@ edge framework for nextJs
 useCases/hello/index.ts
 ```typescript
 import { z } from 'zod';
-import { tineVar, tineInput, payload } from 'tinejs';
+import { tineVar, tineInput, shape } from 'tinejs';
 
 const input = tineInput(z.object({ name: z.string().nullable() }));
 
-const hello = payload({
+const hello = shape({
   message: tineVar(input, ({ name }) => `Hello ${name || 'World'}`)
 });
 
