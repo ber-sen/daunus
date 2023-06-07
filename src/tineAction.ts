@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isMapLike } from './helpers';
 import { resolvePayload } from './resolvePayload';
 import {
+  ResolveTineVar,
   TineAction,
   TineActionOptions,
   TineActionWithOptions,
@@ -57,14 +58,14 @@ export const tineAction =
         if (!args.parseResponse) {
           ctx.set(name, value);
 
-          return value;
+          return resolveTineVar(value);
         }
 
         const parseValue = await parsePayload(ctx, value);
 
         ctx.set(name, parseValue);
 
-        return parseValue;
+        return resolveTineVar(parseValue);
       },
     } satisfies TineAction<D>;
 
@@ -117,3 +118,5 @@ export const parsePayload = async <T>(
 
   return options?.schema.parse(resolvedPayload) as T;
 };
+
+const resolveTineVar = <T>(data: T) => data as ResolveTineVar<T>;

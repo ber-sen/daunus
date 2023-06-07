@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-export type TineVar<T> = T;
-//& ((ctx: TineCtx) => Promise<T>);
+export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
 
 export type TinePayload<T> = T;
 
@@ -15,9 +14,29 @@ export type TineCtx = Map<any, any>;
 
 export type TineActionInfo = { id?: string; path?: string };
 
+export type ResolveTineVar<T> = T extends TineVar<infer U>
+  ? U extends TineVar<infer Z>
+    ? Z
+    : U extends Array<infer A>
+    ? Array<ResolveTineVar<A>>
+    : U extends object
+    ? {
+        [K in keyof U]: ResolveTineVar<U[K]>;
+      }
+    : U
+  : T extends Array<infer A>
+  ? Array<ResolveTineVar<A>>
+  : T extends Date
+  ? T
+  : T extends object
+  ? {
+      [K in keyof T]: ResolveTineVar<T[K]>;
+    }
+  : T;
+
 export type TineAction<T> = {
   name: string;
-  run: (ctx?: TineCtx) => Promise<T>;
+  run: (ctx?: TineCtx) => Promise<ResolveTineVar<T>>;
 };
 
 export type TineActionWithInput<T, I> = {
