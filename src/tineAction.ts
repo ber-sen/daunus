@@ -27,10 +27,15 @@ export const tineAction =
       schema?: z.Schema<P>;
       skipParse?: boolean;
       parseResponse?: boolean;
+      skipLog?: boolean;
     },
   ) =>
-  (payload?: TinePayload<P>, actionCtx?: { name?: string }) => {
+  (
+    payload?: TinePayload<P>,
+    actionCtx?: { name?: string; skipLog?: boolean },
+  ) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
+    const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
     const actionInfo: TineActionInfo<D> = {
       id: uuidv4(),
@@ -77,12 +82,18 @@ export const tineAction =
 
           ctx.set(name, value);
           actionInfo.data = value;
-          ctx.get('actions').set(actionInfo.name, actionInfo);
+
+          if (!skipLog) {
+            ctx.get('actions').set(actionInfo.name, actionInfo);
+          }
 
           return value;
         } catch (e) {
           actionInfo.error = e;
-          ctx.get('actions').set(actionInfo.name, actionInfo);
+
+          if (!skipLog) {
+            ctx.get('actions').set(actionInfo.name, actionInfo);
+          }
 
           throw e;
         } finally {
