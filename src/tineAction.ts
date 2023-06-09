@@ -16,7 +16,7 @@ import {
 export const tineAction =
   <P, D>(
     run: (
-      payload: P,
+      payload: P | undefined,
       { ctx, parsePayload }: TineActionOptions,
     ) => D | Promise<D>,
     args: {

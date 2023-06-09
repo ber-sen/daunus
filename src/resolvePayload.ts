@@ -13,7 +13,7 @@ export const resolvePayload = async <T>(
   }
 
   if (isArray(payload)) {
-    const result = [];
+    const result: any = [];
 
     for (const key in payload) {
       const value = await resolvePayload(ctx, payload[key]);

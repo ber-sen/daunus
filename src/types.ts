@@ -2,17 +2,11 @@ import { z } from 'zod';
 
 export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
 
-export type TinePayload<T> = T;
-
-export type TineZodPayload<T extends z.ZodType<any, any, any>> = TinePayload<
-  z.TypeOf<T>
->;
+export type TinePayload<T> = T; // TODO: fix type
 
 export type TineInput<T> = z.ZodType<T> & { name: string };
 
 export type TineCtx = Map<any, any>;
-
-export type TineActionInfo = { id?: string; path?: string };
 
 export type ResolveTineVar<T> = T extends TineVar<infer U>
   ? U extends TineVar<infer Z>
