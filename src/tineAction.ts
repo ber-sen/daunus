@@ -36,7 +36,7 @@ export const tineAction =
       id: uuidv4(),
       name,
       action: args.action,
-      payload,
+      payload: null,
       data: null,
       error: null,
     };
@@ -58,6 +58,8 @@ export const tineAction =
               : await parsePayload(ctx, payload, {
                   schema: args.schema,
                 });
+
+          actionInfo.payload = parsePayload;
 
           const value = await run(parsedPayload, { ctx, parsePayload });
 
