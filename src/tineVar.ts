@@ -58,6 +58,7 @@ export function tineVar(arg: any, selector?: any) {
 
     tineVar.toString = () => '{{tineVar}}';
     tineVar.toJSON = () => '{{tineVar}}';
+    tineVar.__type = 'tineVar';
 
     return tineVar;
   }
@@ -76,6 +77,7 @@ export function tineVar(arg: any, selector?: any) {
 
   tineVar.toString = () => '{{tineVar}}';
   tineVar.toJSON = () => '{{tineVar}}';
+  tineVar.__type = 'tineVar';
 
   return tineVar;
 }

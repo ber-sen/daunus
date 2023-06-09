@@ -7,7 +7,7 @@ export const isObject = (value: any): value is object =>
     : typeof value == 'object';
 
 export const isTineVar = (value: any) =>
-  typeof value === 'function' && value.name === 'tineVar';
+  typeof value === 'function' && value.__type === 'tineVar';
 
 export const isArray = (value: any): value is any[] => Array.isArray(value);
 

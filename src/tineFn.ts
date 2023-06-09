@@ -9,6 +9,7 @@ export function tineFn<R>(
 
   tineVar.toString = () => '{{tineVar}}';
   tineVar.toJSON = () => '{{tineVar}}';
+  tineVar.__type = 'tineVar';
 
   return tineVar as any;
 }
