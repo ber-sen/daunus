@@ -123,12 +123,7 @@ export const tineAction =
         rawInput: (value: unknown) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set(
-              inputSchema.name,
-              isMapLike(value)
-                ? Object.fromEntries(value as any)
-                : inputSchema.parse(value),
-            );
+            ctx.set(inputSchema.name, inputSchema.parse(value));
           }),
         }),
       }),
