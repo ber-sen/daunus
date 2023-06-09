@@ -59,7 +59,7 @@ export const tineAction =
                   schema: args.schema,
                 });
 
-          actionInfo.payload = parsePayload;
+          actionInfo.payload = parsedPayload;
 
           const value = await run(parsedPayload, { ctx, parsePayload });
 
