@@ -28,9 +28,25 @@ export type ResolveTineVar<T> = T extends TineVar<infer U>
     }
   : T;
 
+export type TineActionInfo<D> = {
+  id: string;
+  name: string;
+  action: string;
+  payload: any;
+  data?: ResolveTineVar<D>;
+  error?: Error;
+};
+
+export type TineActionRunOptions<T> = {
+  onComplete?: (actionInfo: TineActionInfo<T>) => void;
+};
+
 export type TineAction<T> = {
   name: string;
-  run: (ctx?: TineCtx) => Promise<ResolveTineVar<T>>;
+  run: (
+    ctx?: TineCtx,
+    options?: TineActionRunOptions<T>,
+  ) => Promise<ResolveTineVar<T>>;
 };
 
 export type TineActionWithInput<T, I> = {

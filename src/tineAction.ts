@@ -6,7 +6,9 @@ import { resolvePayload } from './resolvePayload';
 import {
   ResolveTineVar,
   TineAction,
+  TineActionInfo,
   TineActionOptions,
+  TineActionRunOptions,
   TineActionWithOptions,
   TineCtx,
   TineInput,
@@ -30,43 +32,68 @@ export const tineAction =
   (payload?: TinePayload<P>, actionCtx?: { name?: string }) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
 
-    const init = (ctx: TineCtx) => {
-      if (!ctx.has('actions')) {
-        ctx.set('useCase', {
-          name,
-          id: uuidv4(),
-        });
-        ctx.set('actions', new Map());
-      }
+    const actionInfo: TineActionInfo<D> = {
+      id: uuidv4(),
+      name,
+      action: args.action,
+      payload,
+      data: null,
+      error: null,
     };
+
+    const makeRun =
+      (init?: (ctx: TineCtx) => void) =>
+      async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<D>) => {
+        if (!ctx.has('actions')) {
+          ctx.set('useCase', actionInfo);
+          ctx.set('actions', new Map());
+        }
+
+        const runFn = async () => {
+          init && init(ctx);
+
+          const parsedPayload =
+            args.skipParse || !payload
+              ? payload
+              : await parsePayload(ctx, payload, {
+                  schema: args.schema,
+                });
+
+          const value = await run(parsedPayload, { ctx, parsePayload });
+
+          if (!args.parseResponse) {
+            return resolveTineVar(value);
+          }
+
+          const parseValue = await parsePayload(ctx, value);
+
+          return resolveTineVar(parseValue);
+        };
+
+        try {
+          const value = await runFn();
+
+          ctx.set(name, value);
+          actionInfo.data = value;
+          ctx.get('actions').set(actionInfo.name, actionInfo);
+
+          return value;
+        } catch (e) {
+          actionInfo.error = e;
+          ctx.get('actions').set(actionInfo.name, actionInfo);
+
+          throw e;
+        } finally {
+          if (options?.onComplete) {
+            options.onComplete(actionInfo);
+          }
+        }
+      };
 
     const action = {
       ...actionCtx,
       name,
-      run: async (ctx: TineCtx = new Map()) => {
-        init(ctx);
-
-        const parsedPayload =
-          args.skipParse || !payload
-            ? payload
-            : await parsePayload(ctx, payload, {
-                schema: args.schema,
-              });
-
-        const value = await run(parsedPayload, { ctx, parsePayload });
-
-        if (!args.parseResponse) {
-          ctx.set(name, value);
-
-          return resolveTineVar(value);
-        }
-
-        const parseValue = await parsePayload(ctx, value);
-
-        ctx.set(name, parseValue);
-
-        return resolveTineVar(parseValue);
-      },
+      run: makeRun(),
     } satisfies TineAction<D>;
 
     return {
@@ -76,28 +103,20 @@ export const tineAction =
         inputSchema,
         input: (value: I) => ({
           ...action,
-          run: async (ctx: TineCtx = new Map()) => {
-            init(ctx);
-
+          run: makeRun((ctx) => {
             ctx.set(inputSchema.name, inputSchema.parse(value));
-
-            return action.run(ctx);
-          },
+          }),
         }),
         rawInput: (value: unknown) => ({
           ...action,
-          run: async (ctx: TineCtx = new Map()) => {
-            init(ctx);
-
+          run: makeRun((ctx) => {
             ctx.set(
               inputSchema.name,
               isMapLike(value)
                 ? Object.fromEntries(value as any)
                 : inputSchema.parse(value),
             );
-
-            return action.run(ctx);
-          },
+          }),
         }),
       }),
     } satisfies TineActionWithOptions<D>;
