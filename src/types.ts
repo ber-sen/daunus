@@ -38,7 +38,7 @@ export type TineActionInfo<D> = {
 };
 
 export type TineActionRunOptions<T> = {
-  onComplete?: (actionInfo: TineActionInfo<T>) => void;
+  onComplete?: (actionInfo: TineActionInfo<T>, ctx: TineCtx) => void;
 };
 
 export type TineAction<T> = {

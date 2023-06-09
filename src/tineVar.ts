@@ -50,20 +50,19 @@ export function tineVar(arg: any, selector?: any) {
   };
 
   if (isArray(arg)) {
-    const caller = async (ctx: TineCtx) => {
+    const tineVar = async (ctx: TineCtx) => {
       const values = await Promise.all(arg.map((item) => getValue(ctx, item)));
 
       return await selector(values);
     };
 
-    caller.___tineVar = true;
-    caller.toString = () => '{{tineVar}}';
-    caller.toJSON = () => '{{tineVar}}';
+    tineVar.toString = () => '{{tineVar}}';
+    tineVar.toJSON = () => '{{tineVar}}';
 
-    return caller;
+    return tineVar;
   }
 
-  const caller = async (ctx: TineCtx) => {
+  const tineVar = async (ctx: TineCtx) => {
     const value = await getValue(ctx, arg);
 
     if (!selector) {
@@ -75,9 +74,8 @@ export function tineVar(arg: any, selector?: any) {
       : get(value, selector);
   };
 
-  caller.___tineVar = true;
-  caller.toString = () => '{{tineVar}}';
-  caller.toJSON = () => '{{tineVar}}';
+  tineVar.toString = () => '{{tineVar}}';
+  tineVar.toJSON = () => '{{tineVar}}';
 
-  return caller;
+  return tineVar;
 }

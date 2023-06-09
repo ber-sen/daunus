@@ -85,7 +85,7 @@ export const tineAction =
           throw e;
         } finally {
           if (options?.onComplete) {
-            options.onComplete(actionInfo);
+            options.onComplete(actionInfo, ctx);
           }
         }
       };
