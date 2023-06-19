@@ -24,4 +24,19 @@ describe('get', () => {
 
     expect(res).toStrictEqual('bar');
   });
+
+  it('should work with proxy', () => {
+    const ctx = new Map();
+    ctx.set('lorem', 'ipsum');
+
+    const $ = new Proxy(ctx, {
+      get(target, name) {
+        return target.get(name);
+      },
+    });
+
+    const res = get<any, any>({ $ }, '$.lorem');
+
+    expect(res).toStrictEqual('ipsum');
+  });
 });

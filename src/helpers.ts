@@ -1,3 +1,4 @@
+import { get } from './get';
 import { TineCtx, TineVar } from './types';
 
 export const isObject = (value: any): value is object =>
@@ -38,7 +39,9 @@ export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
   const interpolated = str.replace(
     /{{\s?([^}]*)\s?}}/g,
     (_: any, key: string) => {
-      return new Function('$', `return ${key}`)($);
+      return get<any, any>({ $ }, key.trim());
+
+      // return new Function('$', `return ${key}`)($);
     },
   );
 
