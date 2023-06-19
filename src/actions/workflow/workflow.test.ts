@@ -1,5 +1,7 @@
 import workflow from './index';
 
+import { tineAction } from '../../tineAction';
+
 describe('workflow', () => {
   it('should work for basic example', async () => {
     const action = workflow({
@@ -38,7 +40,7 @@ describe('workflow', () => {
   it('should work with nested workflows', async () => {
     const ctx = new Map();
 
-    ctx.set('.tine-placeholder-get', ($: any, key: string) =>
+    ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
       new Function('$', `return ${key}`)($),
     );
 
@@ -69,5 +71,33 @@ describe('workflow', () => {
     const res = await action.run(ctx);
 
     expect(res).toStrictEqual({ foo: 'barasd' });
+  });
+
+  it('should allow to add more user defined actions', async () => {
+    const ctx = new Map();
+
+    const actions = new Map();
+
+    actions.set('newAction', {
+      nested: tineAction(() => ({ data: 'lorem ipsum' }), {
+        action: 'newAction',
+      }),
+    });
+
+    ctx.set('.tine-workflow-actions', actions);
+
+    const action = workflow({
+      test: {
+        action: 'newAction.nested',
+      },
+      return: {
+        action: 'shape',
+        payload: '{{ $.test.data }}',
+      },
+    });
+
+    const res = await action.run(ctx);
+
+    expect(res).toStrictEqual('lorem ipsum');
   });
 });

@@ -32,18 +32,18 @@ export const resolveTineVar = (ctx: TineCtx, tineVar: TineVar<any>) =>
 export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
   const $ = new Proxy(ctx, {
     get(target, name) {
-      return target.get(name);
+      return get(target, name as any);
     },
   });
 
   const interpolated = str.replace(
     /{{\s?([^}]*)\s?}}/g,
     (_: any, key: string) => {
-      if (ctx.has('.tine-placeholder-get')) {
-        return ctx.get('.tine-placeholder-get')($, key);
+      if (ctx.has('.tine-placeholder-resolver')) {
+        return ctx.get('.tine-placeholder-resolver')($, key);
       }
 
-      return get<any, any>({ $ }, key.trim());
+      return get({ $ }, key.trim() as any);
     },
   );
 

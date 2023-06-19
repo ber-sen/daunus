@@ -1,3 +1,4 @@
+import { get } from '../../get';
 import { tineAction } from '../../tineAction';
 import { TineActionOptions } from '../../types';
 
@@ -8,7 +9,9 @@ const workflow = tineAction(
     let res = null;
 
     for (const [name, actionDef] of Object.entries(payload)) {
-      const action = BASE_ACTIONS[actionDef.action];
+      const action =
+        BASE_ACTIONS[actionDef.action] ||
+        get(ctx.get('.tine-workflow-actions'), actionDef.action);
 
       if (!action) {
         throw new Error('Action not found');

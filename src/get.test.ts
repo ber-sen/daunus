@@ -35,7 +35,16 @@ describe('get', () => {
       },
     });
 
-    const res = get<any, any>({ $ }, '$.lorem');
+    const res = get({ $ }, '$.lorem');
+
+    expect(res).toStrictEqual('ipsum');
+  });
+
+  it('should work with Map', () => {
+    const ctx = new Map();
+    ctx.set('lorem', 'ipsum');
+
+    const res = get({ ctx }, 'ctx.lorem');
 
     expect(res).toStrictEqual('ipsum');
   });

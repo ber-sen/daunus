@@ -8,6 +8,10 @@ type Position = `[${number}]`;
 
 type NextPath<T> = T extends readonly (infer U)[]
   ? Paths<Position, U>
+  : T extends Map<any, infer V>
+  ? {
+      [K in keyof V]-?: K extends string ? `.${K}` : never;
+    }[keyof V]
   : T extends AnyObject
   ? {
       [K in keyof T]-?: K extends string ? `.${Paths<K, T[K]>}` : never;
@@ -16,6 +20,10 @@ type NextPath<T> = T extends readonly (infer U)[]
 
 export type Path<T> = T extends readonly (infer U)[]
   ? Paths<Position, U>
+  : T extends Map<any, infer V>
+  ? {
+      [K in keyof V]-?: K extends string ? K : never;
+    }[keyof V]
   : T extends AnyObject
   ? {
       [K in keyof T]-?: K extends string ? Paths<K, T[K]> : never;
@@ -38,6 +46,8 @@ type TypeAt<T, A extends string> = A extends Position
     : never
   : A extends keyof T
   ? T[A]
+  : T extends Map<any, infer V>
+  ? V
   : never;
 
 export type TypeAtPath<T, P extends Path<T>> = P extends Accessor<T>
@@ -63,7 +73,12 @@ export function get(data: any, path: string, defaultValue?: any): any {
   const value = path
     .split(/[.[\]]/)
     .filter(Boolean)
-    .reduce<any>((value, key) => (value as any)?.[key], data as any);
+    .reduce<any>((value, key) => {
+      if (value instanceof Map && typeof value.get === 'function') {
+        return value.get(key);
+      }
+      return (value as any)?.[key];
+    }, data);
 
-  return value !== undefined ? value : (defaultValue as any);
+  return value !== undefined ? value : defaultValue;
 }
