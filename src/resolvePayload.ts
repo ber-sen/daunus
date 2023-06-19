@@ -1,13 +1,21 @@
-import { isArray, isObject, isTineVar } from './helpers';
-import { TineCtx, TinePayload, TineVar } from './types';
-
-export const resolveTineVar = (ctx: TineCtx, tineVar: TineVar<any>) =>
-  tineVar(ctx);
+import {
+  isArray,
+  isObject,
+  isTinePlaceholder,
+  isTineVar,
+  resolveTinePlaceholder,
+  resolveTineVar,
+} from './helpers';
+import { TinePayload } from './types';
 
 export const resolvePayload = async <T>(
   ctx: Map<string, unknown>,
   payload: TinePayload<T>,
 ): Promise<T> => {
+  if (isTinePlaceholder(payload)) {
+    return await resolveTinePlaceholder(ctx, payload);
+  }
+
   if (isTineVar(payload)) {
     return resolvePayload(ctx, await resolveTineVar(ctx, payload));
   }
