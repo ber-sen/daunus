@@ -36,6 +36,16 @@ export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
     },
   });
 
+  if (/^{{\s?([^}]*)\s?}}$/g.test(str)) {
+    const match = /^{{\s?([^}]*)\s?}}$/g.exec(str);
+
+    if (ctx.has('.tine-placeholder-resolver')) {
+      return ctx.get('.tine-placeholder-resolver')($, match[1]);
+    }
+
+    return get({ $ }, match[1].trim() as any);
+  }
+
   const interpolated = str.replace(
     /{{\s?([^}]*)\s?}}/g,
     (_: any, key: string) => {

@@ -100,4 +100,23 @@ describe('workflow', () => {
 
     expect(res).toStrictEqual('lorem ipsum');
   });
+
+  it('should work with object', async () => {
+    const action = workflow({
+      test: {
+        action: 'shape',
+        payload: {
+          foo: 'bar',
+        },
+      },
+      return: {
+        action: 'shape',
+        payload: '{{ $.test }}',
+      },
+    });
+
+    const res = await action.run();
+
+    expect(res).toStrictEqual({ foo: 'bar' });
+  });
 });
