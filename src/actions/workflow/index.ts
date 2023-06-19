@@ -1,7 +1,7 @@
 import { get } from '../../get';
 import { tineAction } from '../../tineAction';
 import { TineActionOptions } from '../../types';
-
+import rpc from '../rpc';
 import shape from '../shape';
 
 const workflow = tineAction(
@@ -28,6 +28,7 @@ const workflow = tineAction(
 const BASE_ACTIONS = {
   shape,
   workflow,
+  rpc,
 };
 
 export default workflow;

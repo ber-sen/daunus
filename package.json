@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "Edge framework for NextJs",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/satoshi-cyber/tine#readme",
   "dependencies": {
+    "superjson": "^1.12.3",
     "uuid": "^9.0.0",
     "zod": "^3.21.4"
   },
