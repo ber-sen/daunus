@@ -13,7 +13,7 @@ export const isTineVar = (value: any) =>
   typeof value === 'function' && value.__type === 'tineVar';
 
 export const isTinePlaceholder = (value: any) =>
-  typeof value === 'string' && /{{\s?([^}]*)\s?}}/g.test(value);
+  typeof value === 'string' && /\{\{\s*([\s\S]*?)\s*\}\}/g.test(value);
 
 export const isArray = (value: any): value is any[] => Array.isArray(value);
 
@@ -36,8 +36,8 @@ export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
     },
   });
 
-  if (/^{{\s?([^}]*)\s?}}$/g.test(str)) {
-    const match = /^{{\s?([^}]*)\s?}}$/g.exec(str);
+  if (/^\{\{\s*([\s\S]*?)\s*\}\}$/g.test(str)) {
+    const match = /^\{\{\s*([\s\S]*?)\s*\}\}$/g.exec(str);
 
     if (ctx.has('.tine-placeholder-resolver')) {
       return ctx.get('.tine-placeholder-resolver')($, match[1]);
@@ -47,7 +47,7 @@ export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
   }
 
   const interpolated = str.replace(
-    /{{\s?([^}]*)\s?}}/g,
+    /\{\{\s*([\s\S]*?)\s*\}\}/g,
     (_: any, key: string) => {
       if (ctx.has('.tine-placeholder-resolver')) {
         return ctx.get('.tine-placeholder-resolver')($, key);
