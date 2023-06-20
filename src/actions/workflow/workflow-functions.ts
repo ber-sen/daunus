@@ -1,9 +1,10 @@
 import { get } from '../../get';
-import { TineCtx } from '../../types';
+import { TineAction, TineCtx } from '../../types';
 
 const isNested = (path: string) => {
   const dotRegex = /\./g;
   const matches = path.match(dotRegex);
+
   return matches && matches.length > 1;
 };
 
@@ -16,10 +17,10 @@ export const runAction = async (
     payload,
     name,
   }: { action: [string]; name?: string; payload?: any },
-  baseAction: object,
+  baseActions: Record<string, TineAction<any>>,
 ) => {
   let action =
-    baseAction[actionType[0]] ||
+    baseActions[actionType[0]] ||
     get(ctx.get('.tine-workflow-actions'), actionType[0]);
 
   if (!action) {
