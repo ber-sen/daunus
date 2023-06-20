@@ -10,9 +10,9 @@ const rpc = tineAction(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-tine-secret': secret,
+        'X-Tine-Secret': secret,
       },
-      body: JSON.stringify(superjson.serialize({ ctx, action, payload, name })),
+      body: JSON.stringify(superjson.serialize({ ctx, action, name, payload })),
     });
 
     return superjson.deserialize(await res.json());

@@ -132,4 +132,33 @@ describe('workflow', () => {
 
     expect(res).toStrictEqual({ foo: 'bar' });
   });
+
+  it('should work with condition action', async () => {
+    const ctx = new Map();
+
+    ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
+      new Function('$', `return ${key}`)($),
+    );
+
+    const action = workflow({
+      data: {
+        action: 'shape',
+        payload: 3,
+      },
+      result: {
+        action: 'condition',
+        payload: {
+          if: '{{ $.data === 3 }}',
+          then: {
+            action: 'shape',
+            payload: true,
+          },
+        },
+      },
+    });
+
+    const res = await action.run(ctx);
+
+    expect(res).toStrictEqual(true);
+  });
 });
