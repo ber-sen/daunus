@@ -10,7 +10,7 @@ const rpc = tineAction(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-tine-key': secret,
+        'x-tine-secret': secret,
       },
       body: JSON.stringify(superjson.serialize({ ctx, workflow })),
     });
