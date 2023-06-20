@@ -15,20 +15,20 @@ export const runAction = async (
     action: actionType,
     payload,
     name,
-  }: { action: string; name?: string; payload?: any },
+  }: { action: [string]; name?: string; payload?: any },
   baseAction: object,
 ) => {
   let action =
-    baseAction[actionType] ||
-    get(ctx.get('.tine-workflow-actions'), actionType);
+    baseAction[actionType[0]] ||
+    get(ctx.get('.tine-workflow-actions'), actionType[0]);
 
   if (!action) {
     throw new Error('Action not found');
   }
 
-  if (isNested(actionType)) {
+  if (isNested(actionType[0])) {
     action = action.bind(
-      get(ctx.get('.tine-workflow-actions'), getParent(actionType)),
+      get(ctx.get('.tine-workflow-actions'), getParent(actionType[0])),
     );
   }
 

@@ -6,7 +6,7 @@ describe('workflow', () => {
   it('should work for basic example', async () => {
     const action = workflow({
       test: {
-        action: 'shape',
+        action: ['shape'],
         payload: {
           foo: 'bar',
         },
@@ -21,13 +21,13 @@ describe('workflow', () => {
   it('should work with placeholders', async () => {
     const action = workflow({
       test: {
-        action: 'shape',
+        action: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       return: {
-        action: 'shape',
+        action: ['shape'],
         payload: '{{ $.test.foo }}',
       },
     });
@@ -46,14 +46,14 @@ describe('workflow', () => {
 
     const action = workflow({
       test: {
-        action: 'workflow',
+        action: ['workflow'],
         payload: {
           lorem: {
-            action: 'shape',
+            action: ['shape'],
             payload: 'ipsum',
           },
           data: {
-            action: 'shape',
+            action: ['shape'],
             payload: {
               foo: 'bar',
             },
@@ -61,7 +61,7 @@ describe('workflow', () => {
         },
       },
       return: {
-        action: 'shape',
+        action: ['shape'],
         payload: {
           foo: '{{ $.test.foo + "asd" }}',
         },
@@ -88,10 +88,10 @@ describe('workflow', () => {
 
     const action = workflow({
       test: {
-        action: 'newAction.nested',
+        action: ['newAction.nested'],
       },
       return: {
-        action: 'shape',
+        action: ['shape'],
         payload: '{{ $.test.data }}',
       },
     });
@@ -104,13 +104,13 @@ describe('workflow', () => {
   it('should work with object', async () => {
     const action = workflow({
       test: {
-        action: 'shape',
+        action: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       return: {
-        action: 'shape',
+        action: ['shape'],
         payload: '{{ $.test }}',
       },
     });
@@ -122,7 +122,7 @@ describe('workflow', () => {
 
   it('should work with top level action', async () => {
     const action = workflow({
-      action: 'shape',
+      action: ['shape'],
       payload: {
         foo: 'bar',
       },
@@ -142,15 +142,15 @@ describe('workflow', () => {
 
     const action = workflow({
       data: {
-        action: 'shape',
+        action: ['shape'],
         payload: 3,
       },
       result: {
-        action: 'condition',
+        action: ['condition'],
         payload: {
           if: '{{ $.data === 3 }}',
           then: {
-            action: 'shape',
+            action: ['shape'],
             payload: true,
           },
         },

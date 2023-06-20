@@ -26,12 +26,13 @@ export const isMapLike = (value: any): value is Map<any, any> => {
   );
 };
 
-export const isAction = <T>(obj: T): obj is T & { action: string } => {
+export const isAction = <T>(obj: T): obj is T & { action: [string] } => {
   return (
     isObject(obj) &&
-    Object.keys(obj)[0] === 'action' &&
     'action' in obj &&
-    typeof obj.action === 'string'
+    isArray(obj.action) &&
+    obj.action.length === 1 &&
+    typeof obj.action[0] === 'string'
   );
 };
 
