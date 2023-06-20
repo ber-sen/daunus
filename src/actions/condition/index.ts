@@ -12,7 +12,7 @@ const condition = tineAction(
     { parsePayload, ctx }: TineActionOptions,
   ) => {
     if (await parsePayload(ctx, await resolveAction(ctx, $if))) {
-      return await parsePayload(ctx, await resolveAction(ctx, $then));
+      return (await parsePayload(ctx, await resolveAction(ctx, $then))) as P;
     }
 
     return ((await parsePayload(ctx, await resolveAction(ctx, $else))) ??
