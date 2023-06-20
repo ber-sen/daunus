@@ -119,4 +119,17 @@ describe('workflow', () => {
 
     expect(res).toStrictEqual({ foo: 'bar' });
   });
+
+  it('should work with top level action', async () => {
+    const action = workflow({
+      action: 'shape',
+      payload: {
+        foo: 'bar',
+      },
+    });
+
+    const res = await action.run();
+
+    expect(res).toStrictEqual({ foo: 'bar' });
+  });
 });

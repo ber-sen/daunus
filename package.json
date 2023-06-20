@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.0.58",
+  "version": "0.0.59",
   "description": "Edge framework for NextJs",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

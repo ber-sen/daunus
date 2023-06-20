@@ -5,14 +5,14 @@ import { rpcSchema } from './rpc-schema';
 import { tineAction } from '../../tineAction';
 
 const rpc = tineAction(
-  async ({ endpoint, secret, workflow }, { ctx }) => {
+  async ({ endpoint, secret, action, payload, name }, { ctx }) => {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-tine-secret': secret,
       },
-      body: JSON.stringify(superjson.serialize({ ctx, workflow })),
+      body: JSON.stringify(superjson.serialize({ ctx, action, payload, name })),
     });
 
     return superjson.deserialize(await res.json());
