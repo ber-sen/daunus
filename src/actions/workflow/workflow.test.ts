@@ -182,7 +182,7 @@ describe('workflow', () => {
             payload: '{{ $.before }}',
           },
           after: {
-            name: 'afterRersponse',
+            name: 'afterResponse',
             action: ['shape'],
             payload: 'lorem',
           },
@@ -193,6 +193,6 @@ describe('workflow', () => {
     const res = await action.run(ctx);
 
     expect(res).toStrictEqual({ userId: 'test' });
-    expect(ctx.get('afterRersponse')).toStrictEqual('lorem');
+    expect(ctx.get('afterResponse')).toStrictEqual('lorem');
   });
 });
