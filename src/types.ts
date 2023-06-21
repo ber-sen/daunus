@@ -49,6 +49,12 @@ export type TineAction<T> = {
   ) => Promise<ResolveTineVar<T>>;
 };
 
+export type TineWorkflowAction<T> = {
+  action: [string];
+  payload?: T;
+  name?: string;
+};
+
 export type TineActionWithInput<T, I> = {
   inputSchema: TineInput<I>;
   input: (value: I) => TineAction<T>;

@@ -161,4 +161,38 @@ describe('workflow', () => {
 
     expect(res).toStrictEqual(true);
   });
+
+  it('should work with response action', async () => {
+    const ctx = new Map();
+
+    ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
+      new Function('$', `return ${key}`)($),
+    );
+
+    const action = workflow({
+      result: {
+        action: ['response'],
+        payload: {
+          before: {
+            action: ['shape'],
+            payload: { userId: 'test' },
+          },
+          data: {
+            action: ['shape'],
+            payload: '{{ $.before }}',
+          },
+          after: {
+            name: 'afterRersponse',
+            action: ['shape'],
+            payload: 'lorem',
+          },
+        },
+      },
+    });
+
+    const res = await action.run(ctx);
+
+    expect(res).toStrictEqual({ userId: 'test' });
+    expect(ctx.get('afterRersponse')).toStrictEqual('lorem');
+  });
 });

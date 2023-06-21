@@ -6,6 +6,7 @@ import { TineActionOptions } from '../../types';
 import condition from '../condition';
 import rpc from '../rpc';
 import shape from '../shape';
+import response from '../response';
 
 const workflow = tineAction(
   async (workflow: object, { ctx }: TineActionOptions) => {
@@ -28,6 +29,7 @@ const BASE_ACTIONS = {
   shape,
   workflow,
   condition,
+  response,
   rpc,
 };
 
