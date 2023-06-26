@@ -31,7 +31,10 @@ export const tineAction =
   ) =>
   (
     payload?: TinePayload<P>,
-    actionCtx?: { name?: string; skipLog?: boolean },
+    actionCtx?: {
+      name?: string;
+      skipLog?: boolean;
+    },
   ) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
@@ -71,7 +74,9 @@ export const tineAction =
             return resolveTineVar(value);
           }
 
-          const parseValue = await parsePayload(ctx, value);
+          const parseValue = await parsePayload(ctx, value, {
+            skipPlaceholders: true,
+          });
 
           return resolveTineVar(parseValue);
         };
@@ -134,9 +139,12 @@ export const parsePayload = async <T>(
   payload: TinePayload<T>,
   options?: {
     schema?: z.Schema<T>;
+    skipPlaceholders?: Boolean;
   },
 ) => {
-  const resolvedPayload = await resolvePayload(ctx, payload);
+  const resolvedPayload = await resolvePayload(ctx, payload, {
+    skipPlaceholders: options?.skipPlaceholders,
+  });
 
   if (!options?.schema) {
     return resolvedPayload as T;
