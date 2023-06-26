@@ -5,6 +5,8 @@ export const isObject = (value: any): value is object =>
   value === null ||
   Array.isArray(value) ||
   typeof value == 'function' ||
+  value instanceof Set ||
+  value instanceof Map ||
   value?.constructor === Date
     ? false
     : typeof value == 'object';
