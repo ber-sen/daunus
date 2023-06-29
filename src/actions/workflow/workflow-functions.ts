@@ -20,8 +20,9 @@ export const runAction = async (
   baseActions: Record<string, TineAction<any>>,
 ) => {
   let action =
-    baseActions[actionType[0]] ||
-    get(ctx.get('.tine-workflow-actions'), actionType[0]);
+    baseActions[actionType[0]] || ctx.has('.tine-workflow-actions-resolver')
+      ? ctx.get('.tine-workflow-actions-resolver')(actionType[0])
+      : get(ctx.get('.tine-workflow-actions'), actionType[0]);
 
   if (!action) {
     throw new Error('Action not found');
