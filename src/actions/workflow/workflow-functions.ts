@@ -5,7 +5,7 @@ const isNested = (path: string) => {
   const dotRegex = /\./g;
   const matches = path.match(dotRegex);
 
-  return matches && matches.length > 1;
+  return matches && matches.length > 0;
 };
 
 const getParent = (path: string) => path.split('.').slice(0, -1).join('.');
