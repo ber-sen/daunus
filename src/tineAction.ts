@@ -40,7 +40,6 @@ export const tineAction =
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
     const actionInfo: TineActionInfo<D> = {
-      id: uuidv4(),
       name,
       action: args.action,
       payload: null,

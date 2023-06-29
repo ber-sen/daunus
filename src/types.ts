@@ -29,7 +29,6 @@ export type ResolveTineVar<T> = T extends TineVar<infer U>
   : T;
 
 export type TineActionInfo<D> = {
-  id: string;
   name: string;
   action: string;
   payload: any;
