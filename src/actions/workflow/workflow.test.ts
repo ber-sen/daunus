@@ -165,34 +165,19 @@ describe('workflow', () => {
   it('should work with response action', async () => {
     const ctx = new Map();
 
-    ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
-      new Function('$', `return ${key}`)($),
-    );
+    ctx.set('.tine-workflow-actions-resolver', (name: string) => {
+      return tineAction(() => 'test', { action: name });
+    });
 
     const action = workflow({
-      result: {
-        action: ['response'],
-        payload: {
-          before: {
-            action: ['shape'],
-            payload: { userId: 'test' },
-          },
-          data: {
-            action: ['shape'],
-            payload: '{{ $.before }}',
-          },
-          after: {
-            name: 'afterResponse',
-            action: ['shape'],
-            payload: 'lorem',
-          },
-        },
+      action: ['lorem.ipsum.dolor'],
+      payload: {
+        test: true,
       },
     });
 
     const res = await action.run(ctx);
 
-    expect(res).toStrictEqual({ userId: 'test' });
-    expect(ctx.get('afterResponse')).toStrictEqual('lorem');
+    expect(res).toStrictEqual('test');
   });
 });

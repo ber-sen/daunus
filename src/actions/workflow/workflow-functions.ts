@@ -20,15 +20,16 @@ export const runAction = async (
   baseActions: Record<string, TineAction<any>>,
 ) => {
   let action =
-    baseActions[actionType[0]] || ctx.has('.tine-workflow-actions-resolver')
+    baseActions[actionType[0]] ||
+    (ctx.has('.tine-workflow-actions-resolver')
       ? ctx.get('.tine-workflow-actions-resolver')(actionType[0])
-      : get(ctx.get('.tine-workflow-actions'), actionType[0]);
+      : get(ctx.get('.tine-workflow-actions'), actionType[0]));
 
   if (!action) {
     throw new Error('Action not found');
   }
 
-  if (isNested(actionType[0])) {
+  if (!ctx.has('.tine-workflow-actions-resolver') && isNested(actionType[0])) {
     action = action.bind(
       get(ctx.get('.tine-workflow-actions'), getParent(actionType[0])),
     );
