@@ -106,11 +106,11 @@ export const tineAction =
         }
       };
 
-    const action = {
+    const action: TineAction<D> = {
       ...actionCtx,
       name,
       run: makeRun(),
-    } satisfies TineAction<D>;
+    };
 
     return {
       ...action,
@@ -130,7 +130,7 @@ export const tineAction =
           }),
         }),
       }),
-    } satisfies TineActionWithOptions<D>;
+    } as TineActionWithOptions<D>;
   };
 
 export const parsePayload = async <T>(
