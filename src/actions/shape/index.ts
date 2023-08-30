@@ -1,7 +1,10 @@
 import { tineAction } from '../../tineAction';
 
-const shape = tineAction(<T>(payload: T) => payload, {
-  action: 'shape',
-});
+const shape = tineAction(
+  {
+    action: 'shape',
+  },
+  <T>(payload: T) => payload,
+);
 
 export default shape;

@@ -3,6 +3,7 @@ import { tineAction } from '../../tineAction';
 import { TineActionOptions } from '../../types';
 
 const condition = tineAction(
+  { action: 'condition', skipParse: true },
   async <P, T = null>(
     {
       if: $if,
@@ -18,7 +19,6 @@ const condition = tineAction(
     return ((await parsePayload(ctx, await resolveAction(ctx, $else))) ??
       null) as T;
   },
-  { action: 'condition', skipParse: true },
 );
 
 export default condition;

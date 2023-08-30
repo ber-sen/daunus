@@ -3,6 +3,7 @@ import { tineAction } from '../../tineAction';
 import { TineActionOptions, TineVar, TineWorkflowAction } from '../../types';
 
 const response = tineAction(
+  { action: 'response', skipParse: true },
   async <D, B, A>(
     {
       data,
@@ -29,7 +30,6 @@ const response = tineAction(
 
     return res;
   },
-  { action: 'response', skipParse: true },
 );
 
 export default response;

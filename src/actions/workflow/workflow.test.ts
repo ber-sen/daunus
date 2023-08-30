@@ -79,9 +79,12 @@ describe('workflow', () => {
     const actions = new Map();
 
     actions.set('newAction', {
-      nested: tineAction(() => ({ data: 'lorem ipsum' }), {
-        action: 'newAction',
-      }),
+      nested: tineAction(
+        {
+          action: 'newAction',
+        },
+        () => ({ data: 'lorem ipsum' }),
+      ),
     });
 
     ctx.set('.tine-workflow-actions', actions);
@@ -166,7 +169,7 @@ describe('workflow', () => {
     const ctx = new Map();
 
     ctx.set('.tine-workflow-actions-resolver', (name: string) => {
-      return tineAction(() => 'test', { action: name });
+      return tineAction({ action: name }, () => 'test');
     });
 
     const action = workflow({

@@ -5,6 +5,11 @@ import { rpcSchema } from './rpc-schema';
 import { tineAction } from '../../tineAction';
 
 const rpc = tineAction(
+  {
+    action: 'rpc',
+    schema: rpcSchema,
+    skipParse: true,
+  },
   async ({ endpoint, secret, action, payload, name }, { ctx }) => {
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -16,11 +21,6 @@ const rpc = tineAction(
     });
 
     return superjson.deserialize(await res.json());
-  },
-  {
-    action: 'rpc',
-    schema: rpcSchema,
-    skipParse: true,
   },
 );
 

@@ -16,10 +16,6 @@ import {
 
 export const tineAction =
   <P, D>(
-    run: (
-      payload: P | undefined,
-      { ctx, parsePayload }: TineActionOptions,
-    ) => D | Promise<D>,
     args: {
       action: string;
       name?: string;
@@ -28,6 +24,10 @@ export const tineAction =
       parseResponse?: boolean;
       skipLog?: boolean;
     },
+    run: (
+      payload: P | undefined,
+      { ctx, parsePayload }: TineActionOptions,
+    ) => D | Promise<D>,
   ) =>
   (
     payload?: TinePayload<P>,

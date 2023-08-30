@@ -9,6 +9,7 @@ import shape from '../shape';
 import response from '../response';
 
 const workflow = tineAction(
+  { action: 'workflow', skipParse: true },
   async (workflow: object, { ctx }: TineActionOptions) => {
     if (isAction(workflow)) {
       return await runAction(ctx, workflow, BASE_ACTIONS);
@@ -22,7 +23,6 @@ const workflow = tineAction(
 
     return res;
   },
-  { action: 'workflow', skipParse: true },
 );
 
 const BASE_ACTIONS = {
