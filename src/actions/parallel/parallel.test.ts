@@ -47,4 +47,24 @@ describe('parallel', () => {
 
     expect(res).toStrictEqual([['action.1.1', 'action.1.2'], 'action.2']);
   });
+
+  it('should NOT be able to access return of the first action from the second', async () => {
+    const action = parallel([
+      {
+        name: 'test',
+        action: ['shape'],
+        payload: {
+          foo: 'bar',
+        },
+      },
+      {
+        action: ['shape'],
+        payload: '{{ $.test }}',
+      },
+    ]);
+
+    const res = await action.run();
+
+    expect(res).toStrictEqual([{ foo: 'bar' }, undefined]);
+  });
 });
