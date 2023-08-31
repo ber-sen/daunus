@@ -1,6 +1,20 @@
 import { get } from '../../get';
 import { TineAction, TineCtx } from '../../types';
 
+import condition from '../condition';
+import rpc from '../rpc';
+import shape from '../shape';
+import response from '../response';
+import process from '../process';
+
+export const BASE_ACTIONS = {
+  shape,
+  condition,
+  response,
+  process,
+  rpc,
+};
+
 const isNested = (path: string) => {
   const dotRegex = /\./g;
   const matches = path.match(dotRegex);
@@ -17,7 +31,7 @@ export const runAction = async (
     payload,
     name,
   }: { action: [string]; name?: string; payload?: any },
-  baseActions: Record<string, TineAction<any>>,
+  baseActions: Record<string, TineAction<any>> = BASE_ACTIONS,
 ) => {
   let action =
     baseActions[actionType[0]] ||

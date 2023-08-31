@@ -3,34 +3,23 @@ import { runAction } from './workflow-functions';
 import { isAction } from '../../helpers';
 import { tineAction } from '../../tineAction';
 import { TineActionOptions } from '../../types';
-import condition from '../condition';
-import rpc from '../rpc';
-import shape from '../shape';
-import response from '../response';
 
 const workflow = tineAction(
   { action: 'workflow', skipParse: true },
   async (workflow: object, { ctx }: TineActionOptions) => {
     if (isAction(workflow)) {
-      return await runAction(ctx, workflow, BASE_ACTIONS);
+      return await runAction(ctx, workflow);
     }
 
     let res = null;
 
     for (const [name, { action, payload }] of Object.entries(workflow)) {
-      res = await runAction(ctx, { action, name, payload }, BASE_ACTIONS);
+      res = await runAction(ctx, { action, name, payload });
     }
 
     return res;
   },
 );
 
-const BASE_ACTIONS = {
-  shape,
-  workflow,
-  condition,
-  response,
-  rpc,
-};
-
 export default workflow;
+export { runAction } from './workflow-functions';

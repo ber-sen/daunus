@@ -37,42 +37,6 @@ describe('workflow', () => {
     expect(res).toStrictEqual('bar');
   });
 
-  it('should work with nested workflows', async () => {
-    const ctx = new Map();
-
-    ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
-      new Function('$', `return ${key}`)($),
-    );
-
-    const action = workflow({
-      test: {
-        action: ['workflow'],
-        payload: {
-          lorem: {
-            action: ['shape'],
-            payload: 'ipsum',
-          },
-          data: {
-            action: ['shape'],
-            payload: {
-              foo: 'bar',
-            },
-          },
-        },
-      },
-      return: {
-        action: ['shape'],
-        payload: {
-          foo: '{{ $.test.foo + "asd" }}',
-        },
-      },
-    });
-
-    const res = await action.run(ctx);
-
-    expect(res).toStrictEqual({ foo: 'barasd' });
-  });
-
   it('should allow to add more user defined actions', async () => {
     const ctx = new Map();
 
