@@ -6,11 +6,13 @@ import rpc from '../rpc';
 import shape from '../shape';
 import response from '../response';
 import process from '../process';
+import parallel from '../parallel';
 
 export const BASE_ACTIONS = {
   shape,
   condition,
   response,
+  parallel,
   process,
   rpc,
 };
