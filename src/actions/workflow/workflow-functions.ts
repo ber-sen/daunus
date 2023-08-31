@@ -7,6 +7,7 @@ import shape from '../shape';
 import response from '../response';
 import process from '../process';
 import parallel from '../parallel';
+import serial from '../serial';
 
 export const BASE_ACTIONS = {
   shape,
@@ -14,6 +15,7 @@ export const BASE_ACTIONS = {
   response,
   parallel,
   process,
+  serial,
   rpc,
 };
 
