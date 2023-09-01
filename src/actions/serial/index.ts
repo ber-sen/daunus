@@ -9,14 +9,8 @@ const serial = tineAction(
   async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
     let res = [];
 
-    for (const { action, payload, name } of list) {
-      res.push(
-        await runAction(
-          ctx,
-          { action, name, payload },
-          { ...BASE_ACTIONS, serial },
-        ),
-      );
+    for (const action of list) {
+      res.push(await runAction(ctx, action, { ...BASE_ACTIONS, serial }));
     }
 
     return res;
