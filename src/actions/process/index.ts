@@ -9,12 +9,8 @@ const process = tineAction(
   async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
     let res = null;
 
-    for (const { action, payload, name } of list) {
-      res = await runAction(
-        ctx,
-        { action, name, payload },
-        { ...BASE_ACTIONS, process },
-      );
+    for (const action of list) {
+      res = await runAction(ctx, action, { ...BASE_ACTIONS, process });
     }
 
     return res;
