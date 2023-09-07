@@ -5,7 +5,7 @@ describe('process', () => {
     const action = process([
       {
         name: 'test',
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
@@ -21,13 +21,13 @@ describe('process', () => {
     const action = process([
       {
         name: 'test',
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: '{{ $.test.foo }}',
       },
     ]);
@@ -47,14 +47,14 @@ describe('process', () => {
     const action = process([
       {
         name: 'test',
-        action: ['process'],
+        type: ['process'],
         payload: [
           {
-            action: ['shape'],
+            type: ['shape'],
             payload: 'ipsum',
           },
           {
-            action: ['shape'],
+            type: ['shape'],
             payload: {
               foo: 'bar',
             },
@@ -62,7 +62,7 @@ describe('process', () => {
         ],
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: '{{ $.test.foo + "asd" }}',
         },

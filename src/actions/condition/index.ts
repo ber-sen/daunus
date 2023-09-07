@@ -3,7 +3,7 @@ import { tineAction } from '../../tineAction';
 import { TineActionOptions } from '../../types';
 
 const condition = tineAction(
-  { action: 'condition', skipParse: true },
+  { type: 'condition', skipParse: true },
   async <P, T = null>(
     {
       if: $if,

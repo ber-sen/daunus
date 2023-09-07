@@ -4,7 +4,7 @@ import { TineCtx } from '../../types';
 
 const task = tineAction(
   {
-    action: 'task',
+    type: 'task',
     parseResponse: true,
   },
   <T>(payload: (ctx: TineCtx) => T) => tineFn(payload),

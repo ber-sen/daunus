@@ -17,7 +17,7 @@ import {
 export const tineAction =
   <P, D>(
     args: {
-      action: string;
+      type: string;
       name?: string;
       schema?: z.Schema<P>;
       skipParse?: boolean;
@@ -41,7 +41,7 @@ export const tineAction =
 
     const actionInfo: TineActionInfo<D> = {
       name,
-      action: args.action,
+      type: args.type,
       payload: null,
       data: null,
       error: null,

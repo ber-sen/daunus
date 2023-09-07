@@ -6,7 +6,7 @@ describe('workflow', () => {
   it('should work for basic example', async () => {
     const action = workflow({
       test: {
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
@@ -21,13 +21,13 @@ describe('workflow', () => {
   it('should work with placeholders', async () => {
     const action = workflow({
       test: {
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       return: {
-        action: ['shape'],
+        type: ['shape'],
         payload: '{{ $.test.foo }}',
       },
     });
@@ -45,7 +45,7 @@ describe('workflow', () => {
     actions.set('newAction', {
       nested: tineAction(
         {
-          action: 'newAction',
+          type: 'newAction',
         },
         () => ({ data: 'lorem ipsum' }),
       ),
@@ -55,10 +55,10 @@ describe('workflow', () => {
 
     const action = workflow({
       test: {
-        action: ['newAction.nested'],
+        type: ['newAction.nested'],
       },
       return: {
-        action: ['shape'],
+        type: ['shape'],
         payload: '{{ $.test.data }}',
       },
     });
@@ -71,13 +71,13 @@ describe('workflow', () => {
   it('should work with object', async () => {
     const action = workflow({
       test: {
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       return: {
-        action: ['shape'],
+        type: ['shape'],
         payload: '{{ $.test }}',
       },
     });
@@ -89,7 +89,7 @@ describe('workflow', () => {
 
   it('should work with top level action', async () => {
     const action = workflow({
-      action: ['shape'],
+      type: ['shape'],
       payload: {
         foo: 'bar',
       },
@@ -109,15 +109,15 @@ describe('workflow', () => {
 
     const action = workflow({
       data: {
-        action: ['shape'],
+        type: ['shape'],
         payload: 3,
       },
       result: {
-        action: ['condition'],
+        type: ['condition'],
         payload: {
           if: '{{ $.data === 3 }}',
           then: {
-            action: ['shape'],
+            type: ['shape'],
             payload: true,
           },
         },
@@ -133,11 +133,11 @@ describe('workflow', () => {
     const ctx = new Map();
 
     ctx.set('.tine-workflow-actions-resolver', (name: string) => {
-      return tineAction({ action: name }, () => 'test');
+      return tineAction({ type: name }, () => 'test');
     });
 
     const action = workflow({
-      action: ['lorem.ipsum.dolor'],
+      type: ['lorem.ipsum.dolor'],
       payload: {
         test: true,
       },

@@ -2,7 +2,7 @@ import { tineAction } from '../../tineAction';
 
 const shape = tineAction(
   {
-    action: 'shape',
+    type: 'shape',
   },
   <T>(payload: T) => payload,
 );

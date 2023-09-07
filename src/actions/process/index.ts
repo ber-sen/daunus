@@ -5,7 +5,7 @@ import { TineActionOptions, TineWorkflowAction } from '../../types';
 import { BASE_ACTIONS } from '../workflow/workflow-functions';
 
 const process = tineAction(
-  { action: 'process', skipParse: true },
+  { type: 'process', skipParse: true },
   async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
     let res = null;
 

@@ -6,18 +6,18 @@ import { tineAction } from '../../tineAction';
 
 const rpc = tineAction(
   {
-    action: 'rpc',
+    type: 'rpc',
     schema: rpcSchema,
     skipParse: true,
   },
-  async ({ endpoint, secret, action, payload, name }, { ctx }) => {
+  async ({ endpoint, secret, type, payload, name }, { ctx }) => {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Tine-Secret': secret,
       },
-      body: JSON.stringify(superjson.serialize({ ctx, action, name, payload })),
+      body: JSON.stringify(superjson.serialize({ ctx, type, name, payload })),
     });
 
     return superjson.deserialize(await res.json());

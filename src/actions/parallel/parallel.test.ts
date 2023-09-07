@@ -5,13 +5,13 @@ describe('parallel', () => {
     const action = parallel([
       {
         name: 'test',
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: 'test',
       },
     ]);
@@ -25,20 +25,20 @@ describe('parallel', () => {
     const action = parallel([
       {
         name: 'test',
-        action: ['parallel'],
+        type: ['parallel'],
         payload: [
           {
-            action: ['shape'],
+            type: ['shape'],
             payload: 'action.1.1',
           },
           {
-            action: ['shape'],
+            type: ['shape'],
             payload: 'action.1.2',
           },
         ],
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: 'action.2',
       },
     ]);
@@ -52,13 +52,13 @@ describe('parallel', () => {
     const action = parallel([
       {
         name: 'test',
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: '{{ $.test }}',
       },
     ]);

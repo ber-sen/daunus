@@ -5,13 +5,13 @@ describe('serial', () => {
     const action = serial([
       {
         name: 'test',
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: 'test',
       },
     ]);
@@ -25,20 +25,20 @@ describe('serial', () => {
     const action = serial([
       {
         name: 'test',
-        action: ['serial'],
+        type: ['serial'],
         payload: [
           {
-            action: ['shape'],
+            type: ['shape'],
             payload: 'action.1.1',
           },
           {
-            action: ['shape'],
+            type: ['shape'],
             payload: 'action.1.2',
           },
         ],
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: 'action.2',
       },
     ]);
@@ -52,13 +52,13 @@ describe('serial', () => {
     const action = serial([
       {
         name: 'test',
-        action: ['shape'],
+        type: ['shape'],
         payload: {
           foo: 'bar',
         },
       },
       {
-        action: ['shape'],
+        type: ['shape'],
         payload: '{{ $.test }}',
       },
     ]);

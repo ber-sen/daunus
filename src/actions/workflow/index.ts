@@ -5,7 +5,7 @@ import { tineAction } from '../../tineAction';
 import { TineActionOptions } from '../../types';
 
 const workflow = tineAction(
-  { action: 'workflow', skipParse: true },
+  { type: 'workflow', skipParse: true },
   async (workflow: object, { ctx }: TineActionOptions) => {
     if (isAction(workflow)) {
       return await runAction(ctx, workflow);
@@ -13,8 +13,8 @@ const workflow = tineAction(
 
     let res = null;
 
-    for (const [name, { action, payload }] of Object.entries(workflow)) {
-      res = await runAction(ctx, { action, name, payload });
+    for (const [name, { type, payload }] of Object.entries(workflow)) {
+      res = await runAction(ctx, { type, name, payload });
     }
 
     return res;

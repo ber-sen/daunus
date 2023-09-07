@@ -30,7 +30,7 @@ export type ResolveTineVar<T> = T extends TineVar<infer U>
 
 export type TineActionInfo<D> = {
   name: string;
-  action: string;
+  type: string;
   payload: any;
   data?: ResolveTineVar<D>;
   error?: Error;
@@ -49,7 +49,7 @@ export type TineAction<T> = {
 };
 
 export type TineWorkflowAction<T> = {
-  action: [string];
+  type: [string];
   payload?: T;
   name?: string;
 };

@@ -30,26 +30,22 @@ const getParent = (path: string) => path.split('.').slice(0, -1).join('.');
 
 export const runAction = async (
   ctx: TineCtx,
-  {
-    action: actionType,
-    payload,
-    name,
-  }: { action: [string]; name?: string; payload?: any },
+  { type, payload, name }: { type: [string]; name?: string; payload?: any },
   baseActions: Record<string, TineAction<any>> = BASE_ACTIONS,
 ) => {
   let action =
-    baseActions[actionType[0]] ||
+    baseActions[type[0]] ||
     (ctx.has('.tine-workflow-actions-resolver')
-      ? ctx.get('.tine-workflow-actions-resolver')(actionType[0])
-      : get(ctx.get('.tine-workflow-actions'), actionType[0]));
+      ? ctx.get('.tine-workflow-actions-resolver')(type[0])
+      : get(ctx.get('.tine-workflow-actions'), type[0]));
 
   if (!action) {
     throw new Error('Action not found');
   }
 
-  if (!ctx.has('.tine-workflow-actions-resolver') && isNested(actionType[0])) {
+  if (!ctx.has('.tine-workflow-actions-resolver') && isNested(type[0])) {
     action = action.bind(
-      get(ctx.get('.tine-workflow-actions'), getParent(actionType[0])),
+      get(ctx.get('.tine-workflow-actions'), getParent(type[0])),
     );
   }
 

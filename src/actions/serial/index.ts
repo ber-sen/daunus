@@ -5,7 +5,7 @@ import { TineActionOptions, TineWorkflowAction } from '../../types';
 import { BASE_ACTIONS } from '../workflow/workflow-functions';
 
 const serial = tineAction(
-  { action: 'serial', skipParse: true },
+  { type: 'serial', skipParse: true },
   async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
     let res = [];
 
