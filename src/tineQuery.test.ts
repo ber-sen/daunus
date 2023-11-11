@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { tineInput } from './tineHelpers';
-import { resolvePayload } from './resolvePayload';
+import { resolveParams } from './resolveParams';
 import { TineAction, TineInput } from './types';
 import { tineQuery } from './tineQuery';
 
@@ -20,7 +20,7 @@ describe('tineQuery', () => {
 
     const ctx = getContext(input, { name: 'Earth' });
 
-    const res = await resolvePayload(
+    const res = await resolveParams(
       ctx,
       tineQuery(($) => $.input.name),
     );

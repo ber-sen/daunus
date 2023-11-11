@@ -7,7 +7,7 @@ const task = tineAction(
     type: 'task',
     parseResponse: true,
   },
-  <T>(payload: (ctx: TineCtx) => T) => tineFn(payload),
+  <T>(params: (ctx: TineCtx) => T) => tineFn(params),
 );
 
 export default task;

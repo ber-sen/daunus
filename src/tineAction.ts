@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
-import { resolvePayload } from './resolvePayload';
+import { resolveParams } from './resolveParams';
 import {
   ResolveTineVar,
   TineAction,
@@ -11,7 +11,7 @@ import {
   TineActionWithOptions,
   TineCtx,
   TineInput,
-  TinePayload,
+  TineParams,
 } from './types';
 
 export const tineAction =
@@ -25,12 +25,12 @@ export const tineAction =
       skipLog?: boolean;
     },
     run: (
-      payload: P | undefined,
-      { ctx, parsePayload }: TineActionOptions,
+      params: P | undefined,
+      { ctx, parseParams }: TineActionOptions,
     ) => D | Promise<D>,
   ) =>
   (
-    payload?: TinePayload<P>,
+    params?: TineParams<P>,
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
@@ -42,7 +42,7 @@ export const tineAction =
     const actionInfo: TineActionInfo<D> = {
       name,
       type: args.type,
-      payload: null,
+      params: null,
       data: null,
       error: null,
     };
@@ -58,22 +58,22 @@ export const tineAction =
         const runFn = async () => {
           init && init(ctx);
 
-          const parsedPayload =
-            args.skipParse || !payload
-              ? payload
-              : await parsePayload(ctx, payload, {
+          const parsedParams =
+            args.skipParse || !params
+              ? params
+              : await parseParams(ctx, params, {
                   schema: args.schema,
                 });
 
-          actionInfo.payload = parsedPayload;
+          actionInfo.params = parsedParams;
 
-          const value = await run(parsedPayload, { ctx, parsePayload });
+          const value = await run(parsedParams, { ctx, parseParams });
 
           if (!args.parseResponse) {
             return resolveTineVar(value);
           }
 
-          const parseValue = await parsePayload(ctx, value, {
+          const parseValue = await parseParams(ctx, value, {
             skipPlaceholders: true,
           });
 
@@ -133,23 +133,23 @@ export const tineAction =
     } as TineActionWithOptions<D>;
   };
 
-export const parsePayload = async <T>(
+export const parseParams = async <T>(
   ctx: Map<string, any>,
-  payload: TinePayload<T>,
+  params: TineParams<T>,
   options?: {
     schema?: z.Schema<T>;
     skipPlaceholders?: Boolean;
   },
 ) => {
-  const resolvedPayload = await resolvePayload(ctx, payload, {
+  const resolvedParams = await resolveParams(ctx, params, {
     skipPlaceholders: options?.skipPlaceholders,
   });
 
   if (!options?.schema) {
-    return resolvedPayload as T;
+    return resolvedParams as T;
   }
 
-  return options?.schema.parse(resolvedPayload) as T;
+  return options?.schema.parse(resolvedParams) as T;
 };
 
 const resolveTineVar = <T>(data: T) => data as ResolveTineVar<T>;

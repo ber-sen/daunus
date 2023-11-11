@@ -10,14 +10,14 @@ const rpc = tineAction(
     schema: rpcSchema,
     skipParse: true,
   },
-  async ({ endpoint, secret, type, payload, name }, { ctx }) => {
+  async ({ endpoint, secret, type, params, name }, { ctx }) => {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Tine-Secret': secret,
       },
-      body: JSON.stringify(superjson.serialize({ ctx, type, name, payload })),
+      body: JSON.stringify(superjson.serialize({ ctx, type, name, params })),
     });
 
     return superjson.deserialize(await res.json());

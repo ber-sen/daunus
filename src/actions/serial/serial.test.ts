@@ -6,13 +6,13 @@ describe('serial', () => {
       {
         name: 'test',
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
       {
         type: ['shape'],
-        payload: 'test',
+        params: 'test',
       },
     ]);
 
@@ -26,20 +26,20 @@ describe('serial', () => {
       {
         name: 'test',
         type: ['serial'],
-        payload: [
+        params: [
           {
             type: ['shape'],
-            payload: 'action.1.1',
+            params: 'action.1.1',
           },
           {
             type: ['shape'],
-            payload: 'action.1.2',
+            params: 'action.1.2',
           },
         ],
       },
       {
         type: ['shape'],
-        payload: 'action.2',
+        params: 'action.2',
       },
     ]);
 
@@ -53,13 +53,13 @@ describe('serial', () => {
       {
         name: 'test',
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
       {
         type: ['shape'],
-        payload: '{{ $.test }}',
+        params: '{{ $.test }}',
       },
     ]);
 

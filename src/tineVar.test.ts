@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { tineInput } from './tineHelpers';
-import { resolvePayload } from './resolvePayload';
+import { resolveParams } from './resolveParams';
 import { tineVar } from './tineVar';
 import { TineAction, TineInput } from './types';
 
@@ -21,7 +21,7 @@ describe('tineVar', () => {
 
       const ctx = getContext(input, { name: 'Earth' });
 
-      const res = await resolvePayload(ctx, tineVar(input, 'name'));
+      const res = await resolveParams(ctx, tineVar(input, 'name'));
 
       expect(res).toStrictEqual('Earth');
     });
@@ -34,7 +34,7 @@ describe('tineVar', () => {
 
       const ctx = getContext(input, { variables: { name: 'Earth' } });
 
-      const res = await resolvePayload(ctx, tineVar(input, 'variables.name'));
+      const res = await resolveParams(ctx, tineVar(input, 'variables.name'));
 
       expect(res).toStrictEqual('Earth');
     });
@@ -47,7 +47,7 @@ describe('tineVar', () => {
 
       const ctx = getContext(input, { variables: { names: ['Earth'] } });
 
-      const res = await resolvePayload(
+      const res = await resolveParams(
         ctx,
         tineVar(input, 'variables.names[0]'),
       );
@@ -60,7 +60,7 @@ describe('tineVar', () => {
 
       const ctx = getContext(input, null);
 
-      const res = await resolvePayload(
+      const res = await resolveParams(
         ctx,
         tineVar(input, (val) => Boolean(!val)),
       );
@@ -82,7 +82,7 @@ describe('tineVar', () => {
       ctx.set(input1.name, 'test');
       ctx.set(input2.name, 'test2');
 
-      const res = await resolvePayload(
+      const res = await resolveParams(
         ctx,
         tineVar([input1, input2] as const, ([$1, $2]) => [$1, $2]),
       );

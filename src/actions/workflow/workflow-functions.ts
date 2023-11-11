@@ -30,7 +30,7 @@ const getParent = (path: string) => path.split('.').slice(0, -1).join('.');
 
 export const runAction = async (
   ctx: TineCtx,
-  { type, payload, name }: { type: [string]; name?: string; payload?: any },
+  { type, params, name }: { type: [string]; name?: string; params?: any },
   baseActions: Record<string, TineAction<any>> = BASE_ACTIONS,
 ) => {
   let action =
@@ -49,5 +49,5 @@ export const runAction = async (
     );
   }
 
-  return await action(payload, { name }).run(ctx);
+  return await action(params, { name }).run(ctx);
 };

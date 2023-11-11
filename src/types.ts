@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
 
-export type TinePayload<T> = T; // TODO: fix type
+export type TineParams<T> = T; // TODO: fix type
 
 export type TineInput<T> = z.ZodType<T> & { name: string };
 
@@ -31,7 +31,7 @@ export type ResolveTineVar<T> = T extends TineVar<infer U>
 export type TineActionInfo<D> = {
   name: string;
   type: string;
-  payload: any;
+  params: any;
   data?: ResolveTineVar<D>;
   error?: Error;
 };
@@ -50,7 +50,7 @@ export type TineAction<T> = {
 
 export type TineWorkflowAction<T> = {
   type: [string];
-  payload?: T;
+  params?: T;
   name?: string;
 };
 
@@ -67,7 +67,7 @@ export type TineActionWithOptions<T> = TineAction<T> & {
 
 export type TineActionOptions = {
   ctx: TineCtx;
-  parsePayload: <X>(ctx: Map<string, any>, payload: X) => Promise<X>;
+  parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
 };
 
 export type TineInferReturn<

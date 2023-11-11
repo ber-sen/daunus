@@ -7,7 +7,7 @@ describe('workflow', () => {
     const action = workflow({
       test: {
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
@@ -22,13 +22,13 @@ describe('workflow', () => {
     const action = workflow({
       test: {
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
       return: {
         type: ['shape'],
-        payload: '{{ $.test.foo }}',
+        params: '{{ $.test.foo }}',
       },
     });
 
@@ -59,7 +59,7 @@ describe('workflow', () => {
       },
       return: {
         type: ['shape'],
-        payload: '{{ $.test.data }}',
+        params: '{{ $.test.data }}',
       },
     });
 
@@ -72,13 +72,13 @@ describe('workflow', () => {
     const action = workflow({
       test: {
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
       return: {
         type: ['shape'],
-        payload: '{{ $.test }}',
+        params: '{{ $.test }}',
       },
     });
 
@@ -90,7 +90,7 @@ describe('workflow', () => {
   it('should work with top level action', async () => {
     const action = workflow({
       type: ['shape'],
-      payload: {
+      params: {
         foo: 'bar',
       },
     });
@@ -110,15 +110,15 @@ describe('workflow', () => {
     const action = workflow({
       data: {
         type: ['shape'],
-        payload: 3,
+        params: 3,
       },
       result: {
         type: ['condition'],
-        payload: {
+        params: {
           if: '{{ $.data === 3 }}',
           then: {
             type: ['shape'],
-            payload: true,
+            params: true,
           },
         },
       },
@@ -138,7 +138,7 @@ describe('workflow', () => {
 
     const action = workflow({
       type: ['lorem.ipsum.dolor'],
-      payload: {
+      params: {
         test: true,
       },
     });

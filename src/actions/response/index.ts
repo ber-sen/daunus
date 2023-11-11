@@ -14,17 +14,17 @@ const response = tineAction(
       before?: TineWorkflowAction<B> | TineVar<B>;
       after?: TineWorkflowAction<A> | TineVar<A>;
     },
-    { parsePayload, ctx }: TineActionOptions,
+    { parseParams, ctx }: TineActionOptions,
   ) => {
     if (before) {
-      await parsePayload(ctx, await resolveAction(ctx, before, 'before'));
+      await parseParams(ctx, await resolveAction(ctx, before, 'before'));
     }
 
-    const res: D = await parsePayload(ctx, await resolveAction(ctx, data));
+    const res: D = await parseParams(ctx, await resolveAction(ctx, data));
 
     if (after) {
       (async () => {
-        await parsePayload(ctx, await resolveAction(ctx, after, 'after'));
+        await parseParams(ctx, await resolveAction(ctx, after, 'after'));
       })();
     }
 

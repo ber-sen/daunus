@@ -10,13 +10,13 @@ const condition = tineAction(
       then: $then,
       else: $else = null,
     }: { if: boolean; then: P; else?: T | null },
-    { parsePayload, ctx }: TineActionOptions,
+    { parseParams, ctx }: TineActionOptions,
   ) => {
-    if (await parsePayload(ctx, await resolveAction(ctx, $if))) {
-      return (await parsePayload(ctx, await resolveAction(ctx, $then))) as P;
+    if (await parseParams(ctx, await resolveAction(ctx, $if))) {
+      return (await parseParams(ctx, await resolveAction(ctx, $then))) as P;
     }
 
-    return ((await parsePayload(ctx, await resolveAction(ctx, $else))) ??
+    return ((await parseParams(ctx, await resolveAction(ctx, $else))) ??
       null) as T;
   },
 );

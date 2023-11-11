@@ -13,8 +13,8 @@ const workflow = tineAction(
 
     let res = null;
 
-    for (const [name, { type, payload }] of Object.entries(workflow)) {
-      res = await runAction(ctx, { type, name, payload });
+    for (const [name, { type, params }] of Object.entries(workflow)) {
+      res = await runAction(ctx, { type, name, params });
     }
 
     return res;

@@ -6,7 +6,7 @@ describe('process', () => {
       {
         name: 'test',
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
@@ -22,13 +22,13 @@ describe('process', () => {
       {
         name: 'test',
         type: ['shape'],
-        payload: {
+        params: {
           foo: 'bar',
         },
       },
       {
         type: ['shape'],
-        payload: '{{ $.test.foo }}',
+        params: '{{ $.test.foo }}',
       },
     ]);
 
@@ -48,14 +48,14 @@ describe('process', () => {
       {
         name: 'test',
         type: ['process'],
-        payload: [
+        params: [
           {
             type: ['shape'],
-            payload: 'ipsum',
+            params: 'ipsum',
           },
           {
             type: ['shape'],
-            payload: {
+            params: {
               foo: 'bar',
             },
           },
@@ -63,7 +63,7 @@ describe('process', () => {
       },
       {
         type: ['shape'],
-        payload: {
+        params: {
           foo: '{{ $.test.foo + "asd" }}',
         },
       },

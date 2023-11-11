@@ -12,7 +12,7 @@ import { tineVar, tineInput, shape } from 'tinejs';
 const input = tineInput(z.object({ name: z.string().nullable() }));
 
 const hello = shape({
-  message: tineVar(input, ({ name }) => `Hello ${name || 'World'}`)
+  params: tineVar(input, ({ name }) => `Hello ${name || 'World'}`)
 });
 
 export default hello.withInput(input);

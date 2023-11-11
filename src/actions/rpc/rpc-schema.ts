@@ -5,5 +5,5 @@ export const rpcSchema = z.object({
   secret: z.string(),
   type: z.array(z.string()),
   name: z.string().optional(),
-  payload: z.any(),
+  params: z.any(),
 });
