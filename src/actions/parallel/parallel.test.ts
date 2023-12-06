@@ -1,4 +1,4 @@
-import { tineCtx } from '@/tineHelpers';
+import { tineCtx } from '../../tineHelpers';
 import parallel from './index';
 
 describe('parallel', () => {

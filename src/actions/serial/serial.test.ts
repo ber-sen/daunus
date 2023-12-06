@@ -1,4 +1,4 @@
-import { tineCtx } from '@/tineHelpers';
+import { tineCtx } from '../../tineHelpers';
 import serial from './index';
 
 describe('serial', () => {

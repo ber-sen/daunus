@@ -1,5 +1,4 @@
-import { runAction } from '@/runAction';
-
+import { runAction } from '../../runAction';
 import { tineAction } from '../../tineAction';
 import { TineActionOptions, TineWorkflowAction } from '../../types';
 

@@ -1,5 +1,4 @@
-import { tineCtx } from '@/tineHelpers';
-
+import { tineCtx } from '../../tineHelpers';
 import process from './index';
 
 describe('process', () => {

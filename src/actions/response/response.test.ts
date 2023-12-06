@@ -1,4 +1,4 @@
-import { tineCtx } from '@/tineHelpers';
+import { tineCtx } from '../../tineHelpers';
 import { tineVar } from '../../tineVar';
 import task from '../task';
 import response from './index';
