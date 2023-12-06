@@ -1,3 +1,5 @@
+import { tineCtx } from '@/tineHelpers';
+
 import process from './index';
 
 describe('process', () => {
@@ -12,7 +14,7 @@ describe('process', () => {
       },
     ]);
 
-    const res = await action.run();
+    const res = await action.run(tineCtx());
 
     expect(res).toStrictEqual({ foo: 'bar' });
   });
@@ -32,13 +34,13 @@ describe('process', () => {
       },
     ]);
 
-    const res = await action.run();
+    const res = await action.run(tineCtx());
 
     expect(res).toStrictEqual('bar');
   });
 
   it('should work with nested processes', async () => {
-    const ctx = new Map();
+    const ctx = tineCtx();
 
     ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
       new Function('$', `return ${key}`)($),

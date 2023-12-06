@@ -1,3 +1,4 @@
+import { tineCtx } from '@/tineHelpers';
 import { tineVar } from '../../tineVar';
 import task from '../task';
 import response from './index';
@@ -18,7 +19,7 @@ describe('response', () => {
       data: tineVar(data),
     });
 
-    const res = await action.run();
+    const res = await action.run(tineCtx());
 
     expect(res).toStrictEqual({ rows: ['test', 'test', 1], userId: 0 });
   });

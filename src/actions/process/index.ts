@@ -1,8 +1,7 @@
-import { runAction } from '../workflow';
+import { runAction } from '@/runAction';
 
 import { tineAction } from '../../tineAction';
 import { TineActionOptions, TineWorkflowAction } from '../../types';
-import { BASE_ACTIONS } from '../workflow/workflow-functions';
 
 const process = tineAction(
   { type: 'process', skipParse: true },
@@ -10,7 +9,7 @@ const process = tineAction(
     let res = null;
 
     for (const action of list) {
-      res = await runAction(ctx, action, { ...BASE_ACTIONS, process });
+      res = await runAction(ctx, action);
     }
 
     return res;

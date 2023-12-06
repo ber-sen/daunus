@@ -4,7 +4,7 @@ const shape = tineAction(
   {
     type: 'shape',
   },
-  <T>(params: T) => params,
+  <T>(params: T) => params!,
 );
 
 export default shape;

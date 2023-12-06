@@ -1,23 +1,5 @@
-import { get } from '../../get';
-import { TineAction, TineCtx } from '../../types';
-
-import condition from '../condition';
-import rpc from '../rpc';
-import shape from '../shape';
-import response from '../response';
-import process from '../process';
-import parallel from '../parallel';
-import serial from '../serial';
-
-export const BASE_ACTIONS = {
-  shape,
-  condition,
-  response,
-  parallel,
-  process,
-  serial,
-  rpc,
-};
+import { get } from './get';
+import { TineCtx } from './types';
 
 const isNested = (path: string) => {
   const dotRegex = /\./g;
@@ -31,9 +13,10 @@ const getParent = (path: string) => path.split('.').slice(0, -1).join('.');
 export const runAction = async (
   ctx: TineCtx,
   { type, params, name }: { type: [string]; name?: string; params?: any },
-  baseActions: Record<string, TineAction<any>> = BASE_ACTIONS,
 ) => {
-  let action =
+  const baseActions = ctx.get('.baseActions');
+
+  let action: any =
     baseActions[type[0]] ||
     (ctx.has('.tine-workflow-actions-resolver')
       ? ctx.get('.tine-workflow-actions-resolver')(type[0])
@@ -44,7 +27,7 @@ export const runAction = async (
   }
 
   if (!ctx.has('.tine-workflow-actions-resolver') && isNested(type[0])) {
-    action = action.bind(
+    action = (action as any).bind(
       get(ctx.get('.tine-workflow-actions'), getParent(type[0])),
     );
   }

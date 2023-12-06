@@ -1,3 +1,4 @@
+import { tineCtx } from '@/tineHelpers';
 import parallel from './index';
 
 describe('parallel', () => {
@@ -16,7 +17,7 @@ describe('parallel', () => {
       },
     ]);
 
-    const res = await action.run();
+    const res = await action.run(tineCtx());
 
     expect(res).toStrictEqual([{ foo: 'bar' }, 'test']);
   });
@@ -43,7 +44,7 @@ describe('parallel', () => {
       },
     ]);
 
-    const res = await action.run();
+    const res = await action.run(tineCtx());
 
     expect(res).toStrictEqual([['action.1.1', 'action.1.2'], 'action.2']);
   });
@@ -63,7 +64,7 @@ describe('parallel', () => {
       },
     ]);
 
-    const res = await action.run();
+    const res = await action.run(tineCtx());
 
     expect(res).toStrictEqual([{ foo: 'bar' }, undefined]);
   });

@@ -1,11 +1,15 @@
-import { workflow } from './actions';
 import { isAction } from './helpers';
+import { runAction } from './runAction';
 import { TineCtx } from './types';
 
-export const resolveAction = async <T>(ctx: TineCtx, obj: T, name?: string) => {
-  if (isAction(obj)) {
-    return await workflow(obj, { name }).run(ctx);
+export const resolveAction = async <T>(
+  ctx: TineCtx,
+  action: T,
+  name?: string,
+) => {
+  if (isAction(action)) {
+    await runAction(ctx, name ? { ...action, name } : action);
   }
 
-  return obj;
+  return action;
 };

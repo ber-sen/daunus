@@ -1,7 +1,10 @@
 import { z } from 'zod';
-import { TineInput } from './types';
 
-export const tineCtx = (value: object) => new Map(Object.entries(value));
+import { TineInput } from './types';
+import { BASE_ACTIONS } from './baseActions';
+
+export const tineCtx = (value?: object): Map<any, any> =>
+  new Map(Object.entries({ ...value, '.baseActions': BASE_ACTIONS }));
 
 export const tineInput = <T>(
   schema: z.ZodType<T>,

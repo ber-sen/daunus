@@ -4,10 +4,10 @@ import { resolveParams } from './resolveParams';
 import { tineVar } from './tineVar';
 import { TineAction, TineInput } from './types';
 
-const getContext = <T>(input: TineInput<T> | TineAction<T>, value: object) => {
+const getContext = <T>(input: TineInput<T> | TineAction<T>, value?: object) => {
   const ctx = new Map();
 
-  ctx.set(input.name, value);
+  ctx.set(input?.name, value);
 
   return ctx;
 };
@@ -58,7 +58,7 @@ describe('tineVar', () => {
     it("should return the value if it's fallacy", async () => {
       const input = tineInput(z.string().nullable(), { name: 'input' });
 
-      const ctx = getContext(input, null);
+      const ctx = getContext(input, undefined);
 
       const res = await resolveParams(
         ctx,

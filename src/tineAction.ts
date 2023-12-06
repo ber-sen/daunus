@@ -43,8 +43,8 @@ export const tineAction =
       name,
       type: args.type,
       params: null,
-      data: null,
-      error: null,
+      data: undefined,
+      error: undefined,
     };
 
     const makeRun =
