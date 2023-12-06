@@ -1,7 +1,7 @@
 {
   "name": "tinejs",
-  "version": "0.0.75",
-  "description": "Edge framework for NextJs",
+  "version": "0.0.76",
+  "description": "Yet another typescript framework",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {

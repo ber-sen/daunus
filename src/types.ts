@@ -80,3 +80,13 @@ export type TineInferReturn<
 
 export type TineInferInput<T extends TineActionWithInput<any, any>> =
   T extends TineActionWithInput<any, any> ? Parameters<T['input']>[0] : never;
+
+export class StatusError extends Error {
+  public status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'StatusError';
+    this.status = status;
+  }
+}

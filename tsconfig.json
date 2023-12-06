@@ -1,20 +1,32 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 18",
-
   "compilerOptions": {
-    "lib": ["DOM"],
-    "module": "commonjs",
-    "target": "es2022",
-
-    "strict": false,
-    "esModuleInterop": true,
+    "importHelpers": true,
+    "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
-
-    "outDir": "lib",
-    "declaration": true
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "strictNullChecks": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "react": ["./node_modules/@types/react"]
+    }
   },
-
-  "include": ["src/**/*"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "fake_modules"]
 }
