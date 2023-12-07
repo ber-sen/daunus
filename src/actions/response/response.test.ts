@@ -1,7 +1,8 @@
-import { tineCtx } from '../../tineHelpers';
-import { tineVar } from '../../tineVar';
 import task from '../task';
 import response from './index';
+
+import { tineCtx } from '../../tineHelpers';
+import { tineVar } from '../../tineVar';
 
 describe('response', () => {
   it('should work for basic example', async () => {

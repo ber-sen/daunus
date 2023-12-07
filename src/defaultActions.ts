@@ -3,9 +3,9 @@ import shape from './actions/shape';
 import response from './actions/response';
 import process from './actions/process';
 import parallel from './actions/parallel';
-import serial from './actions//serial';
+import serial from './actions/serial';
 
-export const BASE_ACTIONS = {
+export const DEFAULT_ACTIONS = {
   shape,
   condition,
   response,

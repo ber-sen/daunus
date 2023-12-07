@@ -1,5 +1,6 @@
-import { tineCtx } from '../../tineHelpers';
 import parallel from './index';
+
+import { tineCtx } from '../../tineHelpers';
 
 describe('parallel', () => {
   it('should work with two actions', async () => {

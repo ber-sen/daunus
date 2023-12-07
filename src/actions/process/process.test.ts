@@ -1,5 +1,6 @@
-import { tineCtx } from '../../tineHelpers';
 import process from './index';
+
+import { tineCtx } from '../../tineHelpers';
 
 describe('process', () => {
   it('should work for basic example', async () => {

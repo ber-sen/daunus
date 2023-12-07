@@ -10,11 +10,11 @@ describe('get', () => {
   });
 
   it('should work with array inside object', () => {
-    const data = { a: { b: [{ c: 3 }] } };
+    const data = { a: { b: [{ c: 4 }] } };
 
     const res = get(data, 'a.b[0].c');
 
-    expect(res).toStrictEqual(3);
+    expect(res).toStrictEqual(4);
   });
 
   it('should work with nested array', () => {

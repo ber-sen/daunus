@@ -14,10 +14,10 @@ export const runAction = async (
   ctx: TineCtx,
   { type, params, name }: { type: [string]; name?: string; params?: any },
 ) => {
-  const baseActions = ctx.get('.baseActions');
+  const defaultActions = ctx.get('.defaultActions');
 
   let action: any =
-    baseActions[type[0]] ||
+    defaultActions[type[0]] ||
     (ctx.has('.tine-workflow-actions-resolver')
       ? ctx.get('.tine-workflow-actions-resolver')(type[0])
       : get(ctx.get('.tine-workflow-actions'), type[0]));
