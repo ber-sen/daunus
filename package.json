@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/satoshi-cyber/tine#readme",
   "dependencies": {
-    "superjson": "^1.12.3",
     "uuid": "^9.0.0",
     "zod": "^3.21.4"
   },
