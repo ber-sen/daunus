@@ -6,7 +6,7 @@ import { Wait } from '../../types';
 const wait = tineAction(
   {
     type: 'wait',
-    inputSchema: z.union([
+    paramsSchema: z.union([
       z.object({ delay: z.number() }),
       z.object({ until: z.date() }),
     ]),
