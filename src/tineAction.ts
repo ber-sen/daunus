@@ -34,7 +34,7 @@ export const tineAction =
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
-      outputSchema?: z.Schema<O>;
+      outputSchema?: z.Schema<ResolveTineVar<O>>;
     },
   ) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
