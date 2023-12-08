@@ -127,13 +127,13 @@ export const tineAction =
         input: (value: I) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set(inputSchema.name, inputSchema.parse(value));
+            ctx.set('.input', inputSchema.parse(value));
           }),
         }),
         rawInput: (value: unknown) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set(inputSchema.name, inputSchema.parse(value));
+            ctx.set('.input', inputSchema.parse(value));
           }),
         }),
       }),

@@ -4,7 +4,7 @@ export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
 
 export type TineParams<T> = T; // TODO: fix type
 
-export type TineInput<T> = z.ZodType<T> & { name: string };
+export type TineInput<T> = z.ZodType<T>;
 
 export type TineCtx = Map<any, any>;
 
