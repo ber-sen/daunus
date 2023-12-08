@@ -72,7 +72,7 @@ export type TineActionWithInput<
 > = {
   meta: {
     input?: z.ZodObject<T, U, C, O, I>;
-    output?: z.ZodType<D>;
+    output?: z.ZodType<ResolveTineVar<D>>;
   };
   input: (value: I) => TineAction<D>;
   rawInput: (value: unknown) => TineAction<D>;
@@ -91,7 +91,7 @@ export type TineActionWithOptions<D> = TineAction<D> & {
   ) => TineActionWithInput<T, U, C, O, I, D>;
 } & {
   meta: {
-    output?: z.ZodType<D>;
+    output?: z.ZodType<ResolveTineVar<D>>;
   };
 };
 
