@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.0.83",
+  "version": "0.0.84",
   "description": "Yet another typescript framework",
   "main": "src/index.ts",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/satoshi-cyber/tine#readme",
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^6.3.0",
     "uuid": "^9.0.0",
     "zod": "^3.21.4"
   },

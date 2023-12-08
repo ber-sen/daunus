@@ -6,3 +6,4 @@ export * from './tineHelpers';
 export * from './tineAction';
 export * from './get';
 export * from './actions';
+export * from './zod';
