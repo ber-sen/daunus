@@ -5,6 +5,7 @@ import process from './actions/process';
 import parallel from './actions/parallel';
 import serial from './actions/serial';
 import task from './actions/task';
+import wait from './actions/wait';
 
 export const DEFAULT_ACTIONS = {
   shape,
@@ -14,4 +15,5 @@ export const DEFAULT_ACTIONS = {
   process,
   serial,
   task,
+  wait,
 };

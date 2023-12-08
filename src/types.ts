@@ -90,3 +90,15 @@ export class StatusError extends Error {
     this.status = status;
   }
 }
+
+export class Wait extends Error {
+  public params: {
+    delay: number;
+    ctx: Map<any, any>;
+  };
+
+  constructor(params: { delay: number; ctx: Map<any, any> }) {
+    super('Wait');
+    this.params = params;
+  }
+}
