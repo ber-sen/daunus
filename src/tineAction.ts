@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
 import { resolveParams } from './resolveParams';
@@ -119,7 +119,15 @@ export const tineAction =
         output: actionCtx?.outputSchema,
       },
       noInput: () => action,
-      withInput: <I>(inputSchema: TineInput<I>) => ({
+      withInput: <
+        T extends ZodRawShape,
+        U extends UnknownKeysParam,
+        C extends ZodTypeAny,
+        O,
+        I,
+      >(
+        inputSchema: TineInput<T, U, C, O, I>,
+      ) => ({
         meta: {
           input: inputSchema,
           output: actionCtx?.outputSchema,
@@ -127,13 +135,13 @@ export const tineAction =
         input: (value: I) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set('.input', inputSchema.parse(value));
+            ctx.set('input', inputSchema.parse(value));
           }),
         }),
         rawInput: (value: unknown) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set('.input', inputSchema.parse(value));
+            ctx.set('input', inputSchema.parse(value));
           }),
         }),
       }),

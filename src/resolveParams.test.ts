@@ -6,13 +6,13 @@ import { tineVar } from './tineVar';
 import { tineFn } from './tineFn';
 
 describe('resolveParams', () => {
-  const input = tineInput(z.string(), { name: 'input' });
+  const input = tineInput({ foo: z.string() });
 
   const ctx = new Map();
 
   const inputValue = 'bar';
 
-  ctx.set(input.name, inputValue);
+  ctx.set('input', { foo: 'bar' });
 
   it('should work with an object', async () => {
     const ctx = new Map();
@@ -24,7 +24,7 @@ describe('resolveParams', () => {
   });
 
   it('should resolve value of tineVar inside an object', async () => {
-    const params = { foo: tineVar(input) };
+    const params = { foo: tineVar(input, 'foo') };
 
     const res = await resolveParams(ctx, params);
 
@@ -32,7 +32,7 @@ describe('resolveParams', () => {
   });
 
   it('should resolve value of tineVar inside an another tineVar', async () => {
-    const params = { foo: tineFn(() => tineVar(input)) };
+    const params = { foo: tineFn(() => tineVar(input, 'foo')) };
 
     const res = await resolveParams(ctx, params);
 
@@ -40,7 +40,7 @@ describe('resolveParams', () => {
   });
 
   it('should work in case tineVar is the params', async () => {
-    const params = tineVar(input);
+    const params = tineVar(input, 'foo');
 
     const res = await resolveParams(ctx, params);
 
@@ -48,7 +48,7 @@ describe('resolveParams', () => {
   });
 
   it('should work in case tineVar is in array', async () => {
-    const params = [3, tineVar(input)];
+    const params = [3, tineVar(input, 'foo')];
 
     const res = await resolveParams(ctx, params);
 
@@ -56,7 +56,7 @@ describe('resolveParams', () => {
   });
 
   it('should work in case tineVar is as a nested value in object ', async () => {
-    const params = { level1: { level2: tineVar(input) } };
+    const params = { level1: { level2: tineVar(input, 'foo') } };
 
     const res = await resolveParams(ctx, params);
 
@@ -64,7 +64,7 @@ describe('resolveParams', () => {
   });
 
   it('should work in case tineVar is as a nested value in array ', async () => {
-    const params = [[[tineVar(input)]]];
+    const params = [[[tineVar(input, 'foo')]]];
 
     const res = await resolveParams(ctx, params);
 
@@ -72,7 +72,7 @@ describe('resolveParams', () => {
   });
 
   it('should work in case tineVar is as a nested value in array inside a nested object', async () => {
-    const params = { level1: { level2: [[[tineVar(input)]]] } };
+    const params = { level1: { level2: [[[tineVar(input, 'foo')]]] } };
 
     const res = await resolveParams(ctx, params);
 

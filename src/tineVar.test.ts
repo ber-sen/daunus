@@ -3,12 +3,11 @@ import { z } from 'zod';
 import { tineInput } from './tineHelpers';
 import { resolveParams } from './resolveParams';
 import { tineVar } from './tineVar';
-import { TineAction, TineInput } from './types';
 
-const getContext = <T>(input: TineInput<T> | TineAction<T>, value?: object) => {
+const setContext = <T>(value?: object) => {
   const ctx = new Map();
 
-  ctx.set(input?.name, value);
+  ctx.set('input', value);
 
   return ctx;
 };
@@ -16,11 +15,9 @@ const getContext = <T>(input: TineInput<T> | TineAction<T>, value?: object) => {
 describe('tineVar', () => {
   describe('string selector', () => {
     it('should return the value', async () => {
-      const input = tineInput(z.object({ name: z.string() }), {
-        name: 'input',
-      });
+      const input = tineInput({ name: z.string() });
 
-      const ctx = getContext(input, { name: 'Earth' });
+      const ctx = setContext({ name: 'Earth' });
 
       const res = await resolveParams(ctx, tineVar(input, 'name'));
 
@@ -28,12 +25,9 @@ describe('tineVar', () => {
     });
 
     it('should return the value inside nested object', async () => {
-      const input = tineInput(
-        z.object({ variables: z.object({ name: z.string() }) }),
-        { name: 'input' },
-      );
+      const input = tineInput({ variables: z.object({ name: z.string() }) });
 
-      const ctx = getContext(input, { variables: { name: 'Earth' } });
+      const ctx = setContext({ variables: { name: 'Earth' } });
 
       const res = await resolveParams(ctx, tineVar(input, 'variables.name'));
 
@@ -41,12 +35,11 @@ describe('tineVar', () => {
     });
 
     it('should return the value inside nested object and array', async () => {
-      const input = tineInput(
-        z.object({ variables: z.object({ names: z.array(z.string()) }) }),
-        { name: 'input' },
-      );
+      const input = tineInput({
+        variables: z.object({ names: z.array(z.string()) }),
+      });
 
-      const ctx = getContext(input, { variables: { names: ['Earth'] } });
+      const ctx = setContext({ variables: { names: ['Earth'] } });
 
       const res = await resolveParams(
         ctx,
@@ -54,41 +47,6 @@ describe('tineVar', () => {
       );
 
       expect(res).toStrictEqual('Earth');
-    });
-
-    it("should return the value if it's fallacy", async () => {
-      const input = tineInput(z.string().nullable(), { name: 'input' });
-
-      const ctx = getContext(input, undefined);
-
-      const res = await resolveParams(
-        ctx,
-        tineVar(input, (val) => Boolean(!val)),
-      );
-
-      expect(res).toStrictEqual(true);
-    });
-
-    it('should work with array the value', async () => {
-      const input1 = tineInput(z.object({ firstName: z.string() }), {
-        name: 'input1',
-      });
-
-      const input2 = tineInput(z.object({ lastName: z.string() }), {
-        name: 'input2',
-      });
-
-      const ctx = new Map();
-
-      ctx.set(input1.name, 'test');
-      ctx.set(input2.name, 'test2');
-
-      const res = await resolveParams(
-        ctx,
-        tineVar([input1, input2] as const, ([$1, $2]) => [$1, $2]),
-      );
-
-      expect(res).toStrictEqual(['test', 'test2']);
     });
   });
 });
