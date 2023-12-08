@@ -1,8 +1,8 @@
+import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
+
 import { TineAction, TineCtx, TineInput, TineVar } from './types';
 import { Path, TypeAtPath, get } from './get';
 import { isArray } from './helpers';
-
-import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
 
 type ExtractTineType<T> = T extends readonly TineAction<any>[]
   ? {
