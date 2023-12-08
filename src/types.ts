@@ -56,7 +56,7 @@ export type TineWorkflowAction<T> = {
 
 export type TineActionWithInput<I, O> = {
   meta: {
-    input: z.ZodType<I>;
+    input?: z.ZodType<I>;
     output?: z.ZodType<O>;
   };
   input: (value: I) => TineAction<O>;

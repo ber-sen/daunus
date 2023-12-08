@@ -20,7 +20,6 @@ export const tineAction =
       type: string;
       name?: string;
       paramsSchema?: z.Schema<P>;
-      outputSchema?: z.Schema<O>;
       skipParse?: boolean;
       parseResponse?: boolean;
       skipLog?: boolean;
@@ -35,6 +34,7 @@ export const tineAction =
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
+      outputSchema?: z.Schema<O>;
     },
   ) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
@@ -116,15 +116,14 @@ export const tineAction =
     return {
       ...action,
       meta: {
-        output: args.outputSchema,
+        output: actionCtx?.outputSchema,
       },
       noInput: () => action,
       withInput: <I>(inputSchema: TineInput<I>) => ({
         meta: {
           input: inputSchema,
-          output: args.outputSchema,
+          output: actionCtx?.outputSchema,
         },
-        inputSchema,
         input: (value: I) => ({
           ...action,
           run: makeRun((ctx) => {
