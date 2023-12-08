@@ -54,15 +54,19 @@ export type TineWorkflowAction<T> = {
   name?: string;
 };
 
-export type TineActionWithInput<T, I> = {
-  inputSchema: TineInput<I>;
-  input: (value: I) => TineAction<T>;
-  rawInput: (value: unknown) => TineAction<T>;
+export type TineActionWithInput<I, O, T> = {
+  meta: {
+    input: z.ZodType<I>;
+    output: z.ZodType<O>;
+  };
+  inputSchema: TineInput<T>;
+  input: (value: T) => TineAction<O>;
+  rawInput: (value: unknown) => TineAction<O>;
 };
 
 export type TineActionWithOptions<I, O> = TineAction<O> & {
   noInput: () => TineAction<O>;
-  withInput: (inputSchema: TineInput<I>) => TineActionWithInput<I, O>;
+  withInput: <T>(inputSchema: TineInput<T>) => TineActionWithInput<I, O, T>;
 } & {
   meta: {
     input: z.ZodType<I>;
@@ -76,15 +80,17 @@ export type TineActionOptions = {
 };
 
 export type TineInferReturn<
-  T extends TineAction<any> | TineActionWithInput<any, any>,
-> = T extends TineActionWithInput<any, any>
+  T extends TineAction<any> | TineActionWithInput<any, any, any>,
+> = T extends TineActionWithInput<any, any, any>
   ? Awaited<ReturnType<ReturnType<T['input']>['run']>>
   : T extends TineAction<any>
   ? Awaited<ReturnType<T['run']>>
   : never;
 
-export type TineInferInput<T extends TineActionWithInput<any, any>> =
-  T extends TineActionWithInput<any, any> ? Parameters<T['input']>[0] : never;
+export type TineInferInput<T extends TineActionWithInput<any, any, any>> =
+  T extends TineActionWithInput<any, any, any>
+    ? Parameters<T['input']>[0]
+    : never;
 
 export class StatusError extends Error {
   public status: number;
