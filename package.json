@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.0.84",
+  "version": "0.0.85",
   "description": "Yet another typescript framework",
   "main": "src/index.ts",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/satoshi-cyber/tine.git"
+    "url": "git+https://github.com/satoshi-cyber/tinejs.git"
   },
   "author": "Bersen Pajaziti",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/satoshi-cyber/tine/issues"
+    "url": "https://github.com/satoshi-cyber/tinejs/issues"
   },
-  "homepage": "https://github.com/satoshi-cyber/tine#readme",
+  "homepage": "https://github.com/satoshi-cyber/tinejs#readme",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "uuid": "^9.0.0",

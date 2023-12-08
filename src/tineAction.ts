@@ -15,22 +15,23 @@ import {
 } from './types';
 
 export const tineAction =
-  <P, D>(
+  <I, O>(
     args: {
       type: string;
       name?: string;
-      schema?: z.Schema<P>;
+      inputSchema?: z.Schema<I>;
+      outputSchema?: z.Schema<O>;
       skipParse?: boolean;
       parseResponse?: boolean;
       skipLog?: boolean;
     },
     run: (
-      params: P | undefined,
+      params: I | undefined,
       { ctx, parseParams }: TineActionOptions,
-    ) => D | Promise<D>,
+    ) => O | Promise<O>,
   ) =>
   (
-    params?: TineParams<P>,
+    params?: TineParams<I>,
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
@@ -39,7 +40,7 @@ export const tineAction =
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
-    const actionInfo: TineActionInfo<D> = {
+    const actionInfo: TineActionInfo<O> = {
       name,
       type: args.type,
       params: null,
@@ -49,7 +50,7 @@ export const tineAction =
 
     const makeRun =
       (init?: (ctx: TineCtx) => void) =>
-      async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<D>) => {
+      async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<O>) => {
         if (!ctx.has('actions')) {
           ctx.set('useCase', actionInfo);
           ctx.set('actions', new Map());
@@ -62,7 +63,7 @@ export const tineAction =
             args.skipParse || !params
               ? params
               : await parseParams(ctx, params, {
-                  schema: args.schema,
+                  schema: args.inputSchema,
                 });
 
           actionInfo.params = parsedParams;
@@ -106,7 +107,7 @@ export const tineAction =
         }
       };
 
-    const action: TineAction<D> = {
+    const action: TineAction<O> = {
       ...actionCtx,
       name,
       run: makeRun(),
@@ -114,6 +115,10 @@ export const tineAction =
 
     return {
       ...action,
+      meta: {
+        input: args.inputSchema,
+        output: args.outputSchema,
+      },
       noInput: () => action,
       withInput: <I>(inputSchema: TineInput<I>) => ({
         inputSchema,
@@ -130,7 +135,7 @@ export const tineAction =
           }),
         }),
       }),
-    } as TineActionWithOptions<D>;
+    } as TineActionWithOptions<I, O>;
   };
 
 export const parseParams = async <T>(

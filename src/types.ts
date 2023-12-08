@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zod';
 
 export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
 
@@ -60,9 +60,14 @@ export type TineActionWithInput<T, I> = {
   rawInput: (value: unknown) => TineAction<T>;
 };
 
-export type TineActionWithOptions<T> = TineAction<T> & {
-  noInput: () => TineAction<T>;
-  withInput: <I>(inputSchema: TineInput<I>) => TineActionWithInput<T, I>;
+export type TineActionWithOptions<I, O> = TineAction<O> & {
+  noInput: () => TineAction<O>;
+  withInput: (inputSchema: TineInput<I>) => TineActionWithInput<I, O>;
+} & {
+  meta: {
+    input: z.ZodType<I>;
+    output: z.ZodType<O>;
+  };
 };
 
 export type TineActionOptions = {
