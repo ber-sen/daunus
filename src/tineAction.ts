@@ -15,23 +15,23 @@ import {
 } from './types';
 
 export const tineAction =
-  <I, O>(
+  <P, O>(
     args: {
       type: string;
       name?: string;
-      inputSchema?: z.Schema<I>;
+      paramsSchema?: z.Schema<P>;
       outputSchema?: z.Schema<O>;
       skipParse?: boolean;
       parseResponse?: boolean;
       skipLog?: boolean;
     },
     run: (
-      params: I | undefined,
+      params: P | undefined,
       { ctx, parseParams }: TineActionOptions,
     ) => O | Promise<O>,
   ) =>
   (
-    params?: TineParams<I>,
+    params?: TineParams<P>,
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
@@ -63,7 +63,7 @@ export const tineAction =
             args.skipParse || !params
               ? params
               : await parseParams(ctx, params, {
-                  schema: args.inputSchema,
+                  schema: args.paramsSchema,
                 });
 
           actionInfo.params = parsedParams;
@@ -116,11 +116,14 @@ export const tineAction =
     return {
       ...action,
       meta: {
-        input: args.inputSchema,
         output: args.outputSchema,
       },
       noInput: () => action,
       withInput: <I>(inputSchema: TineInput<I>) => ({
+        meta: {
+          input: inputSchema,
+          output: args.outputSchema,
+        },
         inputSchema,
         input: (value: I) => ({
           ...action,
@@ -135,7 +138,7 @@ export const tineAction =
           }),
         }),
       }),
-    } as TineActionWithOptions<I, O>;
+    } satisfies TineActionWithOptions<O>;
   };
 
 export const parseParams = async <T>(
