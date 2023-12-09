@@ -117,7 +117,7 @@ export const tineAction =
         meta: { ...meta },
         ...action,
       }),
-      withParams: (iSchema, meta) => ({
+      withParams: (iSchema, meta?) => ({
         meta: {
           ...meta,
           iSchema,
