@@ -5,8 +5,6 @@ export function tineQuery<R>(selector: ($: any) => R | Promise<R>): TineVar<R> {
   const tineVar = async (ctx: TineCtx) => {
     const $ = new Proxy(ctx, {
       get(target, name, arg) {
-        console.log({ name: name, target, arg });
-
         return get(target, name as any);
       },
     });

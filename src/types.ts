@@ -62,7 +62,7 @@ export type TineWorkflowAction<T> = {
   name?: string;
 };
 
-export type TineActionWithInput<
+export type TineActionWithParams<
   T extends ZodRawShape,
   U extends UnknownKeysParam,
   C extends ZodTypeAny,
@@ -71,28 +71,29 @@ export type TineActionWithInput<
   D,
 > = {
   meta: {
-    input?: z.ZodObject<T, U, C, O, I>;
-    output?: z.ZodType<ResolveTineVar<D>>;
+    iSchema: z.ZodObject<T, U, C, O, I>;
+    oSchema?: z.ZodType<ResolveTineVar<D>>;
   };
   input: (value: I) => TineAction<D>;
   rawInput: (value: unknown) => TineAction<D>;
 };
 
 export type TineActionWithOptions<D> = TineAction<D> & {
-  noInput: () => TineAction<D>;
-  withInput: <
+  noParams: (oSchema?: z.ZodType<ResolveTineVar<D>>) => TineAction<D> & {
+    meta: {
+      oSchema?: z.ZodType<ResolveTineVar<D>>;
+    };
+  };
+  withParams: <
     T extends ZodRawShape,
     U extends UnknownKeysParam,
     C extends ZodTypeAny,
     O,
     I,
   >(
-    inputSchema: TineInput<T, U, C, O, I>,
-  ) => TineActionWithInput<T, U, C, O, I, D>;
-} & {
-  meta: {
-    output?: z.ZodType<ResolveTineVar<D>>;
-  };
+    iSchema: TineInput<T, U, C, O, I>,
+    oSchema?: z.ZodType<ResolveTineVar<D>>,
+  ) => TineActionWithParams<T, U, C, O, I, D>;
 };
 
 export type TineActionOptions = {
@@ -101,16 +102,18 @@ export type TineActionOptions = {
 };
 
 export type TineInferReturn<
-  T extends TineAction<any> | TineActionWithInput<any, any, any, any, any, any>,
-> = T extends TineActionWithInput<any, any, any, any, any, any>
+  T extends
+    | TineAction<any>
+    | TineActionWithParams<any, any, any, any, any, any>,
+> = T extends TineActionWithParams<any, any, any, any, any, any>
   ? Awaited<ReturnType<ReturnType<T['input']>['run']>>
   : T extends TineAction<any>
   ? Awaited<ReturnType<T['run']>>
   : never;
 
 export type TineInferInput<
-  T extends TineActionWithInput<any, any, any, any, any, any>,
-> = T extends TineActionWithInput<any, any, any, any, any, any>
+  T extends TineActionWithParams<any, any, any, any, any, any>,
+> = T extends TineActionWithParams<any, any, any, any, any, any>
   ? Parameters<T['input']>[0]
   : never;
 

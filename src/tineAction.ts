@@ -1,4 +1,4 @@
-import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from 'zod';
+import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
 import { resolveParams } from './resolveParams';
@@ -10,7 +10,6 @@ import {
   TineActionRunOptions,
   TineActionWithOptions,
   TineCtx,
-  TineInput,
   TineParams,
 } from './types';
 
@@ -34,7 +33,6 @@ export const tineAction =
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
-      outputSchema?: z.Schema<ResolveTineVar<O>>;
     },
   ) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
@@ -115,33 +113,27 @@ export const tineAction =
 
     return {
       ...action,
-      meta: {
-        output: actionCtx?.outputSchema,
-      },
-      noInput: () => action,
-      withInput: <
-        T extends ZodRawShape,
-        U extends UnknownKeysParam,
-        C extends ZodTypeAny,
-        O,
-        I,
-      >(
-        inputSchema: TineInput<T, U, C, O, I>,
-      ) => ({
+      noParams: (oSchema) => ({
         meta: {
-          input: inputSchema,
-          output: actionCtx?.outputSchema,
+          oSchema,
         },
-        input: (value: I) => ({
+        ...action,
+      }),
+      withParams: (iSchema, oSchema?) => ({
+        meta: {
+          iSchema,
+          oSchema,
+        },
+        input: (value) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set('input', inputSchema.parse(value));
+            ctx.set('input', iSchema.parse(value));
           }),
         }),
-        rawInput: (value: unknown) => ({
+        rawInput: (value) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set('input', inputSchema.parse(value));
+            ctx.set('input', iSchema.parse(value));
           }),
         }),
       }),
