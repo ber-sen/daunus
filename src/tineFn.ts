@@ -7,8 +7,8 @@ export function tineFn<R>(
     return await selector(ctx);
   };
 
-  tineVar.toString = () => '{{tineVar}}';
-  tineVar.toJSON = () => '{{tineVar}}';
+  tineVar.toString = () => `{{ ${selector.toString()} }}`;
+  tineVar.toJSON = () => `{{ ${selector.toString()} }}`;
   tineVar.__type = 'tineVar';
 
   return tineVar as any;

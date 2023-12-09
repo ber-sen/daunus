@@ -12,8 +12,8 @@ export function tineQuery<R>(selector: ($: any) => R | Promise<R>): TineVar<R> {
     return await selector($);
   };
 
-  tineVar.toString = () => '{{tineVar}}';
-  tineVar.toJSON = () => '{{tineVar}}';
+  tineVar.toString = () => `{{ ${selector.toString()} }}`;
+  tineVar.toJSON = () => `{{ ${selector.toString()} }}`;
   tineVar.__type = 'tineVar';
 
   return tineVar as any;
