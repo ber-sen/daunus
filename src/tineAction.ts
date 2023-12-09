@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
 import { resolveParams } from './resolveParams';
@@ -117,12 +117,24 @@ export const tineAction =
         meta: { ...meta },
         ...action,
       }),
-      withParams: (iSchema, meta?) => ({
+      withParams: <
+        T extends ZodRawShape,
+        U extends UnknownKeysParam,
+        C extends ZodTypeAny,
+        O,
+        I,
+        D,
+      >(
+        iSchema: z.ZodObject<T, U, C, O, I>,
+        meta?: {
+          oSchema?: z.ZodType<ResolveTineVar<D>>;
+        },
+      ) => ({
         meta: {
           ...meta,
           iSchema,
         },
-        input: (value) => ({
+        input: (value: I) => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set('input', iSchema.parse(value));
