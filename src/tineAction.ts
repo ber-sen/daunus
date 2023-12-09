@@ -113,16 +113,14 @@ export const tineAction =
 
     return {
       ...action,
-      noParams: (oSchema) => ({
-        meta: {
-          oSchema,
-        },
+      noParams: (meta?) => ({
+        meta: { ...meta },
         ...action,
       }),
-      withParams: (iSchema, oSchema?) => ({
+      withParams: (iSchema, meta) => ({
         meta: {
+          ...meta,
           iSchema,
-          oSchema,
         },
         input: (value) => ({
           ...action,

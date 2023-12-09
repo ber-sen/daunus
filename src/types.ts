@@ -79,7 +79,9 @@ export type TineActionWithParams<
 };
 
 export type TineActionWithOptions<D> = TineAction<D> & {
-  noParams: (oSchema?: z.ZodType<ResolveTineVar<D>>) => TineAction<D> & {
+  noParams: (meta?: {
+    oSchema?: z.ZodType<ResolveTineVar<D>>;
+  }) => TineAction<D> & {
     meta: {
       oSchema?: z.ZodType<ResolveTineVar<D>>;
     };
@@ -92,7 +94,7 @@ export type TineActionWithOptions<D> = TineAction<D> & {
     I,
   >(
     iSchema: TineInput<T, U, C, O, I>,
-    oSchema?: z.ZodType<ResolveTineVar<D>>,
+    meta: { oSchema?: z.ZodType<ResolveTineVar<D>> },
   ) => TineActionWithParams<T, U, C, O, I, D>;
 };
 
