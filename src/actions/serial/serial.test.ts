@@ -1,5 +1,6 @@
-import { tineCtx } from '../../tineHelpers';
 import serial from './index';
+
+import { tineCtx } from '../../tineHelpers';
 
 describe('serial', () => {
   it('should work with two actions', async () => {

@@ -2,11 +2,11 @@ import { get } from './get';
 
 describe('get', () => {
   it('should work with nested object', () => {
-    const data = { a: { b: { c: 3 } } };
+    const data = { a: { b: { c: 2 } } };
 
     const res = get(data, 'a.b.c');
 
-    expect(res).toStrictEqual(3);
+    expect(res).toStrictEqual(2);
   });
 
   it('should work with array inside object', () => {
