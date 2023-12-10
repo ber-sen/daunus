@@ -80,8 +80,8 @@ export function tineVar(arg: any, selector?: any) {
       : get(value, selector);
   };
 
-  tineVar.toString = () => '{{tineVar}}';
-  tineVar.toJSON = () => '{{tineVar}}';
+  tineVar.toString = () => `{{ ${selector.toString()} }}`;
+  tineVar.toJSON = () => `{{ ${selector.toString()} }}`;
   tineVar.__type = 'tineVar';
 
   return tineVar;

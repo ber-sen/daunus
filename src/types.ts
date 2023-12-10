@@ -69,10 +69,20 @@ export type TineActionWithParams<
   O,
   I,
   D,
+  P,
+  B,
+  Q,
 > = {
   meta: {
     iSchema: z.ZodObject<T, U, C, O, I>;
     oSchema?: z.ZodType<ResolveTineVar<D>>;
+    openApi?: {
+      method?: string;
+      contentType?: string;
+      params?: P;
+      body?: B;
+      query?: Q;
+    };
   };
   input: (value: I) => TineAction<D>;
   rawInput: (value: unknown) => TineAction<D>;
@@ -92,10 +102,13 @@ export type TineActionWithOptions<D> = TineAction<D> & {
     C extends ZodTypeAny,
     O,
     I,
+    P,
+    B,
+    Q,
   >(
     iSchema: TineInput<T, U, C, O, I>,
     meta: { oSchema?: z.ZodType<ResolveTineVar<D>> },
-  ) => TineActionWithParams<T, U, C, O, I, D>;
+  ) => TineActionWithParams<T, U, C, O, I, D, P, B, Q>;
 };
 
 export type TineActionOptions = {
@@ -106,16 +119,16 @@ export type TineActionOptions = {
 export type TineInferReturn<
   T extends
     | TineAction<any>
-    | TineActionWithParams<any, any, any, any, any, any>,
-> = T extends TineActionWithParams<any, any, any, any, any, any>
+    | TineActionWithParams<any, any, any, any, any, any, any, any, any>,
+> = T extends TineActionWithParams<any, any, any, any, any, any, any, any, any>
   ? Awaited<ReturnType<ReturnType<T['input']>['run']>>
   : T extends TineAction<any>
   ? Awaited<ReturnType<T['run']>>
   : never;
 
 export type TineInferInput<
-  T extends TineActionWithParams<any, any, any, any, any, any>,
-> = T extends TineActionWithParams<any, any, any, any, any, any>
+  T extends TineActionWithParams<any, any, any, any, any, any, any, any, any>,
+> = T extends TineActionWithParams<any, any, any, any, any, any, any, any, any>
   ? Parameters<T['input']>[0]
   : never;
 

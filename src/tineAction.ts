@@ -124,10 +124,20 @@ export const tineAction =
         O,
         I,
         D,
+        P,
+        B,
+        Q,
       >(
         iSchema: z.ZodObject<T, U, C, O, I>,
         meta?: {
           oSchema?: z.ZodType<ResolveTineVar<D>>;
+          openApi?: {
+            method?: string;
+            contentType?: string;
+            params?: P;
+            body?: B;
+            query?: Q;
+          };
         },
       ) => ({
         meta: {

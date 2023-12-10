@@ -44,4 +44,25 @@ describe('tineQuery', () => {
 
     type test = Expect<Equal<A, { success: boolean; data: string }>>;
   });
+
+  it('Should return api props', () => {
+    const input = tineInput({
+      id: z.string(),
+    }).openapi('User');
+
+    const test = shape({ success: true, data: tineVar(input, 'id') });
+
+    const res = test.withParams(input, {
+      oSchema: z.object({ success: z.boolean(), data: z.string() }),
+      openApi: {
+        params: {
+          id: tineVar(input, 'id'),
+        },
+      },
+    });
+
+    expect(JSON.stringify(res.meta.openApi)).toEqual(
+      '{"params":{"id":"{{ id }}"}}',
+    );
+  });
 });

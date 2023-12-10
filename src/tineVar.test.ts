@@ -48,5 +48,11 @@ describe('tineVar', () => {
 
       expect(res).toStrictEqual('Earth');
     });
+
+    it('should return the string value', async () => {
+      const input = tineInput({ name: z.string() });
+
+      expect(tineVar(input, 'name').toString()).toStrictEqual('{{ name }}');
+    });
   });
 });
