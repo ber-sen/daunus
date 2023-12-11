@@ -132,7 +132,15 @@ export const tineAction =
         meta?: {
           oSchema?: z.ZodType<ResolveTineVar<D>>;
           openApi?: {
-            method?: string;
+            method?:
+              | 'get'
+              | 'post'
+              | 'put'
+              | 'delete'
+              | 'patch'
+              | 'head'
+              | 'options'
+              | 'trace';
             contentType?: string;
             params?: P;
             body?: B;
