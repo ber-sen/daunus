@@ -5,5 +5,5 @@ export { default as process } from './process';
 export { default as parallel } from './parallel';
 export { default as serial } from './serial';
 export { default as response } from './response';
-export { default as wait } from './exit';
-export { default as exit } from './wait';
+export { default as exit } from './exit';
+export { default as wait } from './wait';
