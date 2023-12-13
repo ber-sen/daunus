@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { tineInput } from './tineHelpers';
 import { resolveParams } from './resolveParams';
 import { tineVar } from './tineVar';
+import { TineVar } from './types';
 
 const setContext = <T>(value?: object) => {
   const ctx = new Map();
@@ -11,6 +12,14 @@ const setContext = <T>(value?: object) => {
 
   return ctx;
 };
+
+type Expect<T extends true> = T;
+
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y
+  ? 1
+  : 2
+  ? true
+  : false;
 
 describe('tineVar', () => {
   describe('string selector', () => {
@@ -53,6 +62,27 @@ describe('tineVar', () => {
       const input = tineInput({ name: z.string() });
 
       expect(tineVar(input, 'name').toString()).toStrictEqual('{{ name }}');
+    });
+
+    it('should work with union', async () => {
+      const input = tineInput({
+        nested: z.union([
+          z.object({ name: z.string() }),
+          z.object({ id: z.number() }),
+        ]),
+      });
+
+      const test = tineVar(input, (i) => {
+        if ('name' in i.nested) {
+          return i.nested.name;
+        }
+
+        return '';
+      });
+
+      type A = typeof test;
+
+      type test = Expect<Equal<A, TineVar<string>>>;
     });
   });
 });

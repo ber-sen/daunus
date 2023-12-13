@@ -1,4 +1,4 @@
-import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
+import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny, z } from 'zod';
 
 import { TineAction, TineCtx, TineInput, TineVar } from './types';
 import { Path, TypeAtPath, get } from './get';
@@ -18,6 +18,18 @@ export function tineVar<
   I,
   K extends Path<O>,
 >(arg: TineInput<T, U, C, O, I>, selector: K): TineVar<TypeAtPath<O, K>>;
+
+export function tineVar<
+  T extends ZodRawShape,
+  U extends UnknownKeysParam,
+  C extends ZodTypeAny,
+  O,
+  I,
+  R,
+>(
+  arg: TineInput<T, U, C, O, I>,
+  selector: (value: O) => R | Promise<R>,
+): TineVar<R>;
 
 export function tineVar<T, K extends Path<T>>(
   arg: TineAction<T>,

@@ -13,4 +13,18 @@ describe('task', () => {
       success: true,
     });
   });
+
+  it('should work with promise', async () => {
+    const action = task(() =>
+      Promise.resolve({
+        success: true,
+      }),
+    );
+
+    const res = await action.run(tineCtx());
+
+    expect(res).toStrictEqual({
+      success: true,
+    });
+  });
 });
