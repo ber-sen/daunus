@@ -12,7 +12,7 @@ const getParent = (path: string) => path.split('.').slice(0, -1).join('.');
 
 export const runAction = async (
   ctx: TineCtx,
-  { type, params, name }: { type: [string]; name?: string; params?: any },
+  { type, params, name }: { type: string[]; name?: string; params?: any },
 ) => {
   const defaultActions = ctx.get('.defaultActions');
 

@@ -57,7 +57,7 @@ export type TineAction<T> = {
 };
 
 export type TineWorkflowAction<T> = {
-  type: [string];
+  type: string[];
   params?: T;
   name?: string;
 };

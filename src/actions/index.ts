@@ -7,3 +7,4 @@ export { default as serial } from './serial';
 export { default as response } from './response';
 export { default as exit } from './exit';
 export { default as wait } from './wait';
+export { default as workflow } from './workflow';
