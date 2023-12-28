@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.1.05",
+  "version": "0.1.06",
   "description": "Yet another typescript framework",
   "main": "src/index.ts",
   "scripts": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "uuid": "^9.0.0",
-    "zod": "^3.21.4"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
