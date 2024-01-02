@@ -22,6 +22,7 @@ export const tineAction =
       skipParse?: boolean;
       parseResponse?: boolean;
       skipLog?: boolean;
+      skipPlaceholders?: boolean;
     },
     run: (
       params: P | undefined,
@@ -62,6 +63,7 @@ export const tineAction =
               ? params
               : await parseParams(ctx, params, {
                   schema: args.paramsSchema,
+                  skipPlaceholders: args.skipPlaceholders,
                 });
 
           actionInfo.params = parsedParams;
