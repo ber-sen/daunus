@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.1.08",
+  "version": "0.1.09",
   "description": "Yet another typescript framework",
   "main": "src/index.ts",
   "scripts": {
