@@ -24,10 +24,7 @@ export const tineAction =
       skipLog?: boolean;
       skipPlaceholders?: boolean;
     },
-    run: (
-      params: P | undefined,
-      { ctx, parseParams }: TineActionOptions,
-    ) => O | Promise<O>,
+    run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
   ) =>
   (
     params?: TineParams<P>,
@@ -68,7 +65,7 @@ export const tineAction =
 
           actionInfo.params = parsedParams;
 
-          const value = await run(parsedParams, { ctx, parseParams });
+          const value = await run(parsedParams!, { ctx, parseParams });
 
           if (!args.parseResponse) {
             return resolveTineVar(value);

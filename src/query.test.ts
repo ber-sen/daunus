@@ -28,6 +28,12 @@ describe('parseQuery', () => {
 
     expect(res).toEqual(`z.object({ })`);
   });
+
+  it('should work one param', () => {
+    const res = parsePathQuery('?id=number');
+
+    expect(res).toEqual(`z.object({ id: z.coerce.number(), })`);
+  });
 });
 
 describe('encodeParams', () => {

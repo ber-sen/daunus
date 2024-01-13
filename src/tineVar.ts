@@ -1,4 +1,4 @@
-import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny, z } from 'zod';
+import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
 
 import { TineAction, TineCtx, TineInput, TineVar } from './types';
 import { Path, TypeAtPath, get } from './get';
