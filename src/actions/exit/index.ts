@@ -8,7 +8,7 @@ const exit = tineAction(
     type: 'exit',
     paramsSchema: z.object({
       status: z.number(),
-      message: z.string(),
+      message: z.string().optional(),
     }),
   },
   (params) => {
@@ -16,7 +16,7 @@ const exit = tineAction(
       return;
     }
 
-    throw new StatusError(params.message, params.status);
+    throw new StatusError(params.message ?? '', params.status);
   },
 );
 

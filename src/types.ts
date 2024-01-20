@@ -142,13 +142,11 @@ export type TineInferInput<
 
 export class StatusError extends Error {
   public status: number;
-  public description: string;
 
   constructor(message: string, status: number) {
     super(message);
 
     this.name = 'StatusError';
-    this.description = message;
     this.status = status;
   }
 }
