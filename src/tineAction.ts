@@ -27,7 +27,7 @@ export const tineAction =
     run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
   ) =>
   (
-    params?: TineParams<P>,
+    params: TineParams<P>,
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
