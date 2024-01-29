@@ -16,7 +16,7 @@ const exit = tineAction(
       return;
     }
 
-    throw new StatusError(params.message ?? '', params.status);
+    return new StatusError(params.message ?? '', params.status);
   },
 );
 

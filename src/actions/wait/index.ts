@@ -16,7 +16,7 @@ const wait = tineAction(
       return;
     }
 
-    throw new Wait({ ...params, ctx });
+    return new Wait({ ...params, ctx });
   },
 );
 

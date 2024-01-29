@@ -81,6 +81,10 @@ export const tineAction =
         try {
           const value = await runFn();
 
+          if (value instanceof Error) {
+            throw value;
+          }
+
           ctx.set(name, value);
           actionInfo.data = value;
 
