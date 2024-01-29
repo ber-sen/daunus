@@ -140,14 +140,16 @@ export type TineInferInput<
   ? Parameters<T['input']>[0]
   : never;
 
-export class StatusError extends Error {
-  public status: number;
+export class StatusError<S extends number, D> extends Error {
+  public status: S;
+  public data?: D;
 
-  constructor(message: string, status: number) {
+  constructor(status: S, message: string, data?: D) {
     super(message);
 
     this.name = 'StatusError';
     this.status = status;
+    this.data = data;
   }
 }
 
