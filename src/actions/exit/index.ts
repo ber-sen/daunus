@@ -11,13 +11,7 @@ const exit = tineAction(
       message: z.string().optional(),
     }),
   },
-  (params) => {
-    if (!params) {
-      return;
-    }
-
-    return new StatusError(params.message ?? '', params.status);
-  },
+  (params) => new StatusError(params.message ?? '', params.status),
 );
 
 export default exit;
