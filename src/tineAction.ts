@@ -10,8 +10,10 @@ import {
   TineActionRunOptions,
   TineActionWithOptions,
   TineCtx,
+  TineExcludeError,
   TineParams,
 } from './types';
+import { isError } from './helpers';
 
 export const tineAction =
   <P, O>(
@@ -45,6 +47,73 @@ export const tineAction =
     };
 
     const makeRun =
+      (init?: (ctx: TineCtx) => void) =>
+      async (
+        ctx: TineCtx = new Map(),
+        options?: TineActionRunOptions<O>,
+      ): Promise<TineExcludeError<ResolveTineVar<O>>> => {
+        if (!ctx.has('actions')) {
+          ctx.set('useCase', actionInfo);
+          ctx.set('actions', new Map());
+        }
+
+        const runFn = async () => {
+          init && init(ctx);
+
+          const parsedParams =
+            args.skipParse || !params
+              ? params
+              : await parseParams(ctx, params, {
+                  schema: args.paramsSchema,
+                  skipPlaceholders: args.skipPlaceholders,
+                });
+
+          actionInfo.params = parsedParams;
+
+          const value = await run(parsedParams!, { ctx, parseParams });
+
+          if (!args.parseResponse) {
+            return resolveTineVar(value);
+          }
+
+          const parseValue = await parseParams(ctx, value, {
+            skipPlaceholders: true,
+          });
+
+          return resolveTineVar(parseValue);
+        };
+
+        try {
+          const value = await runFn();
+
+          if (isError(value)) {
+            throw value;
+          }
+
+          ctx.set(name, value);
+          actionInfo.data = value;
+
+          if (!skipLog) {
+            ctx.get('actions').set(actionInfo.name, actionInfo);
+          }
+
+          return value as TineExcludeError<ResolveTineVar<O>>;
+        } catch (e) {
+          actionInfo.error = e;
+
+          if (!skipLog) {
+            ctx.get('actions').set(actionInfo.name, actionInfo);
+          }
+
+          throw e;
+        } finally {
+          if (options?.onComplete) {
+            options.onComplete(actionInfo, ctx);
+          }
+        }
+      };
+
+    const makeRunSafe =
       (init?: (ctx: TineCtx) => void) =>
       async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<O>) => {
         if (!ctx.has('actions')) {
@@ -81,10 +150,6 @@ export const tineAction =
         try {
           const value = await runFn();
 
-          if (value instanceof Error) {
-            throw value;
-          }
-
           ctx.set(name, value);
           actionInfo.data = value;
 
@@ -112,6 +177,7 @@ export const tineAction =
       ...actionCtx,
       name,
       run: makeRun(),
+      runSafe: makeRunSafe(),
     };
 
     return {
@@ -160,10 +226,16 @@ export const tineAction =
           run: makeRun((ctx) => {
             ctx.set('input', iSchema.parse(value));
           }),
+          runSafe: makeRunSafe((ctx) => {
+            ctx.set('input', iSchema.parse(value));
+          }),
         }),
         rawInput: (value) => ({
           ...action,
           run: makeRun((ctx) => {
+            ctx.set('input', iSchema.parse(value));
+          }),
+          runSafe: makeRunSafe((ctx) => {
             ctx.set('input', iSchema.parse(value));
           }),
         }),

@@ -19,6 +19,8 @@ export const isTinePlaceholder = (value: any) =>
 
 export const isArray = (value: any): value is any[] => Array.isArray(value);
 
+export const isError = (value: any): value is Error => value instanceof Error;
+
 export const isMapLike = (value: any): value is Map<any, any> => {
   return (
     typeof value === 'object' &&

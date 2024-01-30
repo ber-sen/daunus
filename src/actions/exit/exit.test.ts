@@ -1,7 +1,7 @@
 import exit from './index';
 
 import { tineCtx } from '../../tineHelpers';
-import { StatusError } from '../../types';
+import { TineError } from '../../types';
 
 class NoErrorThrownError extends Error {}
 
@@ -25,7 +25,7 @@ describe('wait', () => {
     const error = await getError(async () => await action.run(tineCtx()));
 
     expect(error).not.toBeInstanceOf(NoErrorThrownError);
-    expect(error).toBeInstanceOf(StatusError);
+    expect(error).toBeInstanceOf(TineError);
     expect(error).toHaveProperty('message', 'Forbidden');
     expect(error).toHaveProperty('status', 403);
   });

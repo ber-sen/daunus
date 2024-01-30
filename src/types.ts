@@ -53,6 +53,10 @@ export type TineAction<T> = {
   run: (
     ctx?: TineCtx,
     options?: TineActionRunOptions<T>,
+  ) => Promise<TineExcludeError<ResolveTineVar<T>>>;
+  runSafe: (
+    ctx?: TineCtx,
+    options?: TineActionRunOptions<T>,
   ) => Promise<ResolveTineVar<T>>;
 };
 
@@ -124,6 +128,10 @@ export type TineActionOptions = {
   parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
 };
 
+export type TineExcludeError<T> = T extends Error ? never : T;
+
+export type TineGetErrors<T> = T extends Error ? T : never;
+
 export type TineInferReturn<
   T extends
     | TineAction<any>
@@ -140,14 +148,14 @@ export type TineInferInput<
   ? Parameters<T['input']>[0]
   : never;
 
-export class StatusError<S extends number, D> extends Error {
+export class TineError<S extends number, D> extends Error {
   public status: S;
   public data?: D;
 
   constructor(status: S, message: string, data?: D) {
     super(message);
 
-    this.name = 'StatusError';
+    this.name = 'TineError';
     this.status = status;
     this.data = data;
   }
