@@ -1,15 +1,15 @@
 import { tineCtx } from '../../tineHelpers';
-import shape from './index';
+import struct from './index';
 
-describe('shape', () => {
+describe('struct', () => {
   it('should work', async () => {
-    const action = shape({
+    const action = struct({
       success: true,
     });
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual({
+    expect(res.data).toStrictEqual({
       success: true,
     });
   });

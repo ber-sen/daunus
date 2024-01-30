@@ -8,9 +8,9 @@ const serial = tineAction(
     const res: Array<any> = [];
 
     for (const action of list) {
-      const data = await runAction(ctx, action);
+      const ares = await runAction(ctx, action);
 
-      res.push(data);
+      res.push(ares.data ?? ares.error);
     }
 
     return res;

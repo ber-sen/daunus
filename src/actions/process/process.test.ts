@@ -1,13 +1,14 @@
 import process from './index';
 
 import { tineCtx } from '../../tineHelpers';
+import { TineError } from '../../types';
 
 describe('process', () => {
   it('should work for basic example', async () => {
     const action = process([
       {
         name: 'test',
-        type: ['shape'],
+        type: ['struct'],
         params: {
           foo: 'bar',
         },
@@ -16,27 +17,74 @@ describe('process', () => {
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual({ foo: 'bar' });
+    expect(res.data).toStrictEqual({ foo: 'bar' });
   });
 
   it('should work with placeholders', async () => {
     const action = process([
       {
         name: 'test',
-        type: ['shape'],
+        type: ['struct'],
         params: {
           foo: 'bar',
         },
       },
       {
-        type: ['shape'],
-        params: '{{ $.test.foo }}',
+        type: ['struct'],
+        params: '{{ $.test.data.foo }}',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual('bar');
+    expect(res.data).toStrictEqual('bar');
+  });
+
+  it('should stop on error', async () => {
+    const action = process([
+      {
+        name: 'test',
+        type: ['struct'],
+        params: {
+          foo: 'bar',
+        },
+      },
+      {
+        name: 'error',
+        type: ['exit'],
+        params: {
+          status: 404,
+        },
+      },
+      {
+        type: ['struct'],
+        params: '{{ $.test.data.foo }}',
+      },
+    ]);
+
+    const res = await action.run(tineCtx());
+
+    expect(res.error).toStrictEqual(new TineError(404));
+  });
+
+  it('should work handle errors placeholders', async () => {
+    const action = process([
+      {
+        name: 'test',
+        type: ['struct'],
+        params: {
+          foo: 'bar',
+        },
+      },
+      {
+        type: ['struct'],
+        params: '{{ $.test.data.foo }}',
+      },
+    ]);
+
+    const res = await action.run(tineCtx());
+
+    expect(res.data).toStrictEqual('bar');
   });
 
   it('should work with nested processes', async () => {
@@ -52,11 +100,11 @@ describe('process', () => {
         type: ['process'],
         params: [
           {
-            type: ['shape'],
+            type: ['struct'],
             params: 'ipsum',
           },
           {
-            type: ['shape'],
+            type: ['struct'],
             params: {
               foo: 'bar',
             },
@@ -64,15 +112,15 @@ describe('process', () => {
         ],
       },
       {
-        type: ['shape'],
+        type: ['struct'],
         params: {
-          foo: '{{ $.test.foo + "asd" }}',
+          foo: '{{ $.test.data.foo + "asd" }}',
         },
       },
     ]);
 
     const res = await action.run(ctx);
 
-    expect(res).toStrictEqual({ foo: 'barasd' });
+    expect(res.data).toStrictEqual({ foo: 'barasd' });
   });
 });

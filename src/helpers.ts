@@ -1,5 +1,11 @@
 import { get } from './get';
-import { TineCtx, TineVar } from './types';
+import {
+  TineCtx,
+  TineError,
+  TineExcludeError,
+  TineGetErrors,
+  TineVar,
+} from './types';
 
 export const isObject = (value: any): value is object =>
   value === null ||
@@ -19,7 +25,8 @@ export const isTinePlaceholder = (value: any) =>
 
 export const isArray = (value: any): value is any[] => Array.isArray(value);
 
-export const isError = (value: any): value is Error => value instanceof Error;
+export const isError = (value: any): value is Error =>
+  value && value.name && value.name === 'TineError';
 
 export const isMapLike = (value: any): value is Map<any, any> => {
   return (
@@ -72,4 +79,23 @@ export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
   );
 
   return interpolated;
+};
+
+export const parseResult = <T>(
+  value: T,
+): {
+  data: TineExcludeError<T>;
+  error?: TineGetErrors<T> | undefined;
+} => {
+  if (isError(value)) {
+    return {
+      data: undefined as TineExcludeError<T>,
+      error: value as TineGetErrors<T>,
+    };
+  }
+
+  return {
+    data: value as TineExcludeError<T>,
+    error: undefined,
+  };
 };

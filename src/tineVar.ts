@@ -58,11 +58,11 @@ export function tineVar(arg: any, selector?: any) {
     }
 
     if (ctx.has(arg.name)) {
-      return ctx.get(arg.name);
+      return ctx.get(arg.name).data ?? ctx.get(arg.name).error;
     }
 
     if ('run' in arg) {
-      return await arg.run(ctx);
+      return (await arg.run(ctx)).data ?? ctx.get(arg.name).error;
     }
   };
 

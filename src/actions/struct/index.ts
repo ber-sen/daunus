@@ -1,10 +1,10 @@
 import { tineAction } from '../../tineAction';
 
-const shape = tineAction(
+const struct = tineAction(
   {
-    type: 'shape',
+    type: 'struct',
   },
   <T>(params: T) => params!,
 );
 
-export default shape;
+export default struct;

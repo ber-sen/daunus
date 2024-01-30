@@ -40,8 +40,8 @@ export type TineActionInfo<D> = {
   name: string;
   type: string;
   params: any;
-  data?: ResolveTineVar<D>;
-  error?: Error;
+  data?: TineExcludeError<ResolveTineVar<D>> | null;
+  error?: TineGetErrors<ResolveTineVar<D>> | null;
 };
 
 export type TineActionRunOptions<T> = {
@@ -53,11 +53,10 @@ export type TineAction<T> = {
   run: (
     ctx?: TineCtx,
     options?: TineActionRunOptions<T>,
-  ) => Promise<TineExcludeError<ResolveTineVar<T>>>;
-  runSafe: (
-    ctx?: TineCtx,
-    options?: TineActionRunOptions<T>,
-  ) => Promise<ResolveTineVar<T>>;
+  ) => Promise<{
+    data: TineExcludeError<ResolveTineVar<T>>;
+    error?: TineGetErrors<ResolveTineVar<T>> | undefined;
+  }>;
 };
 
 export type TineWorkflowAction<T> = {
@@ -152,7 +151,7 @@ export class TineError<S extends number, D> extends Error {
   public status: S;
   public data?: D;
 
-  constructor(status: S, message: string, data?: D) {
+  constructor(status: S, message?: string, data?: D) {
     super(message);
 
     this.name = 'TineError';
@@ -163,19 +162,14 @@ export class TineError<S extends number, D> extends Error {
 
 type WaitParams =
   | {
-      delay: number;
-      ctx: Map<any, any>;
+      delay: string;
     }
   | {
       until: Date;
-      ctx: Map<any, any>;
     };
 
-export class Wait extends Error {
-  public params: WaitParams;
-
+export class Wait extends TineError<102, WaitParams> {
   constructor(params: WaitParams) {
-    super('Wait');
-    this.params = params;
+    super(102, 'Wait', params);
   }
 }

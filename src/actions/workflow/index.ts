@@ -30,7 +30,9 @@ const workflow = tineAction(
       return undefined;
     }
 
-    return runAction(ctx, params.action);
+    const res = await runAction(ctx, params.action);
+
+    return res.data ?? res.error;
   },
 );
 

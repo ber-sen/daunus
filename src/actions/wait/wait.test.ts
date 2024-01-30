@@ -6,14 +6,11 @@ import { Wait } from '../../types';
 describe('wait', () => {
   it('should work throw wait exeption', async () => {
     const action = wait({
-      delay: 1500,
+      delay: '1d',
     });
 
-    try {
-      await action.run(tineCtx());
-    } catch (error) {
-      expect(error).toBeInstanceOf(Wait);
-      expect(error).toHaveProperty('message', 'Wait');
-    }
+    const res = await action.run(tineCtx());
+
+    expect(res.error).toStrictEqual(new Wait({ delay: '1d' }));
   });
 });

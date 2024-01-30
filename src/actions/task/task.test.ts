@@ -9,7 +9,7 @@ describe('task', () => {
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual({
+    expect(res.data).toStrictEqual({
       success: true,
     });
   });
@@ -23,7 +23,7 @@ describe('task', () => {
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual({
+    expect(res.data).toStrictEqual({
       success: true,
     });
   });

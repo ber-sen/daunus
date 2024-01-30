@@ -7,20 +7,20 @@ describe('parallel', () => {
     const action = parallel([
       {
         name: 'test',
-        type: ['shape'],
+        type: ['struct'],
         params: {
           foo: 'bar',
         },
       },
       {
-        type: ['shape'],
+        type: ['struct'],
         params: 'test',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual([{ foo: 'bar' }, 'test']);
+    expect(res.data).toStrictEqual([{ foo: 'bar' }, 'test']);
   });
 
   it('should work with with nested parallel', async () => {
@@ -30,43 +30,43 @@ describe('parallel', () => {
         type: ['parallel'],
         params: [
           {
-            type: ['shape'],
+            type: ['struct'],
             params: 'action.1.1',
           },
           {
-            type: ['shape'],
+            type: ['struct'],
             params: 'action.1.2',
           },
         ],
       },
       {
-        type: ['shape'],
+        type: ['struct'],
         params: 'action.2',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual([['action.1.1', 'action.1.2'], 'action.2']);
+    expect(res.data).toStrictEqual([['action.1.1', 'action.1.2'], 'action.2']);
   });
 
   it('should NOT be able to access return of the first action from the second', async () => {
     const action = parallel([
       {
         name: 'test',
-        type: ['shape'],
+        type: ['struct'],
         params: {
           foo: 'bar',
         },
       },
       {
-        type: ['shape'],
-        params: '{{ $.test }}',
+        type: ['struct'],
+        params: '{{ $.test.data }}',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual([{ foo: 'bar' }, undefined]);
+    expect(res.data).toStrictEqual([{ foo: 'bar' }, undefined]);
   });
 });

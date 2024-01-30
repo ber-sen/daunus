@@ -11,13 +11,13 @@ describe('workflow', () => {
         type: ['process'],
         params: [
           {
-            name: 'data',
-            type: ['shape'],
+            name: 'struct',
+            type: ['struct'],
             params: { name: 'Bar' },
           },
           {
-            type: ['shape'],
-            params: tineQuery(($) => `Foo ${$.data.name}`),
+            type: ['struct'],
+            params: tineQuery(($) => `Foo ${$.struct.data.name}`),
           },
         ],
       },
@@ -30,6 +30,6 @@ describe('workflow', () => {
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual('Foo Bar');
+    expect(res.data).toStrictEqual('Foo Bar');
   });
 });

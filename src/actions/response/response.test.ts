@@ -22,6 +22,6 @@ describe('response', () => {
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual({ rows: ['test', 'test', 1], userId: 0 });
+    expect(res.data).toStrictEqual({ rows: ['test', 'test', 1], userId: 0 });
   });
 });

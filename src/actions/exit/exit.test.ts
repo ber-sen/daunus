@@ -3,18 +3,6 @@ import exit from './index';
 import { tineCtx } from '../../tineHelpers';
 import { TineError } from '../../types';
 
-class NoErrorThrownError extends Error {}
-
-const getError = async <TError>(call: () => unknown): Promise<TError> => {
-  try {
-    await call();
-
-    throw new NoErrorThrownError();
-  } catch (error: unknown) {
-    return error as TError;
-  }
-};
-
 describe('wait', () => {
   it('should exit with message and status', async () => {
     const action = exit({
@@ -22,11 +10,10 @@ describe('wait', () => {
       message: 'Forbidden',
     });
 
-    const error = await getError(async () => await action.run(tineCtx()));
+    const res = await action.run(tineCtx());
 
-    expect(error).not.toBeInstanceOf(NoErrorThrownError);
-    expect(error).toBeInstanceOf(TineError);
-    expect(error).toHaveProperty('message', 'Forbidden');
-    expect(error).toHaveProperty('status', 403);
+    expect(res.error).toBeInstanceOf(TineError);
+    expect(res.error).toHaveProperty('message', 'Forbidden');
+    expect(res.error).toHaveProperty('status', 403);
   });
 });

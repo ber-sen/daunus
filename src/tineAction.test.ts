@@ -1,5 +1,5 @@
 import { tineInput } from './tineHelpers';
-import { shape } from './actions';
+import { struct } from './actions';
 import { tineVar } from './tineVar';
 import { TineInferInput, TineInferReturn } from './types';
 import { z } from './zod';
@@ -18,7 +18,7 @@ describe('tineQuery', () => {
       id: z.string(),
     }).openapi('User');
 
-    const test = shape({ success: true, data: tineVar(input, 'id') });
+    const test = struct({ success: true, data: tineVar(input, 'id') });
 
     const res = test.withParams(input, {
       oSchema: z.object({ success: z.boolean(), data: z.string() }),
@@ -34,7 +34,7 @@ describe('tineQuery', () => {
       id: z.string(),
     }).openapi('User');
 
-    const test = shape({ success: true, data: tineVar(input, 'id') });
+    const test = struct({ success: true, data: tineVar(input, 'id') });
 
     const res = test.withParams(input, {
       oSchema: z.object({ success: z.boolean(), data: z.string() }),
@@ -42,7 +42,9 @@ describe('tineQuery', () => {
 
     type A = TineInferReturn<typeof res>;
 
-    type test = Expect<Equal<A, { success: boolean; data: string }>>;
+    type test = Expect<
+      Equal<A, { data: { success: boolean; data: string }; error?: undefined }>
+    >;
   });
 
   it('Should return api props', () => {
@@ -50,7 +52,7 @@ describe('tineQuery', () => {
       id: z.string(),
     }).openapi('User');
 
-    const test = shape({ success: true, data: tineVar(input, 'id') });
+    const test = struct({ success: true, data: tineVar(input, 'id') });
 
     const res = test.withParams(input, {
       oSchema: z.object({ success: z.boolean(), data: z.string() }),

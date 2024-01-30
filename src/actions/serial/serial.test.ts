@@ -7,20 +7,20 @@ describe('serial', () => {
     const action = serial([
       {
         name: 'test',
-        type: ['shape'],
+        type: ['struct'],
         params: {
           foo: 'bar',
         },
       },
       {
-        type: ['shape'],
+        type: ['struct'],
         params: 'test',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual([{ foo: 'bar' }, 'test']);
+    expect(res.data).toStrictEqual([{ foo: 'bar' }, 'test']);
   });
 
   it('should work with with nested serial', async () => {
@@ -30,43 +30,43 @@ describe('serial', () => {
         type: ['serial'],
         params: [
           {
-            type: ['shape'],
+            type: ['struct'],
             params: 'action.1.1',
           },
           {
-            type: ['shape'],
+            type: ['struct'],
             params: 'action.1.2',
           },
         ],
       },
       {
-        type: ['shape'],
+        type: ['struct'],
         params: 'action.2',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual([['action.1.1', 'action.1.2'], 'action.2']);
+    expect(res.data).toStrictEqual([['action.1.1', 'action.1.2'], 'action.2']);
   });
 
   it('should be able to access return of the first action from the second', async () => {
     const action = serial([
       {
         name: 'test',
-        type: ['shape'],
+        type: ['struct'],
         params: {
           foo: 'bar',
         },
       },
       {
-        type: ['shape'],
-        params: '{{ $.test }}',
+        type: ['struct'],
+        params: '{{ $.test.data }}',
       },
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res).toStrictEqual([{ foo: 'bar' }, { foo: 'bar' }]);
+    expect(res.data).toStrictEqual([{ foo: 'bar' }, { foo: 'bar' }]);
   });
 });
