@@ -1,7 +1,7 @@
 import { tineAction } from '../../tineAction';
 import { Wait } from '../../types';
 
-type WaitParams =
+export type WaitParams =
   | {
       delay: string;
     }

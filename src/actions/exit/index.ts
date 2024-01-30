@@ -1,7 +1,7 @@
 import { tineAction } from '../../tineAction';
 import { TineError } from '../../types';
 
-interface ExitParams<S extends number, D> {
+export interface ExitParams<S extends number, D> {
   status: S;
   message?: string;
   data?: D;

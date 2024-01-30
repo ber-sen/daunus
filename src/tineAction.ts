@@ -92,7 +92,7 @@ export const tineAction =
 
           return value;
         } catch (e) {
-          actionInfo.error = e;
+          actionInfo.error = e as any;
 
           if (!skipLog) {
             ctx.get('actions').set(actionInfo.name, actionInfo);
