@@ -12,7 +12,7 @@ import {
   TineCtx,
   TineParams
 } from "./types";
-import { isError, parseResult } from "./helpers";
+import { parseResult } from "./helpers";
 
 export const tineAction =
   <P, O>(

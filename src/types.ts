@@ -150,7 +150,7 @@ export type TineInferInput<
     ? Parameters<T["input"]>[0]
     : never;
 
-export class TineError<S extends number, D> extends Error {
+export class TineError<S extends number, D = undefined> extends Error {
   public status: S;
   public data?: D;
 
