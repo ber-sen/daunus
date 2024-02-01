@@ -1,10 +1,10 @@
-import { tineAction } from '../../tineAction';
+import { tineAction } from "../../tine_action";
 
 const struct = tineAction(
   {
-    type: 'struct',
+    type: "struct"
   },
-  <T>(params: T) => params!,
+  <T>(params: T) => params!
 );
 
 export default struct;

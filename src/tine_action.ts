@@ -1,7 +1,7 @@
-import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
+import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 
-import { resolveParams } from './resolveParams';
+import { resolveParams } from "./resolve_params";
 import {
   ResolveTineVar,
   TineAction,
@@ -10,9 +10,9 @@ import {
   TineActionRunOptions,
   TineActionWithOptions,
   TineCtx,
-  TineParams,
-} from './types';
-import { isError, parseResult } from './helpers';
+  TineParams
+} from "./types";
+import { isError, parseResult } from "./helpers";
 
 export const tineAction =
   <P, O>(
@@ -25,14 +25,14 @@ export const tineAction =
       skipLog?: boolean;
       skipPlaceholders?: boolean;
     },
-    run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
+    run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>
   ) =>
   (
     params: TineParams<P>,
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
-    },
+    }
   ) => {
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
@@ -42,15 +42,15 @@ export const tineAction =
       type: args.type,
       params: null,
       data: undefined,
-      error: undefined,
+      error: undefined
     };
 
     const makeRun =
       (init?: (ctx: TineCtx) => void) =>
       async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<O>) => {
-        if (!ctx.has('actions')) {
-          ctx.set('useCase', actionInfo);
-          ctx.set('actions', new Map());
+        if (!ctx.has("actions")) {
+          ctx.set("useCase", actionInfo);
+          ctx.set("actions", new Map());
         }
 
         const runFn = async () => {
@@ -61,7 +61,7 @@ export const tineAction =
               ? params
               : await parseParams(ctx, params, {
                   schema: args.paramsSchema,
-                  skipPlaceholders: args.skipPlaceholders,
+                  skipPlaceholders: args.skipPlaceholders
                 });
 
           actionInfo.params = parsedParams;
@@ -73,7 +73,7 @@ export const tineAction =
           }
 
           const parseValue = await parseParams(ctx, value, {
-            skipPlaceholders: true,
+            skipPlaceholders: true
           });
 
           return resolveTineVar(parseValue);
@@ -84,21 +84,21 @@ export const tineAction =
 
           ctx.set(name, value);
           actionInfo.data = value.data;
-          actionInfo.error = value.error;
+          actionInfo.error = value.error ?? null;
 
           if (!skipLog) {
-            ctx.get('actions').set(actionInfo.name, actionInfo);
+            ctx.get("actions").set(actionInfo.name, actionInfo);
           }
 
           return value;
-        } catch (e) {
-          actionInfo.error = e as any;
+        } catch (error: any) {
+          actionInfo.error = error;
 
           if (!skipLog) {
-            ctx.get('actions').set(actionInfo.name, actionInfo);
+            ctx.get("actions").set(actionInfo.name, actionInfo);
           }
 
-          throw e;
+          throw error;
         } finally {
           if (options?.onComplete) {
             options.onComplete(actionInfo, ctx);
@@ -109,14 +109,14 @@ export const tineAction =
     const action: TineAction<O> = {
       ...actionCtx,
       name,
-      run: makeRun(),
+      run: makeRun()
     };
 
     return {
       ...action,
       noParams: (meta?) => ({
         meta: { ...meta },
-        ...action,
+        ...action
       }),
       withParams: <
         T extends ZodRawShape,
@@ -127,45 +127,45 @@ export const tineAction =
         D,
         P,
         B,
-        Q,
+        Q
       >(
         iSchema: z.ZodObject<T, U, C, O, I>,
         meta?: {
           oSchema?: z.ZodType<ResolveTineVar<D>>;
           openApi?: {
             method?:
-              | 'get'
-              | 'post'
-              | 'put'
-              | 'delete'
-              | 'patch'
-              | 'head'
-              | 'options'
-              | 'trace';
+              | "get"
+              | "post"
+              | "put"
+              | "delete"
+              | "patch"
+              | "head"
+              | "options"
+              | "trace";
             contentType?: string;
             params?: P;
             body?: B;
             query?: Q;
           };
-        },
+        }
       ) => ({
         meta: {
           ...meta,
-          iSchema,
+          iSchema
         },
         input: (value: I) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set('input', iSchema.parse(value));
-          }),
+            ctx.set("input", iSchema.parse(value));
+          })
         }),
         rawInput: (value) => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set('input', iSchema.parse(value));
-          }),
-        }),
-      }),
+            ctx.set("input", iSchema.parse(value));
+          })
+        })
+      })
     } satisfies TineActionWithOptions<O>;
   };
 
@@ -174,11 +174,11 @@ export const parseParams = async <T>(
   params: TineParams<T>,
   options?: {
     schema?: z.Schema<T>;
-    skipPlaceholders?: Boolean;
-  },
+    skipPlaceholders?: boolean;
+  }
 ) => {
   const resolvedParams = await resolveParams(ctx, params, {
-    skipPlaceholders: options?.skipPlaceholders,
+    skipPlaceholders: options?.skipPlaceholders
   });
 
   if (!options?.schema) {

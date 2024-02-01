@@ -1,5 +1,5 @@
-import { tineAction } from '../../tineAction';
-import { TineError } from '../../types';
+import { tineAction } from "../../tine_action";
+import { TineError } from "../../types";
 
 export interface ExitParams<S extends number, D> {
   status: S;
@@ -9,10 +9,10 @@ export interface ExitParams<S extends number, D> {
 
 const exit = tineAction(
   {
-    type: 'exit',
+    type: "exit"
   },
   <S extends number, D>(params: ExitParams<S, D>) =>
-    new TineError<S, D>(params.status, params.message ?? '', params.data),
+    new TineError<S, D>(params.status, params.message ?? "", params.data)
 );
 
 export default exit;

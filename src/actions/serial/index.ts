@@ -1,9 +1,9 @@
-import { runAction } from '../../runAction';
-import { tineAction } from '../../tineAction';
-import { TineActionOptions, TineWorkflowAction } from '../../types';
+import { runAction } from "../../run_action";
+import { tineAction } from "../../tine_action";
+import { TineActionOptions, TineWorkflowAction } from "../../types";
 
 const serial = tineAction(
-  { type: 'serial', skipParse: true },
+  { type: "serial", skipParse: true },
   async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
     const res: Array<any> = [];
 
@@ -14,7 +14,7 @@ const serial = tineAction(
     }
 
     return res;
-  },
+  }
 );
 
 export default serial;

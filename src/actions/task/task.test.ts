@@ -1,30 +1,30 @@
-import { tineCtx } from '../../tineHelpers';
-import task from './index';
+import { tineCtx } from "../../tine_helpers";
+import task from "./index";
 
-describe('task', () => {
-  it('should work', async () => {
+describe("task", () => {
+  it("should work", async () => {
     const action = task(() => ({
-      success: true,
+      success: true
     }));
 
     const res = await action.run(tineCtx());
 
     expect(res.data).toStrictEqual({
-      success: true,
+      success: true
     });
   });
 
-  it('should work with promise', async () => {
+  it("should work with promise", async () => {
     const action = task(() =>
       Promise.resolve({
-        success: true,
-      }),
+        success: true
+      })
     );
 
     const res = await action.run(tineCtx());
 
     expect(res.data).toStrictEqual({
-      success: true,
+      success: true
     });
   });
 });

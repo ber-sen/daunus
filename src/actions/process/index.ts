@@ -1,9 +1,9 @@
-import { runAction } from '../../runAction';
-import { tineAction } from '../../tineAction';
-import { TineActionOptions, TineWorkflowAction } from '../../types';
+import { runAction } from "../../run_action";
+import { tineAction } from "../../tine_action";
+import { TineActionOptions, TineWorkflowAction } from "../../types";
 
 const process = tineAction(
-  { type: 'process', skipParse: true },
+  { type: "process", skipParse: true },
   async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
     let res: any = null;
 
@@ -16,7 +16,7 @@ const process = tineAction(
     }
 
     return res?.data || res.error;
-  },
+  }
 );
 
 export default process;

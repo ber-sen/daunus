@@ -1,65 +1,65 @@
-import process from './index';
+import { tineCtx } from "../../tine_helpers";
+import { TineError } from "../../types";
 
-import { tineCtx } from '../../tineHelpers';
-import { TineError } from '../../types';
+import process from "./index";
 
-describe('process', () => {
-  it('should work for basic example', async () => {
+describe("process", () => {
+  it("should work for basic example", async () => {
     const action = process([
       {
-        name: 'test',
-        type: ['struct'],
+        name: "test",
+        type: ["struct"],
         params: {
-          foo: 'bar',
-        },
-      },
+          foo: "bar"
+        }
+      }
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res.data).toStrictEqual({ foo: 'bar' });
+    expect(res.data).toStrictEqual({ foo: "bar" });
   });
 
-  it('should work with placeholders', async () => {
+  it("should work with placeholders", async () => {
     const action = process([
       {
-        name: 'test',
-        type: ['struct'],
+        name: "test",
+        type: ["struct"],
         params: {
-          foo: 'bar',
-        },
+          foo: "bar"
+        }
       },
       {
-        type: ['struct'],
-        params: '{{ $.test.data.foo }}',
-      },
+        type: ["struct"],
+        params: "{{ $.test.data.foo }}"
+      }
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res.data).toStrictEqual('bar');
+    expect(res.data).toStrictEqual("bar");
   });
 
-  it('should stop on error', async () => {
+  it("should stop on error", async () => {
     const action = process([
       {
-        name: 'test',
-        type: ['struct'],
+        name: "test",
+        type: ["struct"],
         params: {
-          foo: 'bar',
-        },
+          foo: "bar"
+        }
       },
       {
-        name: 'error',
-        type: ['exit'],
+        name: "error",
+        type: ["exit"],
         params: {
-          status: 404,
-        },
+          status: 404
+        }
       },
       {
-        type: ['struct'],
-        params: '{{ $.test.data.foo }}',
-      },
+        type: ["struct"],
+        params: "{{ $.test.data.foo }}"
+      }
     ]);
 
     const res = await action.run(tineCtx());
@@ -67,60 +67,61 @@ describe('process', () => {
     expect(res.error).toStrictEqual(new TineError(404));
   });
 
-  it('should work handle errors placeholders', async () => {
+  it("should work handle errors placeholders", async () => {
     const action = process([
       {
-        name: 'test',
-        type: ['struct'],
+        name: "test",
+        type: ["struct"],
         params: {
-          foo: 'bar',
-        },
+          foo: "bar"
+        }
       },
       {
-        type: ['struct'],
-        params: '{{ $.test.data.foo }}',
-      },
+        type: ["struct"],
+        params: "{{ $.test.data.foo }}"
+      }
     ]);
 
     const res = await action.run(tineCtx());
 
-    expect(res.data).toStrictEqual('bar');
+    expect(res.data).toStrictEqual("bar");
   });
 
-  it('should work with nested processes', async () => {
+  it("should work with nested processes", async () => {
     const ctx = tineCtx();
 
-    ctx.set('.tine-placeholder-resolver', ($: any, key: string) =>
-      new Function('$', `return ${key}`)($),
+    ctx.set(".tine-placeholder-resolver", ($: any, key: string) =>
+      // eslint-disable-next-line no-new-func
+      new Function("$", `return ${key}`)($)
     );
 
     const action = process([
       {
-        name: 'test',
-        type: ['process'],
+        name: "test",
+        type: ["process"],
         params: [
           {
-            type: ['struct'],
-            params: 'ipsum',
+            type: ["struct"],
+            params: "ipsum"
           },
           {
-            type: ['struct'],
+            type: ["struct"],
             params: {
-              foo: 'bar',
-            },
-          },
-        ],
+              foo: "bar"
+            }
+          }
+        ]
       },
       {
-        type: ['struct'],
+        type: ["struct"],
         params: {
-          foo: '{{ $.test.data.foo + "asd" }}',
-        },
-      },
+          foo: '{{ $.test.data.foo + "asd" }}'
+        }
+      }
     ]);
 
     const res = await action.run(ctx);
 
-    expect(res.data).toStrictEqual({ foo: 'barasd' });
+    expect(res.data).toStrictEqual({ foo: "barasd" });
   });
 });

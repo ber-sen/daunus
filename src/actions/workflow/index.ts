@@ -1,6 +1,6 @@
-import { runAction } from '../../runAction';
-import { tineAction } from '../../tineAction';
-import { TineActionOptions } from '../../types';
+import { runAction } from "../../run_action";
+import { tineAction } from "../../tine_action";
+import { TineActionOptions } from "../../types";
 
 type Action =
   | {
@@ -24,7 +24,7 @@ interface Workflow {
 }
 
 const workflow = tineAction(
-  { type: 'workflow', skipParse: true },
+  { type: "workflow", skipParse: true },
   async (params: Workflow, { ctx }: TineActionOptions) => {
     if (!params.action) {
       return undefined;
@@ -33,7 +33,7 @@ const workflow = tineAction(
     const res = await runAction(ctx, params.action);
 
     return res.data ?? res.error;
-  },
+  }
 );
 
 export default workflow;

@@ -1,14 +1,15 @@
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
-import { z } from 'zod';
+import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
+// eslint-disable-next-line unicorn/prefer-export-from
 export { z };
 
-const PRIMITIVES = ['number', 'boolean'];
+const PRIMITIVES = new Set(["number", "boolean"]);
 
 export function getType(rawType: string) {
-  if (PRIMITIVES.includes(rawType)) {
+  if (PRIMITIVES.has(rawType)) {
     return `z.coerce.${rawType}()`;
   }
 
@@ -16,9 +17,9 @@ export function getType(rawType: string) {
 }
 
 export function getEncodedType(type: string) {
-  if (type.includes('coerce')) {
-    return type.split('z.coerce.')[1].replace(/\(\)/g, '');
+  if (type.includes("coerce")) {
+    return type.split("z.coerce.")[1].replace(/\(\)/g, "");
   }
 
-  return type.split('z.')[1].replace(/\(\)/g, '');
+  return type.split("z.")[1].replace(/\(\)/g, "");
 }

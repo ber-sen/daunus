@@ -1,11 +1,11 @@
-import { isAction } from './helpers';
-import { runAction } from './runAction';
-import { TineCtx } from './types';
+import { isAction } from "./helpers";
+import { runAction } from "./run_action";
+import { TineCtx } from "./types";
 
 export const resolveAction = async <T>(
   ctx: TineCtx,
   action: T,
-  name?: string,
+  name?: string
 ) => {
   if (isAction(action)) {
     await runAction(ctx, name ? { ...action, name } : action);

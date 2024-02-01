@@ -4,14 +4,14 @@ import {
   isTinePlaceholder,
   isTineVar,
   resolveTinePlaceholder,
-  resolveTineVar,
-} from './helpers';
-import { TineParams } from './types';
+  resolveTineVar
+} from "./helpers";
+import { TineParams } from "./types";
 
 export const resolveParams = async <T>(
   ctx: Map<string, unknown>,
   params: TineParams<T>,
-  options?: { skipPlaceholders?: Boolean },
+  options?: { skipPlaceholders?: boolean }
 ): Promise<T> => {
   if (!options?.skipPlaceholders && isTinePlaceholder(params)) {
     return await resolveTinePlaceholder(ctx, params);
@@ -34,10 +34,10 @@ export const resolveParams = async <T>(
   }
 
   if (isObject(params)) {
-    const result = {};
+    const result: any = {};
 
     for (const key of Object.keys(params)) {
-      const value = await resolveParams(ctx, params[key], options);
+      const value = await resolveParams(ctx, (params as any)[key], options);
 
       result[key] = value;
     }

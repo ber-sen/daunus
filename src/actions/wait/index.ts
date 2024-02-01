@@ -1,5 +1,5 @@
-import { tineAction } from '../../tineAction';
-import { Wait } from '../../types';
+import { tineAction } from "../../tine_action";
+import { Wait } from "../../types";
 
 export type WaitParams =
   | {
@@ -11,11 +11,11 @@ export type WaitParams =
 
 const wait = tineAction(
   {
-    type: 'wait',
+    type: "wait"
   },
   (params: WaitParams) => {
     return new Wait(params);
-  },
+  }
 );
 
 export default wait;

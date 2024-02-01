@@ -1,7 +1,7 @@
-import { TineCtx, TineVar } from './types';
+import { TineCtx, TineVar } from "./types";
 
 export function tineFn<R>(
-  selector: (ctx: TineCtx) => R | Promise<R>,
+  selector: (ctx: TineCtx) => R | Promise<R>
 ): TineVar<R> {
   const tineVar = async (ctx: TineCtx) => {
     return await selector(ctx);
@@ -9,7 +9,7 @@ export function tineFn<R>(
 
   tineVar.toString = () => `{{ ${selector.toString()} }}`;
   tineVar.toJSON = () => `{{ ${selector.toString()} }}`;
-  tineVar.__type = 'tineVar';
+  tineVar.__type = "tineVar";
 
   return tineVar as any;
 }
