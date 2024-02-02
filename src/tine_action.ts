@@ -26,8 +26,10 @@ export const tineAction =
       skipPlaceholders?: boolean;
     },
     run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
-    container: (r: () => Promise<O> | O) => Promise<T> = (r) =>
-      r() as any as Promise<T>
+    container: (
+      r: () => Promise<O> | O,
+      args: { ctx: TineCtx; params: P }
+    ) => Promise<T> = (r) => r() as any as Promise<T>
   ) =>
   (
     params: TineParams<P>,
@@ -68,8 +70,9 @@ export const tineAction =
 
           actionInfo.params = parsedParams;
 
-          const value = await container(() =>
-            run(parsedParams!, { ctx, parseParams })
+          const value = await container(
+            () => run(parsedParams!, { ctx, parseParams }),
+            { ctx, params: parsedParams! }
           );
 
           if (!args.parseResponse) {
