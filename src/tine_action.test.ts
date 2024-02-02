@@ -3,6 +3,7 @@ import { struct } from "./actions";
 import { tineVar } from "./tine_var";
 import { TineInferInput, TineInferReturn } from "./types";
 import { z } from "./zod";
+import { tineAction } from ".";
 
 type Expect<T extends true> = T;
 
@@ -65,5 +66,19 @@ describe("tineQuery", () => {
     expect(JSON.stringify(res.meta.openApi)).toEqual(
       '{"params":{"id":"{{ id }}"}}'
     );
+  });
+
+  it("Should work with container", () => {
+    const test = tineAction(
+      { type: "test" },
+      (payload: string) => payload,
+      async (r) => {
+        return (await r()).length;
+      }
+    )("test");
+
+    type A = TineInferReturn<typeof test>;
+
+    type test = Expect<Equal<A, { data: number; error: never }>>;
   });
 });

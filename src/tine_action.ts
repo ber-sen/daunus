@@ -15,7 +15,7 @@ import {
 import { parseResult } from "./helpers";
 
 export const tineAction =
-  <P, O>(
+  <P, O, T = O>(
     args: {
       type: string;
       name?: string;
@@ -25,7 +25,9 @@ export const tineAction =
       skipLog?: boolean;
       skipPlaceholders?: boolean;
     },
-    run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>
+    run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
+    container: (r: () => Promise<O> | O) => Promise<T> = (r) =>
+      r() as any as Promise<T>
   ) =>
   (
     params: TineParams<P>,
@@ -37,7 +39,7 @@ export const tineAction =
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
-    const actionInfo: TineActionInfo<O> = {
+    const actionInfo: TineActionInfo<T> = {
       name,
       type: args.type,
       params: null,
@@ -47,7 +49,7 @@ export const tineAction =
 
     const makeRun =
       (init?: (ctx: TineCtx) => void) =>
-      async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<O>) => {
+      async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<T>) => {
         if (!ctx.has("actions")) {
           ctx.set("useCase", actionInfo);
           ctx.set("actions", new Map());
@@ -66,7 +68,9 @@ export const tineAction =
 
           actionInfo.params = parsedParams;
 
-          const value = await run(parsedParams!, { ctx, parseParams });
+          const value = await container(() =>
+            run(parsedParams!, { ctx, parseParams })
+          );
 
           if (!args.parseResponse) {
             return resolveTineVar(value);
@@ -106,7 +110,7 @@ export const tineAction =
         }
       };
 
-    const action: TineAction<O> = {
+    const action: TineAction<T> = {
       ...actionCtx,
       name,
       run: makeRun()
@@ -166,7 +170,7 @@ export const tineAction =
           })
         })
       })
-    } satisfies TineActionWithOptions<O>;
+    } satisfies TineActionWithOptions<T>;
   };
 
 export const parseParams = async <T>(
