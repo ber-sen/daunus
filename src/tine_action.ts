@@ -119,7 +119,7 @@ export const tineAction =
       run: makeRun()
     };
 
-    return {
+    const actionWithOptions: TineActionWithOptions<T> = {
       ...action,
       noParams: (meta?) => ({
         meta: { ...meta },
@@ -173,7 +173,9 @@ export const tineAction =
           })
         })
       })
-    } satisfies TineActionWithOptions<T>;
+    };
+
+    return actionWithOptions;
   };
 
 export const parseParams = async <T>(

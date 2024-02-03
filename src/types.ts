@@ -2,7 +2,7 @@ import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
 
 import { z } from "./zod";
 
-export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
+export type TineVar<T, E = T> = T & ((ctx: TineCtx) => Promise<T> | Promise<E>);
 
 export type TineParams<T> = T; // TODO: fix type
 
@@ -119,7 +119,24 @@ export type TineActionWithOptions<D> = TineAction<D> & {
     Q
   >(
     iSchema: TineInput<T, U, C, O, I>,
-    meta: { oSchema?: z.ZodType<ResolveTineVar<D>> }
+    meta: {
+      oSchema?: z.ZodType<ResolveTineVar<D>>;
+      openApi?: {
+        method?:
+          | "get"
+          | "post"
+          | "put"
+          | "delete"
+          | "patch"
+          | "head"
+          | "options"
+          | "trace";
+        contentType?: string;
+        params?: P;
+        body?: B;
+        query?: Q;
+      };
+    }
   ) => TineActionWithParams<T, U, C, O, I, D, P, B, Q>;
 };
 
@@ -128,9 +145,9 @@ export type TineActionOptions = {
   parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
 };
 
-export type TineExcludeError<T> = T extends Error ? never : T;
+export type TineExcludeError<T> = T extends TineError<any, any> ? never : T;
 
-export type TineGetErrors<T> = T extends Error ? T : never;
+export type TineGetErrors<T> = T extends TineError<any, any> ? T : never;
 
 export type TineInferReturn<
   T extends

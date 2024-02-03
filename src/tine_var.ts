@@ -4,6 +4,8 @@ import {
   TineAction,
   TineCtx,
   TineExcludeError,
+  TineActionWithOptions,
+  TineGetErrors,
   TineInput,
   TineVar
 } from "./types";
@@ -52,19 +54,34 @@ export function tineVar<
 ): TineVar<R>;
 
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
+  arg: TineActionWithOptions<T>,
+  selector: K
+): TineVar<TypeAtPath<T, K>, TineGetErrors<T>>;
+
+export function tineVar<T, R>(
+  arg: TineActionWithOptions<T>,
+  selector: (value: T) => R | Promise<R>
+): TineVar<R, TineGetErrors<T>>;
+
+export function tineVar<T>(
+  arg: TineActionWithOptions<T>,
+  selector?: undefined
+): TineVar<T, TineGetErrors<T>>;
+
+export function tineVar<T, K extends Path<TineExcludeError<T>>>(
   arg: TineAction<T>,
   selector: K
-): TineVar<TypeAtPath<TineExcludeError<T>, K>>;
+): TineVar<TypeAtPath<T, K>, TineGetErrors<T>>;
 
 export function tineVar<T, R>(
   arg: TineAction<T>,
   selector: (value: T) => R | Promise<R>
-): TineVar<R>;
+): TineVar<R, TineGetErrors<T>>;
 
 export function tineVar<T>(
   arg: TineAction<T>,
   selector?: undefined
-): TineVar<T>;
+): TineVar<T, TineGetErrors<T>>;
 
 export function tineVar<T extends readonly TineAction<any>[], R>(
   arg: T,

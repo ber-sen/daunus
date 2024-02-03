@@ -3,7 +3,8 @@ import { z } from "zod";
 import { tineInput } from "./tine_helpers";
 import { resolveParams } from "./resolve_params";
 import { tineVar } from "./tine_var";
-import { TineVar } from "./types";
+import { TineError, TineVar } from "./types";
+import { tineAction } from ".";
 
 const setContext = <T>(value?: object) => {
   const ctx = new Map();
@@ -82,6 +83,52 @@ describe("tineVar", () => {
       type A = typeof test;
 
       type test = Expect<Equal<A, TineVar<string>>>;
+    });
+
+    it("should pass errors", () => {
+      const actionWithError = tineAction(
+        {
+          type: "test"
+        },
+        () => {
+          if (Math.random() > 0.5) {
+            return new TineError(404, "Not found");
+          }
+
+          return { message: "Found" };
+        }
+      );
+
+      const action = actionWithError({});
+
+      const test = tineVar(action, "message")(new Map());
+
+      type A = Awaited<typeof test>;
+
+      type test = Expect<Equal<A, string | TineError<404, undefined>>>;
+    });
+
+    it("should pass errors on method selector", () => {
+      const actionWithError = tineAction(
+        {
+          type: "test"
+        },
+        () => {
+          if (Math.random() > 0.5) {
+            return new TineError(404, "Not found");
+          }
+
+          return { message: "Found" };
+        }
+      );
+
+      const action = actionWithError({});
+
+      const test = tineVar(action, ($v) => $v.message)(new Map());
+
+      type A = Awaited<typeof test>;
+
+      type test = Expect<Equal<A, string | TineError<404, undefined>>>;
     });
   });
 });
