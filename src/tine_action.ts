@@ -27,9 +27,9 @@ export const tineAction =
     },
     run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
     container: (
-      r: () => Promise<O> | O,
-      args: { ctx: TineCtx; params: P }
-    ) => Promise<T> = (r) => r() as any as Promise<T>
+      r: (params: P, { ctx, parseParams }: TineActionOptions) => Promise<O> | O,
+      args: [P, TineActionOptions]
+    ) => Promise<T> = (r, args) => r(...args) as any as Promise<T>
   ) =>
   (
     params: TineParams<P>,
@@ -70,10 +70,10 @@ export const tineAction =
 
           actionInfo.params = parsedParams;
 
-          const value = await container(
-            () => run(parsedParams!, { ctx, parseParams }),
-            { ctx, params: parsedParams! }
-          );
+          const value = await container(run, [
+            parsedParams!,
+            { ctx, parseParams }
+          ]);
 
           if (!args.parseResponse) {
             return resolveTineVar(value);

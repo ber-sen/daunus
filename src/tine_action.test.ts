@@ -72,8 +72,8 @@ describe("tineQuery", () => {
     const test = tineAction(
       { type: "test" },
       (payload: string) => payload,
-      async (r) => {
-        return (await r()).length;
+      async (r, args) => {
+        return (await r(...args)).length;
       }
     )("test");
 
