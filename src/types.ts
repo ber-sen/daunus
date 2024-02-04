@@ -2,7 +2,7 @@ import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
 
 import { z } from "./zod";
 
-export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
+export type TineVar<T> = TineExcludeError<T> & ((ctx: TineCtx) => Promise<T>);
 
 export type TineParams<T> = T; // TODO: fix type
 
@@ -54,11 +54,13 @@ export type ResolveTineVarData<T> =
       ? Array<ResolveTineVarData<A>>
       : T extends Date
         ? T
-        : T extends object
-          ? {
-              [K in keyof T]: ResolveTineVarData<T[K]>;
-            }
-          : T;
+        : T extends TineError<any, any>
+          ? TineExcludeError<T>
+          : T extends object
+            ? {
+                [K in keyof T]: ResolveTineVarData<T[K]>;
+              }
+            : T;
 
 export type ResolveTineVarError<T> =
   T extends TineVar<infer U>
@@ -86,11 +88,11 @@ export type ResolveTineVarError<T> =
             : never;
 
 export type ExtractTineErrors<T> =
-  T extends TineError<any>
+  T extends TineError<any, any>
     ? T
     : T extends object
       ? {
-          [K in keyof T]: T[K] extends TineError<any>
+          [K in keyof T]: T[K] extends TineError<any, any>
             ? T[K]
             : ExtractTineErrors<T[K]>;
         }[keyof T]
@@ -101,7 +103,7 @@ export type TineActionInfo<D> = {
   type: string;
   params: any;
   data?: ResolveTineVarData<D>;
-  error?: ExtractTineErrors<ResolveTineVarError<Awaited<D>>>;
+  error?: ExtractTineErrors<ResolveTineVarError<D>>;
 };
 
 export type TineActionRunOptions<T> = {
@@ -111,11 +113,11 @@ export type TineActionRunOptions<T> = {
 export type TineAction<T> = {
   name: string;
   run: (
-    ctx?: TineCtx,
-    options?: TineActionRunOptions<T>
+    ctx?: TineCtx
+    // options?: TineActionRunOptions<T>
   ) => Promise<{
     data: ResolveTineVarData<T>;
-    error: ExtractTineErrors<ResolveTineVarError<Awaited<T>>>;
+    error: ExtractTineErrors<ResolveTineVarError<T>>;
   }>;
 };
 
@@ -178,7 +180,7 @@ export type TineActionWithOptions<D> = TineAction<D> & {
     Q
   >(
     iSchema: TineInput<T, U, C, O, I>,
-    meta: {
+    meta?: {
       oSchema?: z.ZodType<ResolveTineVar<D>>;
       openApi?: {
         method?:
@@ -252,3 +254,10 @@ export class Wait extends TineError<102, WaitParams> {
     super(102, "Wait", params);
   }
 }
+
+export type Expect<T extends true> = T;
+
+export type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+    ? true
+    : false;

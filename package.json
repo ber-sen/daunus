@@ -1,6 +1,6 @@
 {
   "name": "tinejs",
-  "version": "0.1.29",
+  "version": "0.1.31",
   "description": "Yet another typescript framework",
   "scripts": {
     "test": "jest",

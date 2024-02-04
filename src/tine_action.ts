@@ -85,7 +85,7 @@ export const tineAction =
         };
 
         try {
-          const value = parseResult(await runFn());
+          const value = parseResult((await runFn()) as T);
 
           ctx.set(name, value);
           actionInfo.data = value.data;

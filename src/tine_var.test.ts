@@ -3,7 +3,7 @@ import { z } from "zod";
 import { tineInput } from "./tine_helpers";
 import { resolveParams } from "./resolve_params";
 import { tineVar } from "./tine_var";
-import { TineError, TineVar } from "./types";
+import { TineError, TineVar, Equal, Expect } from "./types";
 import { struct, tineAction } from ".";
 
 const setContext = <T>(value?: object) => {
@@ -13,13 +13,6 @@ const setContext = <T>(value?: object) => {
 
   return ctx;
 };
-
-type Expect<T extends true> = T;
-
-type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-    ? true
-    : false;
 
 describe("tineVar", () => {
   describe("string selector", () => {
