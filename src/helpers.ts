@@ -1,6 +1,12 @@
-import { never } from "zod";
 import { get } from "./get";
-import { TineCtx, TineExcludeError, TineGetErrors, TineVar } from "./types";
+import {
+  ResolveTineVarData,
+  ResolveTineVarError,
+  ExtractTineErrors,
+  TineError,
+  TineCtx,
+  TineVar
+} from "./types";
 
 export const isObject = (value: any): value is object =>
   value === null ||
@@ -20,8 +26,8 @@ export const isTinePlaceholder = (value: any) =>
 
 export const isArray = (value: any): value is any[] => Array.isArray(value);
 
-export const isError = (value: any): value is Error =>
-  value && value.name && value.name === "TineError";
+export const isError = (value: any): value is TineError<any, any> =>
+  value instanceof TineError;
 
 export const isMapLike = (value: any): value is Map<any, any> => {
   return (
@@ -76,21 +82,52 @@ export const resolveTinePlaceholder = (ctx: TineCtx, str: TineVar<any>) => {
   return interpolated;
 };
 
+function extractTineErrors<T>(obj: T): TineError<any>[] {
+  const tineErrors: TineError<any>[] = [];
+
+  function traverseObject(obj: any): void {
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const value = obj[key];
+        if (value instanceof TineError) {
+          tineErrors.push(value);
+        } else if (typeof value === "object" && value !== null) {
+          traverseObject(value);
+        }
+      }
+    }
+  }
+
+  traverseObject(obj);
+  return tineErrors;
+}
+
 export const parseResult = <T>(
-  value: T
+  data: T
 ): {
-  data: TineExcludeError<T>;
-  error: TineGetErrors<T>;
+  data: ResolveTineVarData<T>;
+  error: ExtractTineErrors<ResolveTineVarError<T>>;
 } => {
-  if (isError(value)) {
+  if (isError(data)) {
     return {
-      data: undefined as TineExcludeError<T>,
-      error: value as TineGetErrors<T>
+      data: undefined as ResolveTineVarData<T>,
+      error: data as ExtractTineErrors<ResolveTineVarError<T>>
     };
   }
 
+  if (isObject(data)) {
+    const errors = extractTineErrors(data);
+
+    if (errors[0]) {
+      return {
+        data: undefined as ResolveTineVarData<T>,
+        error: errors[0] as ExtractTineErrors<ResolveTineVarError<T>>
+      };
+    }
+  }
+
   return {
-    data: value as TineExcludeError<T>,
-    error: undefined as any as TineGetErrors<T>
+    data: data as ResolveTineVarData<T>,
+    error: undefined as any as ExtractTineErrors<ResolveTineVarError<T>>
   };
 };

@@ -1,5 +1,6 @@
 import {
   isArray,
+  isError,
   isObject,
   isTinePlaceholder,
   isTineVar,
@@ -13,6 +14,10 @@ export const resolveParams = async <T>(
   params: TineParams<T>,
   options?: { skipPlaceholders?: boolean }
 ): Promise<T> => {
+  if (isError(params)) {
+    return params;
+  }
+
   if (!options?.skipPlaceholders && isTinePlaceholder(params)) {
     return await resolveTinePlaceholder(ctx, params);
   }

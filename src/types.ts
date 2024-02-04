@@ -2,7 +2,7 @@ import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
 
 import { z } from "./zod";
 
-export type TineVar<T, E = T> = T & ((ctx: TineCtx) => Promise<T> | Promise<E>);
+export type TineVar<T> = T & ((ctx: TineCtx) => Promise<T>);
 
 export type TineParams<T> = T; // TODO: fix type
 
@@ -37,12 +37,71 @@ export type ResolveTineVar<T> =
             }
           : T;
 
+export type ResolveTineVarData<T> =
+  T extends TineVar<infer U>
+    ? U extends TineVar<infer Z>
+      ? TineExcludeError<Z>
+      : U extends Array<infer A>
+        ? Array<ResolveTineVarData<A>>
+        : U extends TineError<any, any>
+          ? TineExcludeError<U>
+          : U extends object
+            ? {
+                [K in keyof U]: ResolveTineVarData<U[K]>;
+              }
+            : U
+    : T extends Array<infer A>
+      ? Array<ResolveTineVarData<A>>
+      : T extends Date
+        ? T
+        : T extends object
+          ? {
+              [K in keyof T]: ResolveTineVarData<T[K]>;
+            }
+          : T;
+
+export type ResolveTineVarError<T> =
+  T extends TineVar<infer U>
+    ? U extends TineVar<infer Z>
+      ? TineGetErrors<Z>
+      : U extends Array<infer A>
+        ? Array<ResolveTineVarError<A>>
+        : U extends TineError<any, any>
+          ? TineGetErrors<U>
+          : U extends object
+            ? {
+                [K in keyof U]: ResolveTineVarError<U[K]>;
+              }
+            : never
+    : T extends Array<infer A>
+      ? Array<ResolveTineVarError<A>>
+      : T extends Date
+        ? T
+        : T extends TineError<any, any>
+          ? T
+          : T extends object
+            ? {
+                [K in keyof T]: ResolveTineVarError<T[K]>;
+              }
+            : never;
+
+export type ExtractTineErrors<T> =
+  T extends TineError<any>
+    ? T
+    : T extends object
+      ? {
+          [K in keyof T]: T[K] extends TineError<any>
+            ? T[K]
+            : ExtractTineErrors<T[K]>;
+        }[keyof T]
+      : never;
+
 export type TineActionInfo<D> = {
   name: string;
   type: string;
   params: any;
-  data?: TineExcludeError<ResolveTineVar<D>> | null;
-  error?: TineGetErrors<ResolveTineVar<D>> | null;
+  data?: ResolveTineVarData<D>;
+  error?: ExtractTineErrors<ResolveTineVarError<Awaited<D>>>;
 };
 
 export type TineActionRunOptions<T> = {
@@ -55,8 +114,8 @@ export type TineAction<T> = {
     ctx?: TineCtx,
     options?: TineActionRunOptions<T>
   ) => Promise<{
-    data: TineExcludeError<ResolveTineVar<T>>;
-    error: TineGetErrors<ResolveTineVar<T>>;
+    data: ResolveTineVarData<T>;
+    error: ExtractTineErrors<ResolveTineVarError<Awaited<T>>>;
   }>;
 };
 

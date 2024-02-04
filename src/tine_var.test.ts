@@ -4,7 +4,7 @@ import { tineInput } from "./tine_helpers";
 import { resolveParams } from "./resolve_params";
 import { tineVar } from "./tine_var";
 import { TineError, TineVar } from "./types";
-import { tineAction } from ".";
+import { struct, tineAction } from ".";
 
 const setContext = <T>(value?: object) => {
   const ctx = new Map();
@@ -129,6 +129,34 @@ describe("tineVar", () => {
       type A = Awaited<typeof test>;
 
       type test = Expect<Equal<A, string | TineError<404, undefined>>>;
+    });
+
+    it("should pass the error in struct", async () => {
+      const actionWithError = tineAction(
+        {
+          type: "test"
+        },
+        () => {
+          // eslint-disable-next-line no-constant-condition
+          if (true) {
+            return new TineError(404);
+          }
+
+          return { message: "Found" };
+        }
+      );
+
+      const instanceWithError = actionWithError({});
+
+      const action = struct({
+        test: {
+          couldBeError: tineVar(instanceWithError, "message")
+        }
+      });
+
+      const res = await action.run();
+
+      expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
     });
   });
 });

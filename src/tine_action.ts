@@ -44,9 +44,7 @@ export const tineAction =
     const actionInfo: TineActionInfo<T> = {
       name,
       type: args.type,
-      params: null,
-      data: undefined,
-      error: undefined
+      params: null
     };
 
     const makeRun =
@@ -76,14 +74,14 @@ export const tineAction =
           ]);
 
           if (!args.parseResponse) {
-            return resolveTineVar(value);
+            return value;
           }
 
           const parseValue = await parseParams(ctx, value, {
             skipPlaceholders: true
           });
 
-          return resolveTineVar(parseValue);
+          return parseValue;
         };
 
         try {
@@ -91,7 +89,7 @@ export const tineAction =
 
           ctx.set(name, value);
           actionInfo.data = value.data;
-          actionInfo.error = value.error ?? null;
+          actionInfo.error = value.error;
 
           if (!skipLog) {
             ctx.get("actions").set(actionInfo.name, actionInfo);
@@ -196,5 +194,3 @@ export const parseParams = async <T>(
 
   return options?.schema.parse(resolvedParams) as T;
 };
-
-const resolveTineVar = <T>(data: T) => data as ResolveTineVar<T>;

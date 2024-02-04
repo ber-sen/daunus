@@ -10,7 +10,7 @@ import {
   TineVar
 } from "./types";
 import { Path, TypeAtPath, get } from "./get";
-import { isArray } from "./helpers";
+import { isArray, isError } from "./helpers";
 
 async function getValue(ctx: TineCtx, arg: TineAction<any>) {
   if (arg instanceof ZodObject) {
@@ -22,7 +22,9 @@ async function getValue(ctx: TineCtx, arg: TineAction<any>) {
   }
 
   if ("run" in arg) {
-    return (await arg.run(ctx)).data ?? ctx.get(arg.name).error;
+    const res = await arg.run(ctx);
+
+    return res.data ?? res.error;
   }
 }
 
@@ -56,32 +58,32 @@ export function tineVar<
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
   arg: TineActionWithOptions<T>,
   selector: K
-): TineVar<TypeAtPath<T, K>, TineGetErrors<T>>;
+): TineVar<TypeAtPath<T, K> | TineGetErrors<T>>;
 
 export function tineVar<T, R>(
   arg: TineActionWithOptions<T>,
   selector: (value: T) => R | Promise<R>
-): TineVar<R, TineGetErrors<T>>;
+): TineVar<R | TineGetErrors<T>>;
 
 export function tineVar<T>(
   arg: TineActionWithOptions<T>,
   selector?: undefined
-): TineVar<T, TineGetErrors<T>>;
+): TineVar<T | TineGetErrors<T>>;
 
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
   arg: TineAction<T>,
   selector: K
-): TineVar<TypeAtPath<T, K>, TineGetErrors<T>>;
+): TineVar<TypeAtPath<T, K> | TineGetErrors<T>>;
 
 export function tineVar<T, R>(
   arg: TineAction<T>,
   selector: (value: T) => R | Promise<R>
-): TineVar<R, TineGetErrors<T>>;
+): TineVar<R | TineGetErrors<T>>;
 
 export function tineVar<T>(
   arg: TineAction<T>,
   selector?: undefined
-): TineVar<T, TineGetErrors<T>>;
+): TineVar<T | TineGetErrors<T>>;
 
 export function tineVar<T extends readonly TineAction<any>[], R>(
   arg: T,
@@ -105,6 +107,10 @@ export function tineVar(arg: any, selector?: any) {
 
   const tineVar = async (ctx: TineCtx) => {
     const value = await getValue(ctx, arg);
+
+    if (isError(value)) {
+      return value;
+    }
 
     if (!selector) {
       return value;
