@@ -98,26 +98,34 @@ export type ExtractTineErrors<T> =
         }[keyof T]
       : never;
 
-export type TineActionInfo<D> = {
+export type NonUndefined<T> = T extends undefined ? never : T;
+
+export type TineActionInfo<D, P> = {
   name: string;
   type: string;
   params: any;
   data?: ResolveTineVarData<D>;
-  error?: ExtractTineErrors<ResolveTineVarError<D>>;
+  error?: NonUndefined<
+    | ExtractTineErrors<ResolveTineVarError<D>>
+    | ExtractTineErrors<ResolveTineVarError<P>>
+  >;
 };
 
-export type TineActionRunOptions<T> = {
-  onComplete?: (actionInfo: TineActionInfo<T>, ctx: TineCtx) => void;
+export type TineActionRunOptions<T, P> = {
+  onComplete?: (actionInfo: TineActionInfo<T, P>, ctx: TineCtx) => void;
 };
 
-export type TineAction<T> = {
+export type TineAction<T, P> = {
   name: string;
   run: (
     ctx?: TineCtx,
-    options?: TineActionRunOptions<T>
+    options?: TineActionRunOptions<T, P>
   ) => Promise<{
     data: ResolveTineVarData<T>;
-    error: ExtractTineErrors<ResolveTineVarError<T>>;
+    error: NonUndefined<
+      | ExtractTineErrors<ResolveTineVarError<T>>
+      | ExtractTineErrors<ResolveTineVarError<P>>
+    >;
   }>;
 };
 
@@ -127,16 +135,17 @@ export type TineWorkflowAction<T> = {
   name?: string;
 };
 
-export type TineActionWithParams<
+export type TineActionWithInput<
   T extends ZodRawShape,
   U extends UnknownKeysParam,
   C extends ZodTypeAny,
   O,
   I,
-  D,
-  P,
+  Z,
   B,
-  Q
+  Q,
+  D,
+  P
 > = {
   meta: {
     iSchema: z.ZodObject<T, U, C, O, I>;
@@ -152,20 +161,20 @@ export type TineActionWithParams<
         | "options"
         | "trace";
       contentType?: string;
-      params?: P;
+      params?: Z;
       body?: B;
       query?: Q;
     };
   };
-  input: (value: I) => TineAction<D>;
-  rawInput: (value: unknown) => TineAction<D>;
+  input: (value: I) => TineAction<D, P>;
+  rawInput: (value: unknown) => TineAction<D, P>;
 };
 
-export type TineActionWithOptions<D> = TineAction<D> & {
+export type TineActionWithParams<D, P> = TineAction<D, P> & {
   noParams: () // meta?: {
   // oSchema?: z.ZodType<ResolveTineVar<D>>;
   // }
-  => TineAction<D> & {
+  => TineAction<D, P> & {
     // meta: {
     //   // oSchema?: z.ZodType<ResolveTineVar<D>>;
     // };
@@ -176,7 +185,7 @@ export type TineActionWithOptions<D> = TineAction<D> & {
     C extends ZodTypeAny,
     O,
     I,
-    P,
+    Z,
     B,
     Q
   >(
@@ -194,12 +203,12 @@ export type TineActionWithOptions<D> = TineAction<D> & {
           | "options"
           | "trace";
         contentType?: string;
-        params?: P;
+        params?: Z;
         body?: B;
         query?: Q;
       };
     }
-  ) => TineActionWithParams<T, U, C, O, I, D, P, B, Q>;
+  ) => TineActionWithInput<T, U, C, O, I, Z, B, Q, D, P>;
 };
 
 export type TineActionOptions = {
@@ -213,19 +222,52 @@ export type TineGetErrors<T> = T extends TineError<any, any> ? T : never;
 
 export type TineInferReturn<
   T extends
-    | TineAction<any>
-    | TineActionWithParams<any, any, any, any, any, any, any, any, any>
+    | TineAction<any, any>
+    | TineActionWithInput<any, any, any, any, any, any, any, any, any, any>
 > =
-  T extends TineActionWithParams<any, any, any, any, any, any, any, any, any>
+  T extends TineActionWithInput<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
-    : T extends TineAction<any>
+    : T extends TineAction<any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
 export type TineInferInput<
-  T extends TineActionWithParams<any, any, any, any, any, any, any, any, any>
+  T extends TineActionWithInput<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
 > =
-  T extends TineActionWithParams<any, any, any, any, any, any, any, any, any>
+  T extends TineActionWithInput<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
     ? Parameters<T["input"]>[0]
     : never;
 

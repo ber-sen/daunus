@@ -8,11 +8,12 @@ import {
   TineActionInfo,
   TineActionOptions,
   TineActionRunOptions,
-  TineActionWithOptions,
+  TineActionWithParams,
   TineCtx,
   TineParams
 } from "./types";
-import { parseResult } from "./helpers";
+
+import { isError, parseResult } from "./helpers";
 
 export const tineAction =
   <P, O, T = O>(
@@ -41,7 +42,7 @@ export const tineAction =
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
-    const actionInfo: TineActionInfo<T> = {
+    const actionInfo: TineActionInfo<T, P> = {
       name,
       type: args.type,
       params: null
@@ -49,7 +50,10 @@ export const tineAction =
 
     const makeRun =
       (init?: (ctx: TineCtx) => void) =>
-      async (ctx: TineCtx = new Map(), options?: TineActionRunOptions<T>) => {
+      async (
+        ctx: TineCtx = new Map(),
+        options?: TineActionRunOptions<T, P>
+      ) => {
         if (!ctx.has("actions")) {
           ctx.set("useCase", actionInfo);
           ctx.set("actions", new Map());
@@ -68,6 +72,10 @@ export const tineAction =
 
           actionInfo.params = parsedParams;
 
+          if (isError(parsedParams)) {
+            return parsedParams;
+          }
+
           const value = await container(run, [
             parsedParams!,
             { ctx, parseParams }
@@ -85,7 +93,7 @@ export const tineAction =
         };
 
         try {
-          const value = parseResult((await runFn()) as T);
+          const value = parseResult<T, P>((await runFn()) as T);
 
           ctx.set(name, value);
           actionInfo.data = value.data;
@@ -111,27 +119,27 @@ export const tineAction =
         }
       };
 
-    const action: TineAction<T> = {
+    const action: TineAction<T, P> = {
       ...actionCtx,
       name,
       run: makeRun()
     };
 
-    const actionWithOptions: TineActionWithOptions<T> = {
+    const actionWithOptions: TineActionWithParams<T, P> = {
       ...action,
       noParams: () => action,
       withParams: <
-        T extends ZodRawShape,
+        W extends ZodRawShape,
         U extends UnknownKeysParam,
         C extends ZodTypeAny,
         O,
         I,
         D,
-        P,
+        Z,
         B,
         Q
       >(
-        iSchema: z.ZodObject<T, U, C, O, I>,
+        iSchema: z.ZodObject<W, U, C, O, I>,
         meta?: {
           oSchema?: z.ZodType<ResolveTineVar<D>>;
           openApi?: {
@@ -145,7 +153,7 @@ export const tineAction =
               | "options"
               | "trace";
             contentType?: string;
-            params?: P;
+            params?: Z;
             body?: B;
             query?: Q;
           };
@@ -155,13 +163,13 @@ export const tineAction =
           ...meta,
           iSchema
         },
-        input: (value: I) => ({
+        input: (value: I): TineAction<T, P> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));
           })
         }),
-        rawInput: (value) => ({
+        rawInput: (value: unknown): TineAction<T, P> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));

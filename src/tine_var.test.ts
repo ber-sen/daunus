@@ -151,5 +151,38 @@ describe("tineVar", () => {
 
       expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
     });
+
+    it("should pass the error in other actions", async () => {
+      const actionWithError = tineAction(
+        {
+          type: "test"
+        },
+        () => {
+          // eslint-disable-next-line no-constant-condition
+          if (true) {
+            return new TineError(404);
+          }
+
+          return { message: "Found" };
+        }
+      );
+
+      const instanceWithError = actionWithError({});
+
+      const container = tineAction(
+        {
+          type: "test"
+        },
+        (payload: string) => {
+          return payload.length;
+        }
+      );
+
+      const action = container(tineVar(instanceWithError, "message"));
+
+      const res = await action.run();
+
+      expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
+    });
   });
 });

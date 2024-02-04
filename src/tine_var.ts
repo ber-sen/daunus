@@ -4,7 +4,7 @@ import {
   TineAction,
   TineCtx,
   TineExcludeError,
-  TineActionWithOptions,
+  TineActionWithParams,
   TineGetErrors,
   TineInput,
   TineVar
@@ -12,7 +12,7 @@ import {
 import { Path, TypeAtPath, get } from "./get";
 import { isArray, isError } from "./helpers";
 
-async function getValue(ctx: TineCtx, arg: TineAction<any>) {
+async function getValue(ctx: TineCtx, arg: TineAction<any, any>) {
   if (arg instanceof ZodObject) {
     return ctx.get("input");
   }
@@ -28,9 +28,9 @@ async function getValue(ctx: TineCtx, arg: TineAction<any>) {
   }
 }
 
-type ExtractTineType<T> = T extends readonly TineAction<any>[]
+type ExtractTineType<T> = T extends readonly TineAction<any, any>[]
   ? {
-      [K in keyof T]: T[K] extends TineAction<infer Y> ? Y : never;
+      [K in keyof T]: T[K] extends TineAction<infer Y, any> ? Y : never;
     }
   : never;
 
@@ -56,36 +56,36 @@ export function tineVar<
 ): TineVar<R>;
 
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
-  arg: TineActionWithOptions<T>,
+  arg: TineActionWithParams<T, any>,
   selector: K
 ): TineVar<TypeAtPath<TineExcludeError<T>, K> | TineGetErrors<T>>;
 
 export function tineVar<T, R>(
-  arg: TineActionWithOptions<T>,
+  arg: TineActionWithParams<T, any>,
   selector: (value: T) => R | Promise<R>
 ): TineVar<R | TineGetErrors<T>>;
 
 export function tineVar<T>(
-  arg: TineActionWithOptions<T>,
+  arg: TineActionWithParams<T, any>,
   selector?: undefined
 ): TineVar<T | TineGetErrors<T>>;
 
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
-  arg: TineAction<T>,
+  arg: TineAction<T, any>,
   selector: K
 ): TineVar<TypeAtPath<TineExcludeError<T>, K> | TineGetErrors<T>>;
 
 export function tineVar<T, R>(
-  arg: TineAction<T>,
+  arg: TineAction<T, any>,
   selector: (value: T) => R | Promise<R>
 ): TineVar<R | TineGetErrors<T>>;
 
 export function tineVar<T>(
-  arg: TineAction<T>,
+  arg: TineAction<T, any>,
   selector?: undefined
 ): TineVar<T | TineGetErrors<T>>;
 
-export function tineVar<T extends readonly TineAction<any>[], R>(
+export function tineVar<T extends readonly TineAction<any, any>[], R>(
   arg: T,
   selector: (value: ExtractTineType<T>) => R | Promise<R>
 ): TineVar<R>;

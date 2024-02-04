@@ -5,7 +5,8 @@ import {
   ExtractTineErrors,
   TineError,
   TineCtx,
-  TineVar
+  TineVar,
+  NonUndefined
 } from "./types";
 
 export const isObject = (value: any): value is object =>
@@ -102,16 +103,22 @@ function extractTineErrors<T>(obj: T): TineError<any>[] {
   return tineErrors;
 }
 
-export const parseResult = <T>(
+export const parseResult = <T, P>(
   data: T
 ): {
   data: ResolveTineVarData<T>;
-  error: ExtractTineErrors<ResolveTineVarError<T>>;
+  error: NonUndefined<
+    | ExtractTineErrors<ResolveTineVarError<T>>
+    | ExtractTineErrors<ResolveTineVarError<P>>
+  >;
 } => {
   if (isError(data)) {
     return {
       data: undefined as ResolveTineVarData<T>,
-      error: data as ExtractTineErrors<ResolveTineVarError<T>>
+      error: data as NonUndefined<
+        | ExtractTineErrors<ResolveTineVarError<T>>
+        | ExtractTineErrors<ResolveTineVarError<P>>
+      >
     };
   }
 
@@ -121,13 +128,19 @@ export const parseResult = <T>(
     if (errors[0]) {
       return {
         data: undefined as ResolveTineVarData<T>,
-        error: errors[0] as ExtractTineErrors<ResolveTineVarError<T>>
+        error: errors[0] as NonUndefined<
+          | ExtractTineErrors<ResolveTineVarError<T>>
+          | ExtractTineErrors<ResolveTineVarError<P>>
+        >
       };
     }
   }
 
   return {
     data: data as ResolveTineVarData<T>,
-    error: undefined as any as ExtractTineErrors<ResolveTineVarError<T>>
+    error: undefined as any as NonUndefined<
+      | ExtractTineErrors<ResolveTineVarError<T>>
+      | ExtractTineErrors<ResolveTineVarError<P>>
+    >
   };
 };
