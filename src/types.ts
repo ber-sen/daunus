@@ -2,7 +2,10 @@ import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
 
 import { z } from "./zod";
 
-export type TineVar<T> = TineExcludeError<T> & ((ctx: TineCtx) => Promise<T>);
+export type TineVar<T> =
+  TineExcludeError<T> extends never
+    ? T
+    : TineExcludeError<T> & ((ctx: TineCtx) => Promise<T>);
 
 export type TineParams<T> = T; // TODO: fix type
 

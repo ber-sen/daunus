@@ -4,7 +4,7 @@ import { tineInput } from "./tine_helpers";
 import { resolveParams } from "./resolve_params";
 import { tineVar } from "./tine_var";
 import { TineError, TineVar, Equal, Expect } from "./types";
-import { struct, tineAction } from ".";
+import { exit, struct, tineAction } from ".";
 
 const setContext = <T>(value?: object) => {
   const ctx = new Map();
@@ -172,6 +172,22 @@ describe("tineVar", () => {
       const res = await action.run();
 
       expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
+    });
+
+    it("should pass error from exit action", async () => {
+      const error = exit({ status: 403 });
+
+      const action = struct(tineVar(error));
+
+      const res = await action.run();
+
+      type A = Awaited<typeof res>;
+
+      type res = Expect<
+        Equal<A, { data: never; error: TineError<403, unknown> }>
+      >;
+
+      expect(res).toStrictEqual({ data: undefined, error: new TineError(403) });
     });
 
     it("should pass the error in other actions", async () => {
