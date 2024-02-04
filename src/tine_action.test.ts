@@ -21,7 +21,7 @@ describe("tineQuery", () => {
     const test = struct({ success: true, data: tineVar(input, "id") });
 
     const res = test.withParams(input, {
-      oSchema: z.object({ success: z.boolean(), data: z.string() })
+      // oSchema: z.object({ success: z.boolean(), data: z.string() })
     });
 
     type A = TineInferInput<typeof res>;
@@ -37,7 +37,7 @@ describe("tineQuery", () => {
     const test = struct({ success: true, data: tineVar(input, "id") });
 
     const res = test.withParams(input, {
-      oSchema: z.object({ success: z.boolean(), data: z.string() })
+      // oSchema: z.object({ success: z.boolean(), data: z.string() })
     });
 
     type A = TineInferReturn<typeof res>;
@@ -55,7 +55,7 @@ describe("tineQuery", () => {
     const test = struct({ success: true, data: tineVar(input, "id") });
 
     const res = test.withParams(input, {
-      oSchema: z.object({ success: z.boolean(), data: z.string() }),
+      // oSchema: z.object({ success: z.boolean(), data: z.string() }),
       openApi: {
         params: {
           id: tineVar(input, "id")

@@ -113,8 +113,8 @@ export type TineActionRunOptions<T> = {
 export type TineAction<T> = {
   name: string;
   run: (
-    ctx?: TineCtx
-    // options?: TineActionRunOptions<T>
+    ctx?: TineCtx,
+    options?: TineActionRunOptions<T>
   ) => Promise<{
     data: ResolveTineVarData<T>;
     error: ExtractTineErrors<ResolveTineVarError<T>>;
@@ -140,7 +140,7 @@ export type TineActionWithParams<
 > = {
   meta: {
     iSchema: z.ZodObject<T, U, C, O, I>;
-    oSchema?: z.ZodType<ResolveTineVar<D>>;
+    // oSchema?: z.ZodType<ResolveTineVar<D>>;
     openApi?: {
       method?:
         | "get"
@@ -162,12 +162,13 @@ export type TineActionWithParams<
 };
 
 export type TineActionWithOptions<D> = TineAction<D> & {
-  noParams: (meta?: {
-    oSchema?: z.ZodType<ResolveTineVar<D>>;
-  }) => TineAction<D> & {
-    meta: {
-      oSchema?: z.ZodType<ResolveTineVar<D>>;
-    };
+  noParams: () // meta?: {
+  // oSchema?: z.ZodType<ResolveTineVar<D>>;
+  // }
+  => TineAction<D> & {
+    // meta: {
+    //   // oSchema?: z.ZodType<ResolveTineVar<D>>;
+    // };
   };
   withParams: <
     T extends ZodRawShape,
@@ -181,7 +182,7 @@ export type TineActionWithOptions<D> = TineAction<D> & {
   >(
     iSchema: TineInput<T, U, C, O, I>,
     meta?: {
-      oSchema?: z.ZodType<ResolveTineVar<D>>;
+      // oSchema?: z.ZodType<ResolveTineVar<D>>;
       openApi?: {
         method?:
           | "get"

@@ -119,10 +119,7 @@ export const tineAction =
 
     const actionWithOptions: TineActionWithOptions<T> = {
       ...action,
-      noParams: (meta?) => ({
-        meta: { ...meta },
-        ...action
-      }),
+      noParams: () => action,
       withParams: <
         T extends ZodRawShape,
         U extends UnknownKeysParam,
