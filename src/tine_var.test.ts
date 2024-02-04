@@ -152,6 +152,28 @@ describe("tineVar", () => {
       expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
     });
 
+    it("should pass the custom errors struct", async () => {
+      const actionWithError = tineAction(
+        {
+          type: "test"
+        },
+        (params: string) => {
+          // eslint-disable-next-line no-constant-condition
+          if (true) {
+            return new TineError(403);
+          }
+
+          return { message: "Found" };
+        }
+      );
+
+      const action = actionWithError("test");
+
+      const res = await action.run();
+
+      expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
+    });
+
     it("should pass the error in other actions", async () => {
       const actionWithError = tineAction(
         {
