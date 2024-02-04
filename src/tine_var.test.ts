@@ -173,7 +173,7 @@ describe("tineVar", () => {
         {
           type: "test"
         },
-        (payload: string) => {
+        <P extends string>(payload: P) => {
           return payload.length;
         }
       );
@@ -181,6 +181,12 @@ describe("tineVar", () => {
       const action = container(tineVar(instanceWithError, "message"));
 
       const res = await action.run();
+
+      type A = Awaited<typeof res>;
+
+      type res = Expect<
+        Equal<A, { data: number; error: TineError<404, undefined> }>
+      >;
 
       expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
     });
