@@ -58,7 +58,7 @@ export function tineVar<
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
   arg: TineActionWithOptions<T>,
   selector: K
-): TineVar<TypeAtPath<T, K> | TineGetErrors<T>>;
+): TineVar<TypeAtPath<TineExcludeError<T>, K> | TineGetErrors<T>>;
 
 export function tineVar<T, R>(
   arg: TineActionWithOptions<T>,
@@ -73,7 +73,7 @@ export function tineVar<T>(
 export function tineVar<T, K extends Path<TineExcludeError<T>>>(
   arg: TineAction<T>,
   selector: K
-): TineVar<TypeAtPath<T, K> | TineGetErrors<T>>;
+): TineVar<TypeAtPath<TineExcludeError<T>, K> | TineGetErrors<T>>;
 
 export function tineVar<T, R>(
   arg: TineAction<T>,
