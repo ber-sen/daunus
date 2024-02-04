@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { resolveParams } from "./resolve_params";
 import {
+  ErrorParams,
   ResolveTineVar,
   TineAction,
   TineActionInfo,
@@ -10,7 +11,6 @@ import {
   TineActionRunOptions,
   TineActionWithParams,
   TineCtx,
-  TineError,
   TineParams
 } from "./types";
 
@@ -27,11 +27,11 @@ export const tineAction =
       skipLog?: boolean;
       skipPlaceholders?: boolean;
     },
-    run: (params: P, { ctx, parseParams }: TineActionOptions) => O | Promise<O>,
+    run: (params: P, { ctx, parseParams }: TineActionOptions) => Promise<O> | O,
     container: (
       r: (params: P, { ctx, parseParams }: TineActionOptions) => Promise<O> | O,
       args: [P, TineActionOptions]
-    ) => Promise<T> = (r, args) => r(...args) as any as Promise<T>
+    ) => Promise<T> | T = (r, args) => r(...args) as T | Promise<T>
   ) =>
   (
     params: TineParams<P>,
@@ -43,7 +43,7 @@ export const tineAction =
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
-    const actionInfo: TineActionInfo<T, T extends TineError<any> ? T : P> = {
+    const actionInfo: TineActionInfo<T, ErrorParams<T, P>> = {
       name,
       type: args.type,
       params: null
@@ -53,7 +53,7 @@ export const tineAction =
       (init?: (ctx: TineCtx) => void) =>
       async (
         ctx: TineCtx = new Map(),
-        options?: TineActionRunOptions<T, T extends TineError<any> ? T : P>
+        options?: TineActionRunOptions<T, ErrorParams<T, P>>
       ) => {
         if (!ctx.has("actions")) {
           ctx.set("useCase", actionInfo);
@@ -94,9 +94,7 @@ export const tineAction =
         };
 
         try {
-          const value = parseResult<T, T extends TineError<any> ? T : P>(
-            (await runFn()) as T
-          );
+          const value = parseResult<T, ErrorParams<T, P>>((await runFn()) as T);
 
           ctx.set(name, value);
           actionInfo.data = value.data;
@@ -122,16 +120,13 @@ export const tineAction =
         }
       };
 
-    const action: TineAction<T, T extends TineError<any> ? T : P> = {
+    const action: TineAction<T, ErrorParams<T, P>> = {
       ...actionCtx,
       name,
       run: makeRun()
     };
 
-    const actionWithOptions: TineActionWithParams<
-      T,
-      T extends TineError<any> ? T : P
-    > = {
+    const actionWithOptions: TineActionWithParams<T, ErrorParams<T, P>> = {
       ...action,
       noParams: () => action,
       withParams: <
@@ -169,15 +164,13 @@ export const tineAction =
           ...meta,
           iSchema
         },
-        input: (value: I): TineAction<T, T extends TineError<any> ? T : P> => ({
+        input: (value: I): TineAction<T, ErrorParams<T, P>> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));
           })
         }),
-        rawInput: (
-          value: unknown
-        ): TineAction<T, T extends TineError<any> ? T : P> => ({
+        rawInput: (value: unknown): TineAction<T, ErrorParams<T, P>> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));
