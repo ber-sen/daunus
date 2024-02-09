@@ -14,7 +14,7 @@ const response = tineAction(
       before?: TineWorkflowAction<B> | TineVar<B>;
       after?: TineWorkflowAction<A> | TineVar<A>;
     },
-    { parseParams, ctx }: TineActionOptions
+    { parseParams, ctx }: TineActionOptions<any>
   ) => {
     if (before) {
       await parseParams(ctx, await resolveAction(ctx, before, "before"));

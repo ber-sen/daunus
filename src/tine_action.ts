@@ -17,7 +17,7 @@ import {
 import { isError, parseResult } from "./helpers";
 
 export const tineAction =
-  <P, O, T = O>(
+  <P, O, E, T = O>(
     args: {
       type: string;
       name?: string;
@@ -26,11 +26,18 @@ export const tineAction =
       parseResponse?: boolean;
       skipLog?: boolean;
       skipPlaceholders?: boolean;
+      envSchema?: z.Schema<E>;
     },
-    run: (params: P, { ctx, parseParams }: TineActionOptions) => Promise<O> | O,
+    run: (
+      params: P,
+      { ctx, parseParams, env }: TineActionOptions<E>
+    ) => Promise<O> | O,
     container: (
-      r: (params: P, { ctx, parseParams }: TineActionOptions) => Promise<O> | O,
-      args: [P, TineActionOptions]
+      r: (
+        params: P,
+        { ctx, parseParams, env }: TineActionOptions<E>
+      ) => Promise<O> | O,
+      args: [P, TineActionOptions<E>]
     ) => Promise<T> | T = (r, args) => r(...args) as T | Promise<T>
   ) =>
   (
@@ -77,9 +84,13 @@ export const tineAction =
             return parsedParams;
           }
 
+          const env = args.envSchema
+            ? args.envSchema.parse(ctx.get(".env"))
+            : (z.object({}) as E);
+
           const value = await container(run, [
             parsedParams!,
-            { ctx, parseParams }
+            { ctx, parseParams, env }
           ]);
 
           if (!args.parseResponse) {
@@ -120,13 +131,14 @@ export const tineAction =
         }
       };
 
-    const action: TineAction<T, ErrorParams<T, P>> = {
+    const action: TineAction<T, ErrorParams<T, P>, E> = {
       ...actionCtx,
       name,
+      envSchema: args.envSchema,
       run: makeRun()
     };
 
-    const actionWithOptions: TineActionWithParams<T, ErrorParams<T, P>> = {
+    const actionWithOptions: TineActionWithParams<T, ErrorParams<T, P>, E> = {
       ...action,
       noParams: () => action,
       withParams: <
@@ -164,13 +176,13 @@ export const tineAction =
           ...meta,
           iSchema
         },
-        input: (value: I): TineAction<T, ErrorParams<T, P>> => ({
+        input: (value: I): TineAction<T, ErrorParams<T, P>, E> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));
           })
         }),
-        rawInput: (value: unknown): TineAction<T, ErrorParams<T, P>> => ({
+        rawInput: (value: unknown): TineAction<T, ErrorParams<T, P>, E> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));

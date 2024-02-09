@@ -118,8 +118,9 @@ export type TineActionRunOptions<T, P> = {
   onComplete?: (actionInfo: TineActionInfo<T, P>, ctx: TineCtx) => void;
 };
 
-export type TineAction<T, P> = {
+export type TineAction<T, P, E> = {
   name: string;
+  envSchema?: z.Schema<E>;
   run: (
     ctx?: TineCtx,
     options?: TineActionRunOptions<T, P>
@@ -148,7 +149,8 @@ export type TineActionWithInput<
   B,
   Q,
   D,
-  P
+  P,
+  E
 > = {
   meta: {
     iSchema: z.ZodObject<T, U, C, O, I>;
@@ -169,15 +171,15 @@ export type TineActionWithInput<
       query?: Q;
     };
   };
-  input: (value: I) => TineAction<D, P>;
-  rawInput: (value: unknown) => TineAction<D, P>;
+  input: (value: I) => TineAction<D, P, E>;
+  rawInput: (value: unknown) => TineAction<D, P, E>;
 };
 
-export type TineActionWithParams<D, P> = TineAction<D, P> & {
+export type TineActionWithParams<D, P, E> = TineAction<D, P, E> & {
   noParams: () // meta?: {
   // oSchema?: z.ZodType<ResolveTineVar<D>>;
   // }
-  => TineAction<D, P> & {
+  => TineAction<D, P, E> & {
     // meta: {
     //   // oSchema?: z.ZodType<ResolveTineVar<D>>;
     // };
@@ -211,11 +213,12 @@ export type TineActionWithParams<D, P> = TineAction<D, P> & {
         query?: Q;
       };
     }
-  ) => TineActionWithInput<T, U, C, O, I, Z, B, Q, D, P>;
+  ) => TineActionWithInput<T, U, C, O, I, Z, B, Q, D, P, E>;
 };
 
-export type TineActionOptions = {
+export type TineActionOptions<E> = {
   ctx: TineCtx;
+  env: E;
   parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
 };
 
@@ -225,10 +228,11 @@ export type TineGetErrors<T> = T extends TineError<any, any> ? T : never;
 
 export type TineInferReturn<
   T extends
-    | TineAction<any, any>
-    | TineActionWithInput<any, any, any, any, any, any, any, any, any, any>
+    | TineAction<any, any, any>
+    | TineActionWithInput<any, any, any, any, any, any, any, any, any, any, any>
 > =
   T extends TineActionWithInput<
+    any,
     any,
     any,
     any,
@@ -241,7 +245,7 @@ export type TineInferReturn<
     any
   >
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
-    : T extends TineAction<any, any>
+    : T extends TineAction<any, any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
@@ -256,10 +260,12 @@ export type TineInferInput<
     any,
     any,
     any,
+    any,
     any
   >
 > =
   T extends TineActionWithInput<
+    any,
     any,
     any,
     any,

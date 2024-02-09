@@ -4,7 +4,7 @@ import { TineActionOptions, TineWorkflowAction } from "../../types";
 
 const parallel = tineAction(
   { type: "parallel", skipParse: true },
-  (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
+  (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions<any>) => {
     const promises = list.map((item) =>
       runAction(ctx, item).then((item) => item.data ?? item.error)
     );

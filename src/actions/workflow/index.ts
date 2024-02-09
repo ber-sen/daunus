@@ -25,7 +25,7 @@ interface Workflow {
 
 const workflow = tineAction(
   { type: "workflow", skipParse: true },
-  async (params: Workflow, { ctx }: TineActionOptions) => {
+  async (params: Workflow, { ctx }: TineActionOptions<any>) => {
     if (!params.action) {
       return undefined;
     }

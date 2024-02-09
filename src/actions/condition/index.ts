@@ -19,7 +19,7 @@ const condition = tineAction(
   { type: "condition", skipParse: true },
   async <P, T, C>(
     { if: $if, do: $then, else: $else }: ConditionParams<P, T, C>,
-    { parseParams, ctx }: TineActionOptions
+    { parseParams, ctx }: TineActionOptions<any>
   ) => {
     const condition = await parseParams(ctx, await resolveAction(ctx, $if));
 

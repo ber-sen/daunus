@@ -4,7 +4,7 @@ import { TineActionOptions, TineWorkflowAction } from "../../types";
 
 const process = tineAction(
   { type: "process", skipParse: true },
-  async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions) => {
+  async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions<any>) => {
     let res: any = null;
 
     for (const action of list) {

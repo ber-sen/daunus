@@ -81,4 +81,30 @@ describe("tineQuery", () => {
 
     type test = Expect<Equal<A, { data: number; error: never }>>;
   });
+
+  it("Should work with env", () => {
+    const test = tineAction(
+      {
+        type: "test",
+        envSchema: z.object({
+          API_KEY: z.string()
+        })
+      },
+      (_: string, { env }) => {
+        return env.API_KEY;
+      }
+    )("test");
+
+    type A = TineInferReturn<typeof test>;
+
+    type test = Expect<
+      Equal<
+        A,
+        {
+          data: string;
+          error: never;
+        }
+      >
+    >;
+  });
 });

@@ -6,7 +6,7 @@ import { tineVar } from "./tine_var";
 import { TineError, TineVar, Equal, Expect } from "./types";
 import { exit, struct, tineAction } from ".";
 
-const setContext = <T>(value?: object) => {
+const setContext = (value?: object) => {
   const ctx = new Map();
 
   ctx.set("input", value);
@@ -157,7 +157,7 @@ describe("tineVar", () => {
         {
           type: "test"
         },
-        (params: string) => {
+        (_: string) => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
             return new TineError(403);
@@ -171,7 +171,10 @@ describe("tineVar", () => {
 
       const res = await action.run();
 
-      expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
+      expect(res).toStrictEqual({
+        data: undefined,
+        error: new TineError(403)
+      });
     });
 
     it("should pass error from exit action", async () => {
