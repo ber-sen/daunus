@@ -62,49 +62,49 @@ export const tineAction =
         ctx: TineCtx = new Map(),
         options?: TineActionRunOptions<T, ErrorParams<T, P>>
       ) => {
-        if (!ctx.has("actions")) {
-          ctx.set("useCase", actionInfo);
-          ctx.set("actions", new Map());
-        }
-
-        const runFn = async () => {
-          init && init(ctx);
-
-          const parsedParams =
-            args.skipParse || !params
-              ? params
-              : await parseParams(ctx, params, {
-                  schema: args.paramsSchema,
-                  skipPlaceholders: args.skipPlaceholders
-                });
-
-          actionInfo.params = parsedParams;
-
-          if (isError(parsedParams)) {
-            return parsedParams;
-          }
-
-          const env = args.envSchema
-            ? args.envSchema.parse(ctx.get(".env"))
-            : (z.object({}) as E);
-
-          const value = await container(run, [
-            parsedParams!,
-            { ctx, parseParams, env }
-          ]);
-
-          if (!args.parseResponse) {
-            return value;
-          }
-
-          const parseValue = await parseParams(ctx, value, {
-            skipPlaceholders: true
-          });
-
-          return parseValue;
-        };
-
         try {
+          if (!ctx.has("actions")) {
+            ctx.set("useCase", actionInfo);
+            ctx.set("actions", new Map());
+          }
+
+          const runFn = async () => {
+            init && init(ctx);
+
+            const parsedParams =
+              args.skipParse || !params
+                ? params
+                : await parseParams(ctx, params, {
+                    schema: args.paramsSchema,
+                    skipPlaceholders: args.skipPlaceholders
+                  });
+
+            actionInfo.params = parsedParams;
+
+            if (isError(parsedParams)) {
+              return parsedParams;
+            }
+
+            const env = args.envSchema
+              ? args.envSchema.parse(ctx.get(".env"))
+              : (z.object({}) as E);
+
+            const value = await container(run, [
+              parsedParams!,
+              { ctx, parseParams, env }
+            ]);
+
+            if (!args.parseResponse) {
+              return value;
+            }
+
+            const parseValue = await parseParams(ctx, value, {
+              skipPlaceholders: true
+            });
+
+            return parseValue;
+          };
+
           const value = parseResult<T, ErrorParams<T, P>>((await runFn()) as T);
 
           ctx.set(name, value);
