@@ -4,7 +4,7 @@ Powering Your Edge with Cutting-Edge Framework.
 
 # example: 
 
-useCases/helthz/index.ts
+use_cases/helthz/index.ts
 ```typescript
 import { struct } from 'daunus';
 
