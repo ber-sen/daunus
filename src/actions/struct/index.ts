@@ -1,6 +1,6 @@
-import { tineAction } from "../../tine_action";
+import { $action } from "../../daunus_action";
 
-const struct = tineAction(
+const struct = $action(
   {
     type: "struct"
   },

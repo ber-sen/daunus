@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action";
-import { tineAction } from "../../tine_action";
-import { TineActionOptions } from "../../types";
+import { $action } from "../../daunus_action";
+import { DaunusActionOptions } from "../../types";
 
 type Action =
   | {
@@ -23,9 +23,9 @@ interface Workflow {
   };
 }
 
-const workflow = tineAction(
+const workflow = $action(
   { type: "workflow", skipParse: true },
-  async (params: Workflow, { ctx }: TineActionOptions<any>) => {
+  async (params: Workflow, { ctx }: DaunusActionOptions<any>) => {
     if (!params.action) {
       return undefined;
     }

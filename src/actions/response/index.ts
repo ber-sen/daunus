@@ -1,8 +1,12 @@
 import { resolveAction } from "../../resolve_action";
-import { tineAction } from "../../tine_action";
-import { TineActionOptions, TineVar, TineWorkflowAction } from "../../types";
+import { $action } from "../../daunus_action";
+import {
+  DaunusActionOptions,
+  DaunusVar,
+  DaunusWorkflowAction
+} from "../../types";
 
-const response = tineAction(
+const response = $action(
   { type: "response", skipParse: true },
   async <D, B, A>(
     {
@@ -11,10 +15,10 @@ const response = tineAction(
       after
     }: {
       data: D;
-      before?: TineWorkflowAction<B> | TineVar<B>;
-      after?: TineWorkflowAction<A> | TineVar<A>;
+      before?: DaunusWorkflowAction<B> | DaunusVar<B>;
+      after?: DaunusWorkflowAction<A> | DaunusVar<A>;
     },
-    { parseParams, ctx }: TineActionOptions<any>
+    { parseParams, ctx }: DaunusActionOptions<any>
   ) => {
     if (before) {
       await parseParams(ctx, await resolveAction(ctx, before, "before"));

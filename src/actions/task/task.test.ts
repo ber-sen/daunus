@@ -1,4 +1,4 @@
-import { tineCtx } from "../../tine_helpers";
+import { $ctx } from "../../daunus_helpers";
 import task from "./index";
 
 describe("task", () => {
@@ -7,7 +7,7 @@ describe("task", () => {
       success: true
     }));
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual({
       success: true
@@ -21,7 +21,7 @@ describe("task", () => {
       })
     );
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual({
       success: true

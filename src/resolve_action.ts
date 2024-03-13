@@ -1,9 +1,9 @@
 import { isAction } from "./helpers";
 import { runAction } from "./run_action";
-import { TineCtx } from "./types";
+import { DaunusCtx } from "./types";
 
 export const resolveAction = async <T>(
-  ctx: TineCtx,
+  ctx: DaunusCtx,
   action: T,
   name?: string
 ) => {

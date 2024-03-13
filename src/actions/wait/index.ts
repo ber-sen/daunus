@@ -1,4 +1,4 @@
-import { tineAction } from "../../tine_action";
+import { $action } from "../../daunus_action";
 import { Wait } from "../../types";
 
 export type WaitParams =
@@ -9,7 +9,7 @@ export type WaitParams =
       until: Date;
     };
 
-const wait = tineAction(
+const wait = $action(
   {
     type: "wait"
   },

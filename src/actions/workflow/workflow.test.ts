@@ -1,5 +1,5 @@
-import { tineCtx } from "../../tine_helpers";
-import { tineQuery } from "../../tine_query";
+import { $ctx } from "../../daunus_helpers";
+import { $query } from "../../daunus_query";
 
 import workflow from "./index";
 
@@ -17,7 +17,7 @@ describe("workflow", () => {
           },
           {
             type: ["struct"],
-            params: tineQuery(($) => `Foo ${$.struct.data.name}`)
+            params: $query(($) => `Foo ${$.struct.data.name}`)
           }
         ]
       },
@@ -28,7 +28,7 @@ describe("workflow", () => {
       }
     });
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual("Foo Bar");
   });

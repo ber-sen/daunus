@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { tineInput } from "./tine_helpers";
+import { $input } from "./daunus_helpers";
 import { resolveParams } from "./resolve_params";
-import { tineVar } from "./tine_var";
-import { TineError, TineVar, Equal, Expect } from "./types";
-import { exit, struct, tineAction } from ".";
+import { $var } from "./daunus_var";
+import { DaunusError, DaunusVar, Equal, Expect } from "./types";
+import { exit, struct, $action } from ".";
 
 const setContext = (value?: object) => {
   const ctx = new Map();
@@ -14,58 +14,55 @@ const setContext = (value?: object) => {
   return ctx;
 };
 
-describe("tineVar", () => {
+describe("$var", () => {
   describe("string selector", () => {
     it("should return the value", async () => {
-      const input = tineInput({ name: z.string() });
+      const input = $input({ name: z.string() });
 
       const ctx = setContext({ name: "Earth" });
 
-      const res = await resolveParams(ctx, tineVar(input, "name"));
+      const res = await resolveParams(ctx, $var(input, "name"));
 
       expect(res).toStrictEqual("Earth");
     });
 
     it("should return the value inside nested object", async () => {
-      const input = tineInput({ variables: z.object({ name: z.string() }) });
+      const input = $input({ variables: z.object({ name: z.string() }) });
 
       const ctx = setContext({ variables: { name: "Earth" } });
 
-      const res = await resolveParams(ctx, tineVar(input, "variables.name"));
+      const res = await resolveParams(ctx, $var(input, "variables.name"));
 
       expect(res).toStrictEqual("Earth");
     });
 
     it("should return the value inside nested object and array", async () => {
-      const input = tineInput({
+      const input = $input({
         variables: z.object({ names: z.array(z.string()) })
       });
 
       const ctx = setContext({ variables: { names: ["Earth"] } });
 
-      const res = await resolveParams(
-        ctx,
-        tineVar(input, "variables.names[0]")
-      );
+      const res = await resolveParams(ctx, $var(input, "variables.names[0]"));
 
       expect(res).toStrictEqual("Earth");
     });
 
     it("should return the string value", () => {
-      const input = tineInput({ name: z.string() });
+      const input = $input({ name: z.string() });
 
-      expect(tineVar(input, "name").toString()).toStrictEqual("{{ name }}");
+      expect($var(input, "name").toString()).toStrictEqual("{{ name }}");
     });
 
     it("should work with union", () => {
-      const input = tineInput({
+      const input = $input({
         nested: z.union([
           z.object({ name: z.string() }),
           z.object({ id: z.number() })
         ])
       });
 
-      const test = tineVar(input, (i) => {
+      const test = $var(input, (i) => {
         if ("name" in i.nested) {
           return i.nested.name;
         }
@@ -75,17 +72,17 @@ describe("tineVar", () => {
 
       type A = typeof test;
 
-      type test = Expect<Equal<A, TineVar<string>>>;
+      type test = Expect<Equal<A, DaunusVar<string>>>;
     });
 
     it("should pass errors", () => {
-      const actionWithError = tineAction(
+      const actionWithError = $action(
         {
           type: "test"
         },
         () => {
           if (Math.random() > 0.5) {
-            return new TineError(404, "Not found");
+            return new DaunusError(404, "Not found");
           }
 
           return { message: "Found" };
@@ -94,21 +91,21 @@ describe("tineVar", () => {
 
       const action = actionWithError({});
 
-      const test = tineVar(action, "message")(new Map());
+      const test = $var(action, "message")(new Map());
 
       type A = Awaited<typeof test>;
 
-      type test = Expect<Equal<A, string | TineError<404, undefined>>>;
+      type test = Expect<Equal<A, string | DaunusError<404, undefined>>>;
     });
 
     it("should pass errors on method selector", () => {
-      const actionWithError = tineAction(
+      const actionWithError = $action(
         {
           type: "test"
         },
         () => {
           if (Math.random() > 0.5) {
-            return new TineError(404, "Not found");
+            return new DaunusError(404, "Not found");
           }
 
           return { message: "Found" };
@@ -117,22 +114,22 @@ describe("tineVar", () => {
 
       const action = actionWithError({});
 
-      const test = tineVar(action, ($v) => $v.message)(new Map());
+      const test = $var(action, ($v) => $v.message)(new Map());
 
       type A = Awaited<typeof test>;
 
-      type test = Expect<Equal<A, string | TineError<404, undefined>>>;
+      type test = Expect<Equal<A, string | DaunusError<404, undefined>>>;
     });
 
     it("should pass the error in struct", async () => {
-      const actionWithError = tineAction(
+      const actionWithError = $action(
         {
           type: "test"
         },
         () => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
-            return new TineError(404);
+            return new DaunusError(404);
           }
 
           return { message: "Found" };
@@ -143,24 +140,27 @@ describe("tineVar", () => {
 
       const action = struct({
         test: {
-          couldBeError: tineVar(instanceWithError, "message")
+          couldBeError: $var(instanceWithError, "message")
         }
       });
 
       const res = await action.run();
 
-      expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
+      expect(res).toStrictEqual({
+        data: undefined,
+        error: new DaunusError(404)
+      });
     });
 
     it("should pass the custom errors struct", async () => {
-      const actionWithError = tineAction(
+      const actionWithError = $action(
         {
           type: "test"
         },
         (_: string) => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
-            return new TineError(403);
+            return new DaunusError(403);
           }
 
           return { message: "Found" };
@@ -173,35 +173,38 @@ describe("tineVar", () => {
 
       expect(res).toStrictEqual({
         data: undefined,
-        error: new TineError(403)
+        error: new DaunusError(403)
       });
     });
 
     it("should pass error from exit action", async () => {
       const error = exit({ status: 403 });
 
-      const action = struct(tineVar(error));
+      const action = struct($var(error));
 
       const res = await action.run();
 
       type A = Awaited<typeof res>;
 
       type res = Expect<
-        Equal<A, { data: never; error: TineError<403, unknown> }>
+        Equal<A, { data: never; error: DaunusError<403, unknown> }>
       >;
 
-      expect(res).toStrictEqual({ data: undefined, error: new TineError(403) });
+      expect(res).toStrictEqual({
+        data: undefined,
+        error: new DaunusError(403)
+      });
     });
 
     it("should pass the error in other actions", async () => {
-      const actionWithError = tineAction(
+      const actionWithError = $action(
         {
           type: "test"
         },
         () => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
-            return new TineError(404);
+            return new DaunusError(404);
           }
 
           return { message: "Found" };
@@ -210,7 +213,7 @@ describe("tineVar", () => {
 
       const instanceWithError = actionWithError({});
 
-      const container = tineAction(
+      const container = $action(
         {
           type: "test"
         },
@@ -219,17 +222,20 @@ describe("tineVar", () => {
         }
       );
 
-      const action = container(tineVar(instanceWithError, "message"));
+      const action = container($var(instanceWithError, "message"));
 
       const res = await action.run();
 
       type A = Awaited<typeof res>;
 
       type res = Expect<
-        Equal<A, { data: number; error: TineError<404, undefined> }>
+        Equal<A, { data: number; error: DaunusError<404, undefined> }>
       >;
 
-      expect(res).toStrictEqual({ data: undefined, error: new TineError(404) });
+      expect(res).toStrictEqual({
+        data: undefined,
+        error: new DaunusError(404)
+      });
     });
   });
 });

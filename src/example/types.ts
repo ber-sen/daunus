@@ -1,4 +1,4 @@
-import { tineFn, struct, condition, tineVar, exit } from "../";
+import { $fn, struct, condition, $var, exit } from "../";
 
 const error = exit({
   status: 404,
@@ -8,14 +8,14 @@ const error = exit({
   }
 });
 
-const random = struct(tineFn(() => Math.random()));
+const random = struct($fn(() => Math.random()));
 
 const success = struct({ success: true });
 
 const res = condition({
-  if: tineVar(random, (val) => val > 0),
-  do: tineVar(success),
-  else: tineVar(error)
+  if: $var(random, (val) => val > 0),
+  do: $var(success),
+  else: $var(error)
 });
 
 export default error.noParams();

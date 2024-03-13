@@ -1,10 +1,10 @@
 import { runAction } from "../../run_action";
-import { tineAction } from "../../tine_action";
-import { TineWorkflowAction } from "../../types";
+import { $action } from "../../daunus_action";
+import { DaunusWorkflowAction } from "../../types";
 
-const serial = tineAction(
+const serial = $action(
   { type: "serial", skipParse: true },
-  async (list: TineWorkflowAction<any>[], { ctx }) => {
+  async (list: DaunusWorkflowAction<any>[], { ctx }) => {
     const res: Array<any> = [];
 
     for (const action of list) {

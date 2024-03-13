@@ -1,5 +1,5 @@
-import { tineCtx } from "../../tine_helpers";
-import { TineError } from "../../types";
+import { $ctx } from "../../daunus_helpers";
+import { DaunusError } from "../../types";
 
 import process from "./index";
 
@@ -15,7 +15,7 @@ describe("process", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual({ foo: "bar" });
   });
@@ -35,7 +35,7 @@ describe("process", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual("bar");
   });
@@ -62,9 +62,9 @@ describe("process", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
-    expect(res.error).toStrictEqual(new TineError(404));
+    expect(res.error).toStrictEqual(new DaunusError(404));
   });
 
   it("should work handle errors placeholders", async () => {
@@ -82,15 +82,15 @@ describe("process", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual("bar");
   });
 
   it("should work with nested processes", async () => {
-    const ctx = tineCtx();
+    const ctx = $ctx();
 
-    ctx.set(".tine-placeholder-resolver", ($: any, key: string) =>
+    ctx.set(".daunus-placeholder-resolver", ($: any, key: string) =>
       // eslint-disable-next-line no-new-func
       new Function("$", `return ${key}`)($)
     );

@@ -1,9 +1,9 @@
-import { tineInput } from "./tine_helpers";
+import { $input } from "./daunus_helpers";
 import { struct } from "./actions";
-import { tineVar } from "./tine_var";
-import { TineInferInput, TineInferReturn } from "./types";
+import { $var } from "./daunus_var";
+import { DaunusInferInput, DaunusInferReturn } from "./types";
 import { z } from "./zod";
-import { tineAction } from ".";
+import { $action } from "./daunus_action";
 
 type Expect<T extends true> = T;
 
@@ -12,35 +12,31 @@ type Equal<X, Y> =
     ? true
     : false;
 
-describe("tineQuery", () => {
+describe("$query", () => {
   it("Should infer input", () => {
-    const input = tineInput({
+    const input = $input({
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: tineVar(input, "id") });
+    const test = struct({ success: true, data: $var(input, "id") });
 
-    const res = test.withParams(input, {
-      // oSchema: z.object({ success: z.boolean(), data: z.string() })
-    });
+    const res = test.withParams(input);
 
-    type A = TineInferInput<typeof res>;
+    type A = DaunusInferInput<typeof res>;
 
     type test = Expect<Equal<A, { id: string }>>;
   });
 
   it("Should infer return", () => {
-    const input = tineInput({
+    const input = $input({
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: tineVar(input, "id") });
+    const test = struct({ success: true, data: $var(input, "id") });
 
-    const res = test.withParams(input, {
-      // oSchema: z.object({ success: z.boolean(), data: z.string() })
-    });
+    const res = test.withParams(input);
 
-    type A = TineInferReturn<typeof res>;
+    type A = DaunusInferReturn<typeof res>;
 
     type test = Expect<
       Equal<A, { data: { success: boolean; data: string }; error: never }>
@@ -48,17 +44,17 @@ describe("tineQuery", () => {
   });
 
   it("Should return api props", () => {
-    const input = tineInput({
+    const input = $input({
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: tineVar(input, "id") });
+    const test = struct({ success: true, data: $var(input, "id") });
 
     const res = test.withParams(input, {
       // oSchema: z.object({ success: z.boolean(), data: z.string() }),
       openApi: {
         params: {
-          id: tineVar(input, "id")
+          id: $var(input, "id")
         }
       }
     });
@@ -69,7 +65,7 @@ describe("tineQuery", () => {
   });
 
   it("Should work with container", () => {
-    const test = tineAction(
+    const test = $action(
       { type: "test" },
       (payload: string) => payload,
       async (r, args) => {
@@ -77,13 +73,13 @@ describe("tineQuery", () => {
       }
     )("test");
 
-    type A = TineInferReturn<typeof test>;
+    type A = DaunusInferReturn<typeof test>;
 
     type test = Expect<Equal<A, { data: number; error: never }>>;
   });
 
   it("Should work with env", () => {
-    const test = tineAction(
+    const test = $action(
       {
         type: "test",
         envSchema: z.object({
@@ -95,7 +91,7 @@ describe("tineQuery", () => {
       }
     )("test");
 
-    type A = TineInferReturn<typeof test>;
+    type A = DaunusInferReturn<typeof test>;
 
     type test = Expect<
       Equal<

@@ -1,7 +1,7 @@
 import { isError } from "../../helpers";
 import { resolveAction } from "../../resolve_action";
-import { tineAction } from "../../tine_action";
-import { TineActionOptions } from "../../types";
+import { $action } from "../../daunus_action";
+import { DaunusActionOptions } from "../../types";
 
 type ConditionParams<P, T, C> =
   | {
@@ -15,11 +15,11 @@ type ConditionParams<P, T, C> =
       else: T;
     };
 
-const condition = tineAction(
+const condition = $action(
   { type: "condition", skipParse: true },
   async <P, T, C>(
     { if: $if, do: $then, else: $else }: ConditionParams<P, T, C>,
-    { parseParams, ctx }: TineActionOptions<any>
+    { parseParams, ctx }: DaunusActionOptions<any>
   ) => {
     const condition = await parseParams(ctx, await resolveAction(ctx, $if));
 

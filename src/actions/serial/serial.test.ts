@@ -1,4 +1,4 @@
-import { tineCtx } from "../../tine_helpers";
+import { $ctx } from "../../daunus_helpers";
 
 import serial from "./index";
 
@@ -18,7 +18,7 @@ describe("serial", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual([{ foo: "bar" }, "test"]);
   });
@@ -45,7 +45,7 @@ describe("serial", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual([["action.1.1", "action.1.2"], "action.2"]);
   });
@@ -65,7 +65,7 @@ describe("serial", () => {
       }
     ]);
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual([{ foo: "bar" }, { foo: "bar" }]);
   });

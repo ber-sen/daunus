@@ -1,5 +1,5 @@
-import { tineAction } from "../../tine_action";
-import { TineError } from "../../types";
+import { $action } from "../../daunus_action";
+import { DaunusError } from "../../types";
 
 export interface ExitParams<S extends number, D = undefined> {
   status: S;
@@ -7,12 +7,12 @@ export interface ExitParams<S extends number, D = undefined> {
   data?: D;
 }
 
-const exit = tineAction(
+const exit = $action(
   {
     type: "exit"
   },
   <S extends number, D>(params: ExitParams<S, D>) =>
-    new TineError<S, D>(params.status, params.message ?? "", params.data)
+    new DaunusError<S, D>(params.status, params.message ?? "", params.data)
 );
 
 export default exit;

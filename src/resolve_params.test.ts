@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { tineInput } from "./tine_helpers";
+import { $input } from "./daunus_helpers";
 import { resolveParams } from "./resolve_params";
-import { tineVar } from "./tine_var";
-import { tineFn } from "./tine_fn";
+import { $var } from "./daunus_var";
+import { $fn } from "./daunus_fn";
 
 describe("resolveParams", () => {
-  const input = tineInput({ foo: z.string() });
+  const input = $input({ foo: z.string() });
 
   const ctx = new Map();
 
@@ -23,56 +23,56 @@ describe("resolveParams", () => {
     expect(res).toStrictEqual(params);
   });
 
-  it("should resolve value of tineVar inside an object", async () => {
-    const params = { foo: tineVar(input, "foo") };
+  it("should resolve value of $var inside an object", async () => {
+    const params = { foo: $var(input, "foo") };
 
     const res = await resolveParams(ctx, params);
 
     expect(res).toStrictEqual({ foo: inputValue });
   });
 
-  it("should resolve value of tineVar inside an another tineVar", async () => {
-    const params = { foo: tineFn(() => tineVar(input, "foo")) };
+  it("should resolve value of $var inside an another $var", async () => {
+    const params = { foo: $fn(() => $var(input, "foo")) };
 
     const res = await resolveParams(ctx, params);
 
     expect(res).toStrictEqual({ foo: inputValue });
   });
 
-  it("should work in case tineVar is the params", async () => {
-    const params = tineVar(input, "foo");
+  it("should work in case $var is the params", async () => {
+    const params = $var(input, "foo");
 
     const res = await resolveParams(ctx, params);
 
     expect(res).toStrictEqual(inputValue);
   });
 
-  it("should work in case tineVar is in array", async () => {
-    const params = [3, tineVar(input, "foo")];
+  it("should work in case $var is in array", async () => {
+    const params = [3, $var(input, "foo")];
 
     const res = await resolveParams(ctx, params);
 
     expect(res).toStrictEqual([3, inputValue]);
   });
 
-  it("should work in case tineVar is as a nested value in object ", async () => {
-    const params = { level1: { level2: tineVar(input, "foo") } };
+  it("should work in case $var is as a nested value in object ", async () => {
+    const params = { level1: { level2: $var(input, "foo") } };
 
     const res = await resolveParams(ctx, params);
 
     expect(res).toStrictEqual({ level1: { level2: inputValue } });
   });
 
-  it("should work in case tineVar is as a nested value in array ", async () => {
-    const params = [[[tineVar(input, "foo")]]];
+  it("should work in case $var is as a nested value in array ", async () => {
+    const params = [[[$var(input, "foo")]]];
 
     const res = await resolveParams(ctx, params);
 
     expect(res).toStrictEqual([[[inputValue]]]);
   });
 
-  it("should work in case tineVar is as a nested value in array inside a nested object", async () => {
-    const params = { level1: { level2: [[[tineVar(input, "foo")]]] } };
+  it("should work in case $var is as a nested value in array inside a nested object", async () => {
+    const params = { level1: { level2: [[[$var(input, "foo")]]] } };
 
     const res = await resolveParams(ctx, params);
 

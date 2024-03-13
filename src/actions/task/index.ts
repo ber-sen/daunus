@@ -1,13 +1,13 @@
-import { tineAction } from "../../tine_action";
-import { tineFn } from "../../tine_fn";
-import { TineCtx } from "../../types";
+import { $action } from "../../daunus_action";
+import { $fn } from "../../daunus_fn";
+import { DaunusCtx } from "../../types";
 
-const task = tineAction(
+const task = $action(
   {
     type: "task",
     parseResponse: true
   },
-  <T>(params: (ctx: TineCtx) => Promise<T> | T) => tineFn(params)
+  <T>(params: (ctx: DaunusCtx) => Promise<T> | T) => $fn(params)
 );
 
 export default task;

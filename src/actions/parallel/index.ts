@@ -1,10 +1,10 @@
 import { runAction } from "../../run_action";
-import { tineAction } from "../../tine_action";
-import { TineActionOptions, TineWorkflowAction } from "../../types";
+import { $action } from "../../daunus_action";
+import { DaunusActionOptions, DaunusWorkflowAction } from "../../types";
 
-const parallel = tineAction(
+const parallel = $action(
   { type: "parallel", skipParse: true },
-  (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions<any>) => {
+  (list: DaunusWorkflowAction<any>[], { ctx }: DaunusActionOptions<any>) => {
     const promises = list.map((item) =>
       runAction(ctx, item).then((item) => item.data ?? item.error)
     );

@@ -1,5 +1,5 @@
 import { resolveParams } from "./resolve_params";
-import { tineQuery } from "./tine_query";
+import { $query } from "./daunus_query";
 
 const setContext = (value: object) => {
   const ctx = new Map();
@@ -9,13 +9,13 @@ const setContext = (value: object) => {
   return ctx;
 };
 
-describe("tineQuery", () => {
+describe("$query", () => {
   it("should return the value", async () => {
     const ctx = setContext({ name: "Earth" });
 
     const res = await resolveParams(
       ctx,
-      tineQuery(($) => $.input.name)
+      $query(($) => $.input.name)
     );
 
     expect(res).toStrictEqual("Earth");

@@ -1,4 +1,4 @@
-import { tineCtx } from "../../tine_helpers";
+import { $ctx } from "../../daunus_helpers";
 import { Wait } from "../../types";
 
 import wait from "./index";
@@ -9,7 +9,7 @@ describe("wait", () => {
       delay: "1d"
     });
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.error).toStrictEqual(new Wait({ delay: "1d" }));
   });

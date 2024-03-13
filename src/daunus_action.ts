@@ -4,19 +4,19 @@ import { v4 as uuidv4 } from "uuid";
 import { resolveParams } from "./resolve_params";
 import {
   ErrorParams,
-  ResolveTineVar,
-  TineAction,
-  TineActionInfo,
-  TineActionOptions,
-  TineActionRunOptions,
-  TineActionWithParams,
-  TineCtx,
-  TineParams
+  ResolveDaunusVar,
+  DaunusAction,
+  DaunusActionInfo,
+  DaunusActionOptions,
+  DaunusActionRunOptions,
+  DaunusActionWithParams,
+  DaunusCtx,
+  DaunusParams
 } from "./types";
 
 import { isError, parseResult } from "./helpers";
 
-export const tineAction =
+export const $action =
   <P, O, E, T = O>(
     args: {
       type: string;
@@ -30,18 +30,18 @@ export const tineAction =
     },
     run: (
       params: P,
-      { ctx, parseParams, env }: TineActionOptions<E>
+      { ctx, parseParams, env }: DaunusActionOptions<E>
     ) => Promise<O> | O,
     container: (
       r: (
         params: P,
-        { ctx, parseParams, env }: TineActionOptions<E>
+        { ctx, parseParams, env }: DaunusActionOptions<E>
       ) => Promise<O> | O,
-      args: [P, TineActionOptions<E>]
+      args: [P, DaunusActionOptions<E>]
     ) => Promise<T> | T = (r, args) => r(...args) as T | Promise<T>
   ) =>
   (
-    params: TineParams<P>,
+    params: DaunusParams<P>,
     actionCtx?: {
       name?: string;
       skipLog?: boolean;
@@ -50,17 +50,17 @@ export const tineAction =
     const name: string = actionCtx?.name || args.name || uuidv4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
-    const actionInfo: TineActionInfo<T, ErrorParams<T, P>> = {
+    const actionInfo: DaunusActionInfo<T, ErrorParams<T, P>> = {
       name,
       type: args.type,
       params: null
     };
 
     const makeRun =
-      (init?: (ctx: TineCtx) => void) =>
+      (init?: (ctx: DaunusCtx) => void) =>
       async (
-        ctx: TineCtx = new Map(),
-        options?: TineActionRunOptions<T, ErrorParams<T, P>>
+        ctx: DaunusCtx = new Map(),
+        options?: DaunusActionRunOptions<T, ErrorParams<T, P>>
       ) => {
         try {
           if (!ctx.has("actions")) {
@@ -131,14 +131,14 @@ export const tineAction =
         }
       };
 
-    const action: TineAction<T, ErrorParams<T, P>, E> = {
+    const action: DaunusAction<T, ErrorParams<T, P>, E> = {
       ...actionCtx,
       name,
       envSchema: args.envSchema,
       run: makeRun()
     };
 
-    const actionWithOptions: TineActionWithParams<T, ErrorParams<T, P>, E> = {
+    const actionWithOptions: DaunusActionWithParams<T, ErrorParams<T, P>, E> = {
       ...action,
       noParams: () => action,
       withParams: <
@@ -154,7 +154,7 @@ export const tineAction =
       >(
         iSchema: z.ZodObject<W, U, C, O, I>,
         meta?: {
-          oSchema?: z.ZodType<ResolveTineVar<D>>;
+          oSchema?: z.ZodType<ResolveDaunusVar<D>>;
           openApi?: {
             method?:
               | "get"
@@ -176,13 +176,13 @@ export const tineAction =
           ...meta,
           iSchema
         },
-        input: (value: I): TineAction<T, ErrorParams<T, P>, E> => ({
+        input: (value: I): DaunusAction<T, ErrorParams<T, P>, E> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));
           })
         }),
-        rawInput: (value: unknown): TineAction<T, ErrorParams<T, P>, E> => ({
+        rawInput: (value: unknown): DaunusAction<T, ErrorParams<T, P>, E> => ({
           ...action,
           run: makeRun((ctx) => {
             ctx.set("input", iSchema.parse(value));
@@ -196,7 +196,7 @@ export const tineAction =
 
 export const parseParams = async <T>(
   ctx: Map<string, any>,
-  params: TineParams<T>,
+  params: DaunusParams<T>,
   options?: {
     schema?: z.Schema<T>;
     skipPlaceholders?: boolean;

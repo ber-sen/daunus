@@ -1,6 +1,6 @@
 {
-  "name": "tinejs",
-  "version": "0.1.42",
+  "name": "daunus",
+  "version": "0.1.43",
   "description": "Yet another typescript framework",
   "scripts": {
     "test": "jest",
@@ -32,14 +32,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/satoshi-cyber/tinejs.git"
+    "url": "git+https://github.com/TaskWish/daunus.git"
   },
   "author": "Bersen Pajaziti",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/satoshi-cyber/tinejs/issues"
+    "url": "https://github.com/TaskWish/daunus/issues"
   },
-  "homepage": "https://www.tinelang.org",
+  "homepage": "https://www.daunus.com",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "uuid": "^9.0.0",

@@ -1,7 +1,7 @@
 import task from "../task";
 
-import { tineCtx } from "../../tine_helpers";
-import { tineVar } from "../../tine_var";
+import { $ctx } from "../../daunus_helpers";
+import { $var } from "../../daunus_var";
 
 import response from "./index";
 
@@ -13,15 +13,15 @@ describe("response", () => {
 
     const data = task(() => ({
       rows: ["test", "test", i++],
-      userId: tineVar(claims, "userId")
+      userId: $var(claims, "userId")
     }));
 
     const action = response({
-      before: tineVar(claims),
-      data: tineVar(data)
+      before: $var(claims),
+      data: $var(data)
     });
 
-    const res = await action.run(tineCtx());
+    const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual({ rows: ["test", "test", 1], userId: 0 });
   });

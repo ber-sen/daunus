@@ -2,14 +2,14 @@ import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
 
 import { z } from "./zod";
 
-export type TineVar<T> =
-  TineExcludeError<T> extends never
+export type DaunusVar<T> =
+  DaunusExcludeError<T> extends never
     ? T
-    : TineExcludeError<T> & ((ctx: TineCtx) => Promise<T>);
+    : DaunusExcludeError<T> & ((ctx: DaunusCtx) => Promise<T>);
 
-export type TineParams<T> = T; // TODO: fix type
+export type DaunusParams<T> = T; // TODO: fix type
 
-export type TineInput<
+export type DaunusInput<
   T extends ZodRawShape,
   U extends UnknownKeysParam,
   C extends ZodTypeAny,
@@ -17,129 +17,129 @@ export type TineInput<
   I
 > = z.ZodObject<T, U, C, O, I>;
 
-export type TineCtx = Map<any, any>;
+export type DaunusCtx = Map<any, any>;
 
-export type ResolveTineVar<T> =
-  T extends TineVar<infer U>
-    ? U extends TineVar<infer Z>
+export type ResolveDaunusVar<T> =
+  T extends DaunusVar<infer U>
+    ? U extends DaunusVar<infer Z>
       ? Z
       : U extends Array<infer A>
-        ? Array<ResolveTineVar<A>>
+        ? Array<ResolveDaunusVar<A>>
         : U extends object
           ? {
-              [K in keyof U]: ResolveTineVar<U[K]>;
+              [K in keyof U]: ResolveDaunusVar<U[K]>;
             }
           : U
     : T extends Array<infer A>
-      ? Array<ResolveTineVar<A>>
+      ? Array<ResolveDaunusVar<A>>
       : T extends Date
         ? T
         : T extends object
           ? {
-              [K in keyof T]: ResolveTineVar<T[K]>;
+              [K in keyof T]: ResolveDaunusVar<T[K]>;
             }
           : T;
 
-export type ResolveTineVarData<T> =
-  T extends TineVar<infer U>
-    ? U extends TineVar<infer Z>
-      ? TineExcludeError<Z>
+export type ResolveDaunusVarData<T> =
+  T extends DaunusVar<infer U>
+    ? U extends DaunusVar<infer Z>
+      ? DaunusExcludeError<Z>
       : U extends Array<infer A>
-        ? Array<ResolveTineVarData<A>>
-        : U extends TineError<any, any>
-          ? TineExcludeError<U>
+        ? Array<ResolveDaunusVarData<A>>
+        : U extends DaunusError<any, any>
+          ? DaunusExcludeError<U>
           : U extends object
             ? {
-                [K in keyof U]: ResolveTineVarData<U[K]>;
+                [K in keyof U]: ResolveDaunusVarData<U[K]>;
               }
             : U
     : T extends Array<infer A>
-      ? Array<ResolveTineVarData<A>>
+      ? Array<ResolveDaunusVarData<A>>
       : T extends Date
         ? T
-        : T extends TineError<any, any>
-          ? TineExcludeError<T>
+        : T extends DaunusError<any, any>
+          ? DaunusExcludeError<T>
           : T extends object
             ? {
-                [K in keyof T]: ResolveTineVarData<T[K]>;
+                [K in keyof T]: ResolveDaunusVarData<T[K]>;
               }
             : T;
 
-export type ResolveTineVarError<T> =
-  T extends TineVar<infer U>
-    ? U extends TineVar<infer Z>
-      ? TineGetErrors<Z>
+export type ResolveDaunusVarError<T> =
+  T extends DaunusVar<infer U>
+    ? U extends DaunusVar<infer Z>
+      ? DaunusGetErrors<Z>
       : U extends Array<infer A>
-        ? Array<ResolveTineVarError<A>>
-        : U extends TineError<any, any>
-          ? TineGetErrors<U>
+        ? Array<ResolveDaunusVarError<A>>
+        : U extends DaunusError<any, any>
+          ? DaunusGetErrors<U>
           : U extends object
             ? {
-                [K in keyof U]: ResolveTineVarError<U[K]>;
+                [K in keyof U]: ResolveDaunusVarError<U[K]>;
               }
             : never
     : T extends Array<infer A>
-      ? Array<ResolveTineVarError<A>>
+      ? Array<ResolveDaunusVarError<A>>
       : T extends Date
         ? T
-        : T extends TineError<any, any>
+        : T extends DaunusError<any, any>
           ? T
           : T extends object
             ? {
-                [K in keyof T]: ResolveTineVarError<T[K]>;
+                [K in keyof T]: ResolveDaunusVarError<T[K]>;
               }
             : never;
 
-export type ExtractTineErrors<T> =
-  T extends TineError<any, any>
+export type ExtractDaunusErrors<T> =
+  T extends DaunusError<any, any>
     ? T
     : T extends object
       ? {
-          [K in keyof T]: T[K] extends TineError<any, any>
+          [K in keyof T]: T[K] extends DaunusError<any, any>
             ? T[K]
-            : ExtractTineErrors<T[K]>;
+            : ExtractDaunusErrors<T[K]>;
         }[keyof T]
       : never;
 
 export type NonUndefined<T> = T extends undefined ? never : T;
 
-export type TineActionInfo<D, P> = {
+export type DaunusActionInfo<D, P> = {
   name: string;
   type: string;
   params: any;
-  data?: ResolveTineVarData<D>;
+  data?: ResolveDaunusVarData<D>;
   error?: NonUndefined<
-    | ExtractTineErrors<ResolveTineVarError<D>>
-    | ExtractTineErrors<ResolveTineVarError<P>>
+    | ExtractDaunusErrors<ResolveDaunusVarError<D>>
+    | ExtractDaunusErrors<ResolveDaunusVarError<P>>
   >;
 };
 
-export type TineActionRunOptions<T, P> = {
-  onComplete?: (actionInfo: TineActionInfo<T, P>, ctx: TineCtx) => void;
+export type DaunusActionRunOptions<T, P> = {
+  onComplete?: (actionInfo: DaunusActionInfo<T, P>, ctx: DaunusCtx) => void;
 };
 
-export type TineAction<T, P, E> = {
+export type DaunusAction<T, P, E> = {
   name: string;
   envSchema?: z.Schema<E>;
   run: (
-    ctx?: TineCtx,
-    options?: TineActionRunOptions<T, P>
+    ctx?: DaunusCtx,
+    options?: DaunusActionRunOptions<T, P>
   ) => Promise<{
-    data: ResolveTineVarData<T>;
+    data: ResolveDaunusVarData<T>;
     error: NonUndefined<
-      | ExtractTineErrors<ResolveTineVarError<T>>
-      | ExtractTineErrors<ResolveTineVarError<P>>
+      | ExtractDaunusErrors<ResolveDaunusVarError<T>>
+      | ExtractDaunusErrors<ResolveDaunusVarError<P>>
     >;
   }>;
 };
 
-export type TineWorkflowAction<T> = {
+export type DaunusWorkflowAction<T> = {
   type: string[];
   params?: T;
   name?: string;
 };
 
-export type TineActionWithInput<
+export type DaunusActionWithInput<
   T extends ZodRawShape,
   U extends UnknownKeysParam,
   C extends ZodTypeAny,
@@ -154,7 +154,7 @@ export type TineActionWithInput<
 > = {
   meta: {
     iSchema: z.ZodObject<T, U, C, O, I>;
-    // oSchema?: z.ZodType<ResolveTineVar<D>>;
+    // oSchema?: z.ZodType<ResolveDaunusVar<D>>;
     openApi?: {
       method?:
         | "get"
@@ -171,19 +171,12 @@ export type TineActionWithInput<
       query?: Q;
     };
   };
-  input: (value: I) => TineAction<D, P, E>;
-  rawInput: (value: unknown) => TineAction<D, P, E>;
+  input: (value: I) => DaunusAction<D, P, E>;
+  rawInput: (value: unknown) => DaunusAction<D, P, E>;
 };
 
-export type TineActionWithParams<D, P, E> = TineAction<D, P, E> & {
-  noParams: () // meta?: {
-  // oSchema?: z.ZodType<ResolveTineVar<D>>;
-  // }
-  => TineAction<D, P, E> & {
-    // meta: {
-    //   // oSchema?: z.ZodType<ResolveTineVar<D>>;
-    // };
-  };
+export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
+  noParams: () => DaunusAction<D, P, E>;
   withParams: <
     T extends ZodRawShape,
     U extends UnknownKeysParam,
@@ -194,9 +187,8 @@ export type TineActionWithParams<D, P, E> = TineAction<D, P, E> & {
     B,
     Q
   >(
-    iSchema: TineInput<T, U, C, O, I>,
+    iSchema: DaunusInput<T, U, C, O, I>,
     meta?: {
-      // oSchema?: z.ZodType<ResolveTineVar<D>>;
       openApi?: {
         method?:
           | "get"
@@ -213,25 +205,37 @@ export type TineActionWithParams<D, P, E> = TineAction<D, P, E> & {
         query?: Q;
       };
     }
-  ) => TineActionWithInput<T, U, C, O, I, Z, B, Q, D, P, E>;
+  ) => DaunusActionWithInput<T, U, C, O, I, Z, B, Q, D, P, E>;
 };
 
-export type TineActionOptions<E> = {
-  ctx: TineCtx;
+export type DaunusActionOptions<E> = {
+  ctx: DaunusCtx;
   env: E;
   parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
 };
 
-export type TineExcludeError<T> = T extends TineError<any, any> ? never : T;
+export type DaunusExcludeError<T> = T extends DaunusError<any, any> ? never : T;
 
-export type TineGetErrors<T> = T extends TineError<any, any> ? T : never;
+export type DaunusGetErrors<T> = T extends DaunusError<any, any> ? T : never;
 
-export type TineInferReturn<
+export type DaunusInferReturn<
   T extends
-    | TineAction<any, any, any>
-    | TineActionWithInput<any, any, any, any, any, any, any, any, any, any, any>
+    | DaunusAction<any, any, any>
+    | DaunusActionWithInput<
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any,
+        any
+      >
 > =
-  T extends TineActionWithInput<
+  T extends DaunusActionWithInput<
     any,
     any,
     any,
@@ -245,12 +249,12 @@ export type TineInferReturn<
     any
   >
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
-    : T extends TineAction<any, any, any>
+    : T extends DaunusAction<any, any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
-export type TineInferInput<
-  T extends TineActionWithInput<
+export type DaunusInferInput<
+  T extends DaunusActionWithInput<
     any,
     any,
     any,
@@ -264,7 +268,7 @@ export type TineInferInput<
     any
   >
 > =
-  T extends TineActionWithInput<
+  T extends DaunusActionWithInput<
     any,
     any,
     any,
@@ -280,14 +284,14 @@ export type TineInferInput<
     ? Parameters<T["input"]>[0]
     : never;
 
-export class TineError<S extends number, D = undefined> extends Error {
+export class DaunusError<S extends number, D = undefined> extends Error {
   public status: S;
   public data?: D;
 
   constructor(status: S, message?: string, data?: D) {
     super(message);
 
-    this.name = "TineError";
+    this.name = "DaunusError";
     this.status = status;
     this.data = data;
   }
@@ -301,7 +305,7 @@ type WaitParams =
       until: Date;
     };
 
-export class Wait extends TineError<102, WaitParams> {
+export class Wait extends DaunusError<102, WaitParams> {
   constructor(params: WaitParams) {
     super(102, "Wait", params);
   }
@@ -315,4 +319,4 @@ export type Equal<X, Y> =
     : false;
 
 export type ErrorParams<T, P> =
-  ExtractTineErrors<T> extends never ? P : ExtractTineErrors<T>;
+  ExtractDaunusErrors<T> extends never ? P : ExtractDaunusErrors<T>;

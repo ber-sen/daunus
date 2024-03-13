@@ -1,10 +1,13 @@
 import { runAction } from "../../run_action";
-import { tineAction } from "../../tine_action";
-import { TineActionOptions, TineWorkflowAction } from "../../types";
+import { $action } from "../../daunus_action";
+import { DaunusActionOptions, DaunusWorkflowAction } from "../../types";
 
-const process = tineAction(
+const process = $action(
   { type: "process", skipParse: true },
-  async (list: TineWorkflowAction<any>[], { ctx }: TineActionOptions<any>) => {
+  async (
+    list: DaunusWorkflowAction<any>[],
+    { ctx }: DaunusActionOptions<any>
+  ) => {
     let res: any = null;
 
     for (const action of list) {
