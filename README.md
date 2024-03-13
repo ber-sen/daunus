@@ -6,7 +6,7 @@ Powering Your Edge with Cutting-Edge Framework.
 
 useCases/helthz/index.ts
 ```typescript
-import { struct } from 'tinejs';
+import { struct } from 'daunus';
 
 const healthz = struct({ success: true });
 
