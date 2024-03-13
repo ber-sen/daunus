@@ -1,10 +1,9 @@
+import { v4 } from "@lukeed/uuid/secure";
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from "zod";
-import { v4 as uuidv4 } from "uuid";
 
 import { resolveParams } from "./resolve_params";
 import {
   ErrorParams,
-  ResolveDaunusVar,
   DaunusAction,
   DaunusActionInfo,
   DaunusActionOptions,
@@ -47,7 +46,7 @@ export const $action =
       skipLog?: boolean;
     }
   ) => {
-    const name: string = actionCtx?.name || args.name || uuidv4();
+    const name: string = actionCtx?.name || args.name || v4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
     const actionInfo: DaunusActionInfo<T, ErrorParams<T, P>> = {
@@ -147,15 +146,13 @@ export const $action =
         C extends ZodTypeAny,
         O,
         I,
-        D,
         Z,
         B,
         Q
       >(
         iSchema: z.ZodObject<W, U, C, O, I>,
         meta?: {
-          oSchema?: z.ZodType<ResolveDaunusVar<D>>;
-          openApi?: {
+          openapi?: {
             method?:
               | "get"
               | "post"

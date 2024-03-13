@@ -154,8 +154,7 @@ export type DaunusActionWithInput<
 > = {
   meta: {
     iSchema: z.ZodObject<T, U, C, O, I>;
-    // oSchema?: z.ZodType<ResolveDaunusVar<D>>;
-    openApi?: {
+    openapi?: {
       method?:
         | "get"
         | "post"
@@ -189,7 +188,7 @@ export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   >(
     iSchema: DaunusInput<T, U, C, O, I>,
     meta?: {
-      openApi?: {
+      openapi?: {
         method?:
           | "get"
           | "post"

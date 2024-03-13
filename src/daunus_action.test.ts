@@ -51,15 +51,14 @@ describe("$query", () => {
     const test = struct({ success: true, data: $var(input, "id") });
 
     const res = test.withParams(input, {
-      // oSchema: z.object({ success: z.boolean(), data: z.string() }),
-      openApi: {
+      openapi: {
         params: {
           id: $var(input, "id")
         }
       }
     });
 
-    expect(JSON.stringify(res.meta.openApi)).toEqual(
+    expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"params":{"id":"{{ id }}"}}'
     );
   });
