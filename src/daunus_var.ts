@@ -28,7 +28,7 @@ async function getValue(ctx: DaunusCtx, arg: DaunusAction<any, any, any>) {
   }
 }
 
-type ExtractTineType<T> = T extends readonly DaunusAction<any, any, any>[]
+type ExtractDaunusType<T> = T extends readonly DaunusAction<any, any, any>[]
   ? {
       [K in keyof T]: T[K] extends DaunusAction<infer Y, any, any> ? Y : never;
     }
@@ -87,7 +87,7 @@ export function $var<T>(
 
 export function $var<T extends readonly DaunusAction<any, any, any>[], R>(
   arg: T,
-  selector: (value: ExtractTineType<T>) => R | Promise<R>
+  selector: (value: ExtractDaunusType<T>) => R | Promise<R>
 ): DaunusVar<R>;
 
 export function $var(arg: any, selector?: any) {

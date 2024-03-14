@@ -86,7 +86,7 @@ export const resolveDaunusPlaceholder = (
   return interpolated;
 };
 
-function extractTineErrors<T>(obj: T): DaunusError<any>[] {
+function extractDaunusErrors<T>(obj: T): DaunusError<any>[] {
   const daunusErrors: DaunusError<any>[] = [];
 
   function traverseObject(obj: any): void {
@@ -126,7 +126,7 @@ export const parseResult = <T, P>(
   }
 
   if (isObject(data)) {
-    const errors = extractTineErrors(data);
+    const errors = extractDaunusErrors(data);
 
     if (errors[0]) {
       return {
