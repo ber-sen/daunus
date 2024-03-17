@@ -4,7 +4,7 @@ import { DaunusActionOptions, DaunusWorkflowAction } from "../../types";
 
 const parallel = $action(
   { type: "parallel", skipParse: true },
-  (list: DaunusWorkflowAction<any>[], { ctx }: DaunusActionOptions<any>) => {
+  (list: DaunusWorkflowAction<any>[], { ctx }: DaunusActionOptions) => {
     const promises = list.map((item) =>
       runAction(ctx, item).then((item) => item.data ?? item.error)
     );

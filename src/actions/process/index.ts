@@ -4,10 +4,7 @@ import { DaunusActionOptions, DaunusWorkflowAction } from "../../types";
 
 const process = $action(
   { type: "process", skipParse: true },
-  async (
-    list: DaunusWorkflowAction<any>[],
-    { ctx }: DaunusActionOptions<any>
-  ) => {
+  async (list: DaunusWorkflowAction<any>[], { ctx }: DaunusActionOptions) => {
     let res: any = null;
 
     for (const action of list) {

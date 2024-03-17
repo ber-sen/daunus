@@ -208,9 +208,8 @@ export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   ) => DaunusActionWithInput<T, U, C, O, I, Z, B, Q, D, P, E>;
 };
 
-export type DaunusActionOptions<E> = {
+export type DaunusActionOptions = {
   ctx: DaunusCtx;
-  env: E;
   parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
 };
 

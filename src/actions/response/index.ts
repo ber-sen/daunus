@@ -18,7 +18,7 @@ const response = $action(
       before?: DaunusWorkflowAction<B> | DaunusVar<B>;
       after?: DaunusWorkflowAction<A> | DaunusVar<A>;
     },
-    { parseParams, ctx }: DaunusActionOptions<any>
+    { parseParams, ctx }: DaunusActionOptions
   ) => {
     if (before) {
       await parseParams(ctx, await resolveAction(ctx, before, "before"));

@@ -30,14 +30,16 @@ export const $action =
     },
     run: (
       params: P,
-      { ctx, parseParams, env }: DaunusActionOptions<E>
+      { ctx, parseParams }: DaunusActionOptions,
+      env: E
     ) => Promise<O> | O,
     container: (
       r: (
         params: P,
-        { ctx, parseParams, env }: DaunusActionOptions<E>
+        { ctx, parseParams }: DaunusActionOptions,
+        env: E
       ) => Promise<O> | O,
-      args: [P, DaunusActionOptions<E>]
+      args: [P, DaunusActionOptions, E]
     ) => Promise<T> | T = (r, args) => r(...args) as T | Promise<T>
   ) =>
   (
@@ -91,7 +93,8 @@ export const $action =
 
             const value = await container(run, [
               parsedParams!,
-              { ctx, parseParams, env }
+              { ctx, parseParams },
+              env
             ]);
 
             if (!args.parseResponse) {

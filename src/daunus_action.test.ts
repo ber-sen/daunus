@@ -85,7 +85,7 @@ describe("$query", () => {
           API_KEY: z.string()
         })
       },
-      (_: string, { env }) => {
+      (_: string, __, env) => {
         return env.API_KEY;
       }
     )("test");
@@ -108,7 +108,7 @@ describe("$query", () => {
       {
         type: "test"
       },
-      (_: string, { env }) => {
+      (_: string) => {
         return "test";
       }
     );

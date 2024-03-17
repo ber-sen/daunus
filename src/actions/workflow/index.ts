@@ -25,7 +25,7 @@ interface Workflow {
 
 const workflow = $action(
   { type: "workflow", skipParse: true },
-  async (params: Workflow, { ctx }: DaunusActionOptions<any>) => {
+  async (params: Workflow, { ctx }: DaunusActionOptions) => {
     if (!params.action) {
       return undefined;
     }

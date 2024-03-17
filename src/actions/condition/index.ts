@@ -19,7 +19,7 @@ const condition = $action(
   { type: "condition", skipParse: true },
   async <P, T, C>(
     { if: $if, do: $then, else: $else }: ConditionParams<P, T, C>,
-    { parseParams, ctx }: DaunusActionOptions<any>
+    { parseParams, ctx }: DaunusActionOptions
   ) => {
     const condition = await parseParams(ctx, await resolveAction(ctx, $if));
 
