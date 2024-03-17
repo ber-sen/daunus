@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { v4 } from "@lukeed/uuid/secure";
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from "zod";
 
@@ -16,7 +17,7 @@ import {
 import { isError, parseResult } from "./helpers";
 
 export const $action =
-  <P, O, E, T = O>(
+  <P, O, E = {}, T = O>(
     args: {
       type: string;
       name?: string;

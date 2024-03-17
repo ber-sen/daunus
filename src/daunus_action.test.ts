@@ -102,4 +102,20 @@ describe("$query", () => {
       >
     >;
   });
+
+  it("Should work without env return", () => {
+    const test = $action(
+      {
+        type: "test"
+      },
+      (_: string, { env }) => {
+        return "test";
+      }
+    );
+
+    type A = z.infer<NonNullable<ReturnType<typeof test>["envSchema"]>>;
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    type test = Expect<Equal<A, {}>>;
+  });
 });

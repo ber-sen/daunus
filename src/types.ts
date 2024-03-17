@@ -118,7 +118,8 @@ export type DaunusActionRunOptions<T, P> = {
   onComplete?: (actionInfo: DaunusActionInfo<T, P>, ctx: DaunusCtx) => void;
 };
 
-export type DaunusAction<T, P, E> = {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type DaunusAction<T, P, E = {}> = {
   name: string;
   envSchema?: z.Schema<E>;
   run: (
