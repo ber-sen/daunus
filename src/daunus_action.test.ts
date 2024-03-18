@@ -1,7 +1,7 @@
 import { $input } from "./daunus_helpers";
 import { struct } from "./actions";
 import { $var } from "./daunus_var";
-import { DaunusInferInput, DaunusInferReturn } from "./types";
+import { DaunusError, DaunusInferInput, DaunusInferReturn } from "./types";
 import { z } from "./zod";
 import { $action } from "./daunus_action";
 
@@ -75,6 +75,30 @@ describe("$query", () => {
     type A = DaunusInferReturn<typeof test>;
 
     type test = Expect<Equal<A, { data: number; error: never }>>;
+  });
+
+  it("Should work with array", () => {
+    const test = $action({ type: "test" }, (payload: string) => {
+      if (Math.random() > 0.5) {
+        return new DaunusError(500, "Server Error");
+      }
+
+      return [{ name: payload }];
+    })("test");
+
+    type A = DaunusInferReturn<typeof test>;
+
+    type test = Expect<
+      Equal<
+        A,
+        {
+          data: {
+            name: string;
+          }[];
+          error: DaunusError<500, undefined>;
+        }
+      >
+    >;
   });
 
   it("Should work with env", () => {

@@ -93,13 +93,15 @@ export type ResolveDaunusVarError<T> =
 export type ExtractDaunusErrors<T> =
   T extends DaunusError<any, any>
     ? T
-    : T extends object
-      ? {
-          [K in keyof T]: T[K] extends DaunusError<any, any>
-            ? T[K]
-            : ExtractDaunusErrors<T[K]>;
-        }[keyof T]
-      : never;
+    : T extends Array<infer A>
+      ? never
+      : T extends object
+        ? {
+            [K in keyof T]: T[K] extends DaunusError<any, any>
+              ? T[K]
+              : ExtractDaunusErrors<T[K]>;
+          }[keyof T]
+        : never;
 
 export type NonUndefined<T> = T extends undefined ? never : T;
 
