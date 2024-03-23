@@ -9,9 +9,9 @@ const csv = $action(
     { columns, rows }: CSVParams<T>,
     { ctx }: DaunusActionOptions
   ) => {
-    const { data } = await transform({}).run(ctx);
-
-    const { writable, readable } = data;
+    const {
+      data: { writable, readable }
+    } = await transform({}).run(ctx);
 
     (async () => {
       const writer = writable.getWriter();
