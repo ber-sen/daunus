@@ -6,7 +6,7 @@ import {
 import { $action } from "../..";
 
 const transform = $action(
-  { type: "transform" },
+  { type: "stream.transform" },
   <I, O>(params: {
     transformer?: Transformer<I, O>;
     writableStrategy?: QueuingStrategy<I>;
