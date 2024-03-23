@@ -1,5 +1,6 @@
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
 
+import { ReadableStream, TransformStream } from "web-streams-polyfill";
 import { z } from "./zod";
 
 export type DaunusVar<T> =
@@ -41,29 +42,33 @@ export type ResolveDaunusVar<T> =
           : T;
 
 export type ResolveDaunusVarData<T> =
-  T extends DaunusVar<infer U>
-    ? U extends DaunusVar<infer Z>
-      ? DaunusExcludeError<Z>
-      : U extends Array<infer A>
-        ? Array<ResolveDaunusVarData<A>>
-        : U extends DaunusError<any, any>
-          ? DaunusExcludeError<U>
-          : U extends object
-            ? {
-                [K in keyof U]: ResolveDaunusVarData<U[K]>;
-              }
-            : U
-    : T extends Array<infer A>
-      ? Array<ResolveDaunusVarData<A>>
-      : T extends Date
-        ? T
-        : T extends DaunusError<any, any>
-          ? DaunusExcludeError<T>
-          : T extends object
-            ? {
-                [K in keyof T]: ResolveDaunusVarData<T[K]>;
-              }
-            : T;
+  T extends ReadableStream<infer O>
+    ? ReadableStream<O>
+    : T extends TransformStream<infer I, infer O>
+      ? TransformStream<I, O>
+      : T extends DaunusVar<infer U>
+        ? U extends DaunusVar<infer Z>
+          ? DaunusExcludeError<Z>
+          : U extends Array<infer A>
+            ? Array<ResolveDaunusVarData<A>>
+            : U extends DaunusError<any, any>
+              ? DaunusExcludeError<U>
+              : U extends object
+                ? {
+                    [K in keyof U]: ResolveDaunusVarData<U[K]>;
+                  }
+                : U
+        : T extends Array<infer A>
+          ? Array<ResolveDaunusVarData<A>>
+          : T extends Date
+            ? T
+            : T extends DaunusError<any, any>
+              ? DaunusExcludeError<T>
+              : T extends object
+                ? {
+                    [K in keyof T]: ResolveDaunusVarData<T[K]>;
+                  }
+                : T;
 
 export type ResolveDaunusVarError<T> =
   T extends DaunusVar<infer U>

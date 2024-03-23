@@ -1,3 +1,4 @@
+import { ReadableStream, TransformStream } from "web-streams-polyfill";
 import { get } from "./get";
 import {
   ResolveDaunusVarData,
@@ -88,6 +89,10 @@ export const resolveDaunusPlaceholder = (
 
 function extractDaunusErrors<T>(obj: T): DaunusError<any>[] {
   const daunusErrors: DaunusError<any>[] = [];
+
+  if (obj instanceof TransformStream || obj instanceof ReadableStream) {
+    return daunusErrors;
+  }
 
   function traverseObject(obj: any): void {
     for (const key in obj) {

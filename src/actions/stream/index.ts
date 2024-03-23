@@ -1,7 +1,9 @@
 import { transform } from "typescript";
+import csv from "./csv";
 
 const stream = {
-  transform
+  transform,
+  csv
 };
 
 export default stream;

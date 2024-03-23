@@ -6,6 +6,7 @@
     "unicorn/prefer-module": 0,
     "unicorn/prefer-top-level-await": 0,
     "unicorn/no-array-reduce": 0,
+    "@typescript-eslint/ban-types": 0,
     "unicorn/filename-case": [
       "error",
       {
