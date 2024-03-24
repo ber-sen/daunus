@@ -13,7 +13,7 @@ const wait = $action(
   {
     type: "wait"
   },
-  (params: WaitParams) => {
+  () => (params: WaitParams) => {
     return new Wait(params);
   }
 );

@@ -4,7 +4,9 @@ const struct = $action(
   {
     type: "struct"
   },
-  <T>(params: T) => params!
+  () =>
+    <T>(params: T) =>
+      params!
 );
 
 export default struct;

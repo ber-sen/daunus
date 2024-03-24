@@ -80,7 +80,7 @@ describe("$var", () => {
         {
           type: "test"
         },
-        () => {
+        () => () => {
           if (Math.random() > 0.5) {
             return new DaunusError(404, "Not found");
           }
@@ -103,7 +103,7 @@ describe("$var", () => {
         {
           type: "test"
         },
-        () => {
+        () => () => {
           if (Math.random() > 0.5) {
             return new DaunusError(404, "Not found");
           }
@@ -126,7 +126,7 @@ describe("$var", () => {
         {
           type: "test"
         },
-        () => {
+        () => () => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
             return new DaunusError(404);
@@ -157,7 +157,7 @@ describe("$var", () => {
         {
           type: "test"
         },
-        (_: string) => {
+        () => (_: string) => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
             return new DaunusError(403);
@@ -201,7 +201,7 @@ describe("$var", () => {
         {
           type: "test"
         },
-        () => {
+        () => () => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
             return new DaunusError(404);
@@ -217,9 +217,10 @@ describe("$var", () => {
         {
           type: "test"
         },
-        <P extends string>(payload: P) => {
-          return payload.length;
-        }
+        () =>
+          <P extends string>(payload: P) => {
+            return payload.length;
+          }
       );
 
       const action = container($var(instanceWithError, "message"));

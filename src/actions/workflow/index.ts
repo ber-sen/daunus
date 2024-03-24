@@ -1,6 +1,5 @@
 import { runAction } from "../../run_action";
 import { $action } from "../../daunus_action";
-import { DaunusActionOptions } from "../../types";
 
 type Action =
   | {
@@ -25,15 +24,16 @@ interface Workflow {
 
 const workflow = $action(
   { type: "workflow", skipParse: true },
-  async (params: Workflow, { ctx }: DaunusActionOptions) => {
-    if (!params.action) {
-      return undefined;
+  ({ ctx }) =>
+    async (params: Workflow) => {
+      if (!params.action) {
+        return undefined;
+      }
+
+      const res = await runAction(ctx, params.action);
+
+      return res.data ?? res.error;
     }
-
-    const res = await runAction(ctx, params.action);
-
-    return res.data ?? res.error;
-  }
 );
 
 export default workflow;

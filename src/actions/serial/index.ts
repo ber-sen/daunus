@@ -4,17 +4,18 @@ import { DaunusWorkflowAction } from "../../types";
 
 const serial = $action(
   { type: "serial", skipParse: true },
-  async (list: DaunusWorkflowAction<any>[], { ctx }) => {
-    const res: Array<any> = [];
+  ({ ctx }) =>
+    async (list: DaunusWorkflowAction<any>[]) => {
+      const res: Array<any> = [];
 
-    for (const action of list) {
-      const ares = await runAction(ctx, action);
+      for (const action of list) {
+        const ares = await runAction(ctx, action);
 
-      res.push(ares.data ?? ares.error);
+        res.push(ares.data ?? ares.error);
+      }
+
+      return res;
     }
-
-    return res;
-  }
 );
 
 export default serial;

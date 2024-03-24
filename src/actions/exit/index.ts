@@ -11,8 +11,9 @@ const exit = $action(
   {
     type: "exit"
   },
-  <S extends number, D>(params: ExitParams<S, D>) =>
-    new DaunusError<S, D>(params.status, params.message ?? "", params.data)
+  () =>
+    <S extends number, D>(params: ExitParams<S, D>) =>
+      new DaunusError<S, D>(params.status, params.message ?? "", params.data)
 );
 
 export default exit;

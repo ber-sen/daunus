@@ -66,9 +66,9 @@ describe("$query", () => {
   it("Should work with container", () => {
     const test = $action(
       { type: "test" },
-      (payload: string) => payload,
-      async (r, args) => {
-        return (await r(...args)).length;
+      () => (payload: string) => payload,
+      async (r, [options, payload]) => {
+        return (await r(options)(payload)).length;
       }
     )("test");
 
@@ -78,7 +78,7 @@ describe("$query", () => {
   });
 
   it("Should work with array", () => {
-    const test = $action({ type: "test" }, (payload: string) => {
+    const test = $action({ type: "test" }, () => (payload: string) => {
       if (Math.random() > 0.5) {
         return new DaunusError(500, "Server Error");
       }
@@ -109,9 +109,10 @@ describe("$query", () => {
           API_KEY: z.string()
         })
       },
-      (_: string, __, env) => {
-        return env.API_KEY;
-      }
+      ({ env }) =>
+        (_: string) => {
+          return env.API_KEY;
+        }
     )("test");
 
     type A = DaunusInferReturn<typeof test>;
@@ -132,7 +133,7 @@ describe("$query", () => {
       {
         type: "test"
       },
-      (_: string) => {
+      () => (_: string) => {
         return "test";
       }
     );

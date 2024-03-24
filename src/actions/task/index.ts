@@ -7,7 +7,9 @@ const task = $action(
     type: "task",
     parseResponse: true
   },
-  <T>(params: (ctx: DaunusCtx) => Promise<T> | T) => $fn(params)
+  () =>
+    <T>(params: (ctx: DaunusCtx) => Promise<T> | T) =>
+      $fn(params)
 );
 
 export default task;

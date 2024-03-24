@@ -7,13 +7,11 @@ import {
   ErrorParams,
   DaunusAction,
   DaunusActionInfo,
-  DaunusActionOptions,
   DaunusActionRunOptions,
   DaunusActionWithParams,
   DaunusCtx,
   DaunusParams
 } from "./types";
-
 import { isError, parseResult } from "./helpers";
 
 export const $action =
@@ -27,20 +25,36 @@ export const $action =
       skipLog?: boolean;
       skipPlaceholders?: boolean;
       envSchema?: z.Schema<E>;
+      container?: (parmas: P) => T;
     },
-    run: (
-      params: P,
-      { ctx, parseParams }: DaunusActionOptions,
-      env: E
-    ) => Promise<O> | O,
+    fn: ({
+      ctx,
+      parseParams,
+      env
+    }: {
+      ctx: DaunusCtx;
+      parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
+      env: E;
+    }) => (params: P) => Promise<O> | O,
     container: (
-      r: (
-        params: P,
-        { ctx, parseParams }: DaunusActionOptions,
-        env: E
-      ) => Promise<O> | O,
-      args: [P, DaunusActionOptions, E]
-    ) => Promise<T> | T = (r, args) => r(...args) as T | Promise<T>
+      r: ({
+        ctx,
+        parseParams,
+        env
+      }: {
+        ctx: DaunusCtx;
+        parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
+        env: E;
+      }) => (params: P) => Promise<O> | O,
+      args: [
+        {
+          ctx: DaunusCtx;
+          parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
+          env: E;
+        },
+        P
+      ]
+    ) => Promise<T> | T = (r, args) => r(args[0])(args[1]) as T | Promise<T>
   ) =>
   (
     params: DaunusParams<P>,
@@ -91,10 +105,9 @@ export const $action =
               ? args.envSchema.parse(ctx.get(".env"))
               : (z.object({}) as E);
 
-            const value = await container(run, [
-              parsedParams!,
-              { ctx, parseParams },
-              env
+            const value = await container(fn, [
+              { ctx, parseParams, env },
+              parsedParams!
             ]);
 
             if (!args.parseResponse) {

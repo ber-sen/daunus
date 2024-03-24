@@ -215,11 +215,6 @@ export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   ) => DaunusActionWithInput<T, U, C, O, I, Z, B, Q, D, P, E>;
 };
 
-export type DaunusActionOptions = {
-  ctx: DaunusCtx;
-  parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
-};
-
 export type DaunusExcludeError<T> = T extends DaunusError<any, any> ? never : T;
 
 export type DaunusGetErrors<T> = T extends DaunusError<any, any> ? T : never;
