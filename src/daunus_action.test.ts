@@ -66,9 +66,9 @@ describe("$query", () => {
   it("Should work with container", () => {
     const test = $action(
       { type: "test" },
-      () => (payload: string) => payload,
-      async (r, [options, payload]) => {
-        return (await r(options)(payload)).length;
+      () => (params: string) => params,
+      async (fn, options, params) => {
+        return (await fn(options)(params)).length;
       }
     )("test");
 

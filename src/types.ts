@@ -1,6 +1,6 @@
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
-
 import { ReadableStream, TransformStream } from "web-streams-polyfill";
+
 import { z } from "./zod";
 
 export type DaunusVar<T> =
@@ -321,3 +321,8 @@ export type Equal<X, Y> =
 
 export type ErrorParams<T, P> =
   ExtractDaunusErrors<T> extends never ? P : ExtractDaunusErrors<T>;
+
+export type DaunusSchema<T> =
+  | { schema: z.Schema<T>; jsonSchema: string }
+  | { jsonSchema: string }
+  | { schema: z.Schema<T> };
