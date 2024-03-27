@@ -61,7 +61,7 @@ describe("serial", () => {
       },
       {
         type: ["struct"],
-        params: "{{ $.test.data }}"
+        params: "<% $.test.data %>"
       }
     ]);
 

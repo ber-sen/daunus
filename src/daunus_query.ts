@@ -12,8 +12,8 @@ export function $query<R>(selector: ($: any) => R | Promise<R>): DaunusVar<R> {
     return await selector($);
   };
 
-  $query.toString = () => `{{ ${selector.toString()} }}`;
-  $query.toJSON = () => `{{ ${selector.toString()} }}`;
+  $query.toString = () => `<% ${selector.toString()} %>`;
+  $query.toJSON = () => `<% ${selector.toString()} %>`;
   $query.__type = "daunus_var";
 
   return $query as any;

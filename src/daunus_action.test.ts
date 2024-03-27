@@ -59,7 +59,7 @@ describe("$query", () => {
     });
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
-      '{"params":{"id":"{{ id }}"}}'
+      '{"params":{"id":"<% id %>"}}'
     );
   });
 

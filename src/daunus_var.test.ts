@@ -51,7 +51,7 @@ describe("$var", () => {
     it("should return the string value", () => {
       const input = $input({ name: z.string() });
 
-      expect($var(input, "name").toString()).toStrictEqual("{{ name }}");
+      expect($var(input, "name").toString()).toStrictEqual("<% name %>");
     });
 
     it("should work with union", () => {

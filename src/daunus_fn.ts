@@ -7,8 +7,8 @@ export function $fn<R>(
     return await selector(ctx);
   };
 
-  $fn.toString = () => `{{ ${selector.toString()} }}`;
-  $fn.toJSON = () => `{{ ${selector.toString()} }}`;
+  $fn.toString = () => `<% ${selector.toString()} %>`;
+  $fn.toJSON = () => `<% ${selector.toString()} %>`;
   $fn.__type = "daunus_var";
 
   return $fn as any;

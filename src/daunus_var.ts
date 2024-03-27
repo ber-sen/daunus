@@ -98,8 +98,8 @@ export function $var(arg: any, selector?: any) {
       return await selector(values);
     };
 
-    $var.toString = () => "{{daunus_var}}";
-    $var.toJSON = () => "{{daunus_var}}";
+    $var.toString = () => "<% daunus_var %>";
+    $var.toJSON = () => "<% daunus_var %>";
     $var.__type = "daunus_var";
 
     return $var;
@@ -121,8 +121,8 @@ export function $var(arg: any, selector?: any) {
       : get(value, selector);
   };
 
-  $var.toString = () => `{{ ${selector.toString()} }}`;
-  $var.toJSON = () => `{{ ${selector.toString()} }}`;
+  $var.toString = () => `<% ${selector.toString()} %>`;
+  $var.toJSON = () => `<% ${selector.toString()} %>`;
   $var.__type = "daunus_var";
 
   return $var;

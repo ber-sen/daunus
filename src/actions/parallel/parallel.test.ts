@@ -61,7 +61,7 @@ describe("parallel", () => {
       },
       {
         type: ["struct"],
-        params: "{{ $.test.data }}"
+        params: "<% $.test.data %>"
       }
     ]);
 

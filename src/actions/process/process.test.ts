@@ -31,7 +31,7 @@ describe("process", () => {
       },
       {
         type: ["struct"],
-        params: "{{ $.test.data.foo }}"
+        params: "<% $.test.data.foo %>"
       }
     ]);
 
@@ -58,7 +58,7 @@ describe("process", () => {
       },
       {
         type: ["struct"],
-        params: "{{ $.test.data.foo }}"
+        params: "<% $.test.data.foo %>"
       }
     ]);
 
@@ -78,7 +78,7 @@ describe("process", () => {
       },
       {
         type: ["struct"],
-        params: "{{ $.test.data.foo }}"
+        params: "<% $.test.data.foo %>"
       }
     ]);
 
@@ -115,7 +115,7 @@ describe("process", () => {
       {
         type: ["struct"],
         params: {
-          foo: '{{ $.test.data.foo + "asd" }}'
+          foo: '<% $.test.data.foo + "asd" %>'
         }
       }
     ]);
