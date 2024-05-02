@@ -32,4 +32,40 @@ describe("workflow", () => {
 
     expect(res.data).toStrictEqual("Foo Bar");
   });
+
+  it("should work with streams", async () => {
+    const action = workflow({
+      name: "Foo",
+      action: {
+        type: ["process"],
+        params: [
+          {
+            name: "csv",
+            type: ["csv"],
+            params: {
+              rows: [
+                { hello: "world", foo: "bar" },
+                { hello: "world 2", foo: "bar 2" }
+              ]
+            }
+          },
+          {
+            type: ["struct"],
+            params: $query(($) => `Foo\n${$.csv.data}`)
+          }
+        ]
+      },
+      trigger: {
+        name: "endpoint",
+        type: ["endpoint"],
+        params: { method: "post" }
+      }
+    });
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual(
+      "Foo\nhello,foo\r\nworld,bar\r\nworld 2,bar 2"
+    );
+  });
 });

@@ -6,6 +6,7 @@ import parallel from "./actions/parallel";
 import serial from "./actions/serial";
 import task from "./actions/task";
 import exit from "./actions/exit";
+import csv from "./actions/csv";
 
 export const DEFAULT_ACTIONS = {
   struct,
@@ -15,5 +16,6 @@ export const DEFAULT_ACTIONS = {
   process,
   serial,
   task,
-  exit
+  exit,
+  csv
 };

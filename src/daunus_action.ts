@@ -2,6 +2,7 @@
 import { v4 } from "@lukeed/uuid/secure";
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from "zod";
 
+import { ReadableStream } from "web-streams-polyfill";
 import { resolveParams } from "./resolve_params";
 import {
   ErrorParams,
@@ -121,9 +122,20 @@ export const $action =
             return parseValue;
           };
 
-          const value = parseResult<T, ErrorParams<T, P>>((await runFn()) as T);
+          const rawValue = parseResult<T, ErrorParams<T, P>>(
+            (await runFn()) as T
+          );
+
+          const value: typeof rawValue =
+            rawValue.data instanceof ReadableStream
+              ? {
+                  data: await new Response(rawValue.data).text(),
+                  error: rawValue.error
+                }
+              : (rawValue as any);
 
           ctx.set(name, value);
+
           actionInfo.data = value.data;
           actionInfo.error = value.error;
 

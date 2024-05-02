@@ -1,15 +1,13 @@
-import transform from "../transform";
-import { $action } from "../../..";
+import { TransformStream } from "web-streams-polyfill";
+import { $action } from "../../daunus_action";
 import { writeRows } from "./lib";
 import { CSVParams } from "./types";
 
 const csv = $action(
-  { type: "stream.csv" },
-  ({ ctx }) =>
-    async <T extends {}>({ columns, rows }: CSVParams<T>) => {
-      const {
-        data: { writable, readable }
-      } = await transform({}).run(ctx);
+  { type: "csv" },
+  () =>
+    <T extends {}>({ columns, rows }: CSVParams<T>) => {
+      const { writable, readable } = new TransformStream();
 
       (async () => {
         const writer = writable.getWriter();

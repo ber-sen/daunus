@@ -1,4 +1,4 @@
-import { $ctx } from "../../..";
+import { $ctx } from "../..";
 import csv from ".";
 
 describe("encode", () => {
@@ -10,8 +10,8 @@ describe("encode", () => {
       ]
     }).run($ctx());
 
-    const data = await new Response(action.data).text();
-
-    expect(data).toStrictEqual("hello,foo\r\nworld,bar\r\nworld 2,bar 2");
+    expect(action.data).toStrictEqual(
+      "hello,foo\r\nworld,bar\r\nworld 2,bar 2"
+    );
   });
 });

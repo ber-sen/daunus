@@ -43,7 +43,7 @@ export type ResolveDaunusVar<T> =
 
 export type ResolveDaunusVarData<T> =
   T extends ReadableStream<infer O>
-    ? ReadableStream<O>
+    ? string
     : T extends TransformStream<infer I, infer O>
       ? TransformStream<I, O>
       : T extends DaunusVar<infer U>
