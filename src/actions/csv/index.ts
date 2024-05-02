@@ -25,7 +25,7 @@ const csv = $action(
         await writer.close();
       })();
 
-      return new DaunusReadable(readable, "blob");
+      return new DaunusReadable(readable, "text");
     }
 );
 
