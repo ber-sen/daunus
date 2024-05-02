@@ -10,7 +10,8 @@ import {
   DaunusActionRunOptions,
   DaunusActionWithParams,
   DaunusCtx,
-  DaunusParams
+  DaunusParams,
+  DaunusReadable
 } from "./types";
 import { isError, parseResult } from "./helpers";
 
@@ -126,9 +127,9 @@ export const $action =
           );
 
           const value: typeof rawValue =
-            !ctx.get("pass_streams") && rawValue.data instanceof ReadableStream
+            !ctx.get("pass_streams") && rawValue.data instanceof DaunusReadable
               ? {
-                  data: await new Response(rawValue.data).text(),
+                  data: await rawValue.data.parse(),
                   error: rawValue.error
                 }
               : (rawValue as any);

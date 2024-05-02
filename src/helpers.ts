@@ -6,7 +6,8 @@ import {
   DaunusError,
   DaunusCtx,
   DaunusVar,
-  NonUndefined
+  NonUndefined,
+  DaunusReadable
 } from "./types";
 
 export const isObject = (value: any): value is object =>
@@ -89,7 +90,7 @@ export const resolveDaunusPlaceholder = (
 function extractDaunusErrors<T>(obj: T): DaunusError<any>[] {
   const daunusErrors: DaunusError<any>[] = [];
 
-  if (obj instanceof TransformStream || obj instanceof ReadableStream) {
+  if (obj instanceof DaunusReadable) {
     return daunusErrors;
   }
 

@@ -41,33 +41,37 @@ export type ResolveDaunusVar<T> =
           : T;
 
 export type ResolveDaunusVarData<T> =
-  T extends ReadableStream<infer O>
-    ? string
-    : T extends TransformStream<infer I, infer O>
-      ? TransformStream<I, O>
-      : T extends DaunusVar<infer U>
-        ? U extends DaunusVar<infer Z>
-          ? DaunusExcludeError<Z>
-          : U extends Array<infer A>
-            ? Array<ResolveDaunusVarData<A>>
-            : U extends DaunusError<any, any>
-              ? DaunusExcludeError<U>
-              : U extends object
-                ? {
-                    [K in keyof U]: ResolveDaunusVarData<U[K]>;
-                  }
-                : U
-        : T extends Array<infer A>
+  T extends DaunusReadable<infer Z>
+    ? Z extends "text"
+      ? string
+      : Z extends "arrayBuffer"
+        ? ArrayBuffer
+        : Z extends "blob"
+          ? Blob
+          : string
+    : T extends DaunusVar<infer U>
+      ? U extends DaunusVar<infer Z>
+        ? DaunusExcludeError<Z>
+        : U extends Array<infer A>
           ? Array<ResolveDaunusVarData<A>>
-          : T extends Date
-            ? T
-            : T extends DaunusError<any, any>
-              ? DaunusExcludeError<T>
-              : T extends object
-                ? {
-                    [K in keyof T]: ResolveDaunusVarData<T[K]>;
-                  }
-                : T;
+          : U extends DaunusError<any, any>
+            ? DaunusExcludeError<U>
+            : U extends object
+              ? {
+                  [K in keyof U]: ResolveDaunusVarData<U[K]>;
+                }
+              : U
+      : T extends Array<infer A>
+        ? Array<ResolveDaunusVarData<A>>
+        : T extends Date
+          ? T
+          : T extends DaunusError<any, any>
+            ? DaunusExcludeError<T>
+            : T extends object
+              ? {
+                  [K in keyof T]: ResolveDaunusVarData<T[K]>;
+                }
+              : T;
 
 export type ResolveDaunusVarError<T> =
   T extends DaunusVar<infer U>
@@ -294,6 +298,32 @@ export class DaunusError<S extends number, D = undefined> extends Error {
     this.name = "DaunusError";
     this.status = status;
     this.data = data;
+  }
+}
+
+export class DaunusReadable<T extends "text" | "arrayBuffer" | "blob"> {
+  public readable: ReadableStream<any>;
+  public type: "text" | "arrayBuffer" | "blob";
+
+  constructor(readable: ReadableStream<any>, type: T) {
+    this.readable = readable;
+    this.type = type;
+  }
+
+  parse() {
+    if (this.type === "text") {
+      return new Response(this.readable).text();
+    }
+
+    if (this.type === "arrayBuffer") {
+      return new Response(this.readable).arrayBuffer();
+    }
+
+    if (this.type === "blob") {
+      return new Response(this.readable).blob();
+    }
+
+    return new Response(this.readable).text();
   }
 }
 
