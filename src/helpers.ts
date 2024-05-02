@@ -1,4 +1,3 @@
-import { ReadableStream, TransformStream } from "web-streams-polyfill";
 import { get } from "./get";
 import {
   ResolveDaunusVarData,

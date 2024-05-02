@@ -1,5 +1,4 @@
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
-import { ReadableStream, TransformStream } from "web-streams-polyfill";
 
 import { z } from "./zod";
 

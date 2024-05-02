@@ -1,4 +1,3 @@
-import { WritableStreamDefaultWriter } from "web-streams-polyfill";
 import { Column } from "./types";
 
 const quote = '"';

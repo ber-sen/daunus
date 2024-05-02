@@ -2,7 +2,6 @@
 import { v4 } from "@lukeed/uuid/secure";
 import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from "zod";
 
-import { ReadableStream } from "web-streams-polyfill";
 import { resolveParams } from "./resolve_params";
 import {
   ErrorParams,
@@ -127,7 +126,7 @@ export const $action =
           );
 
           const value: typeof rawValue =
-            rawValue.data instanceof ReadableStream
+            !ctx.get("pass_streams") && rawValue.data instanceof ReadableStream
               ? {
                   data: await new Response(rawValue.data).text(),
                   error: rawValue.error
