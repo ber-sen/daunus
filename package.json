@@ -1,6 +1,6 @@
 {
   "name": "daunus",
-  "version": "0.1.56",
+  "version": "0.1.57",
   "description": "Yet another typescript framework",
   "scripts": {
     "test": "jest",
@@ -9,24 +9,15 @@
     "build": "unbuild",
     "dev": "unbuild --stub"
   },
+  "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*",
-        "./dist/index.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist"
   ],
