@@ -143,4 +143,23 @@ describe("$query", () => {
     // eslint-disable-next-line @typescript-eslint/ban-types
     type test = Expect<Equal<A, {}>>;
   });
+
+  it("Should work be able to change params from container", () => {
+    const enhance =
+      <P, R, B = P | null>(run: (p: P) => R) =>
+      (ep: B) =>
+        run(ep as any as P);
+
+    const test = $action(
+      { type: "test" },
+      () => enhance((params: string) => params),
+      async (fn, options, params) => {
+        return (await fn(options)(params)).length;
+      }
+    )("test");
+
+    type A = DaunusInferReturn<typeof test>;
+
+    type test = Expect<Equal<A, { data: number; error: never }>>;
+  });
 });
