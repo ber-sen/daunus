@@ -1,4 +1,4 @@
-import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from "zod";
+import { ZodObject } from "zod";
 
 import {
   DaunusAction,
@@ -34,25 +34,14 @@ type ExtractDaunusType<T> = T extends readonly DaunusAction<any, any, any>[]
     }
   : never;
 
-export function $var<
-  T extends ZodRawShape,
-  U extends UnknownKeysParam,
-  C extends ZodTypeAny,
-  O,
-  I,
-  K extends Path<O>
->(arg: DaunusInput<T, U, C, O, I>, selector: K): DaunusVar<TypeAtPath<O, K>>;
+export function $var<I, K extends Path<I>>(
+  arg: DaunusInput<I>,
+  selector: K
+): DaunusVar<TypeAtPath<I, K>>;
 
-export function $var<
-  T extends ZodRawShape,
-  U extends UnknownKeysParam,
-  C extends ZodTypeAny,
-  O,
-  I,
-  R
->(
-  arg: DaunusInput<T, U, C, O, I>,
-  selector: (value: O) => R | Promise<R>
+export function $var<I, R>(
+  arg: DaunusInput<I>,
+  selector: (value: I) => R | Promise<R>
 ): DaunusVar<R>;
 
 export function $var<T, K extends Path<DaunusExcludeError<T>>>(

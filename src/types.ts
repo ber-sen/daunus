@@ -1,5 +1,3 @@
-import { UnknownKeysParam, ZodRawShape, ZodTypeAny } from "zod";
-
 import { z } from "./zod";
 
 export type DaunusVar<T> =
@@ -9,13 +7,7 @@ export type DaunusVar<T> =
 
 export type DaunusParams<T> = T; // TODO: fix type
 
-export type DaunusInput<
-  T extends ZodRawShape,
-  U extends UnknownKeysParam,
-  C extends ZodTypeAny,
-  O,
-  I
-> = z.ZodObject<T, U, C, O, I>;
+export type DaunusInput<T> = z.ZodType<T>;
 
 export type DaunusCtx = Map<any, any>;
 
@@ -150,21 +142,9 @@ export type DaunusWorkflowAction<T> = {
   name?: string;
 };
 
-export type DaunusActionWithInput<
-  T extends ZodRawShape,
-  U extends UnknownKeysParam,
-  C extends ZodTypeAny,
-  O,
-  I,
-  Z,
-  B,
-  Q,
-  D,
-  P,
-  E
-> = {
+export type DaunusActionWithInput<I, Z, B, Q, D, P, E> = {
   meta: {
-    iSchema: z.ZodObject<T, U, C, O, I>;
+    iSchema: Zod.ZodType<I>;
     openapi?: {
       method?:
         | "get"
@@ -187,17 +167,8 @@ export type DaunusActionWithInput<
 
 export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   noParams: () => DaunusAction<D, P, E>;
-  withParams: <
-    T extends ZodRawShape,
-    U extends UnknownKeysParam,
-    C extends ZodTypeAny,
-    O,
-    I,
-    Z,
-    B,
-    Q
-  >(
-    iSchema: DaunusInput<T, U, C, O, I>,
+  withParams: <I, Z, B, Q>(
+    iSchema: DaunusInput<I>,
     meta?: {
       openapi?: {
         method?:
@@ -215,7 +186,7 @@ export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
         query?: Q;
       };
     }
-  ) => DaunusActionWithInput<T, U, C, O, I, Z, B, Q, D, P, E>;
+  ) => DaunusActionWithInput<I, Z, B, Q, D, P, E>;
 };
 
 export type DaunusExcludeError<T> = T extends DaunusError<any, any> ? never : T;
@@ -225,66 +196,18 @@ export type DaunusGetErrors<T> = T extends DaunusError<any, any> ? T : never;
 export type DaunusInferReturn<
   T extends
     | DaunusAction<any, any, any>
-    | DaunusActionWithInput<
-        any,
-        any,
-        any,
-        any,
-        any,
-        any,
-        any,
-        any,
-        any,
-        any,
-        any
-      >
+    | DaunusActionWithInput<any, any, any, any, any, any, any>
 > =
-  T extends DaunusActionWithInput<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  T extends DaunusActionWithInput<any, any, any, any, any, any, any>
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
     : T extends DaunusAction<any, any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
 export type DaunusInferInput<
-  T extends DaunusActionWithInput<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  T extends DaunusActionWithInput<any, any, any, any, any, any, any>
 > =
-  T extends DaunusActionWithInput<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  T extends DaunusActionWithInput<any, any, any, any, any, any, any>
     ? Parameters<T["input"]>[0]
     : never;
 
@@ -352,6 +275,6 @@ export type ErrorParams<T, P> =
   ExtractDaunusErrors<T> extends never ? P : ExtractDaunusErrors<T>;
 
 export type DaunusSchema<T> =
+  | z.Schema<T>
   | { schema: z.Schema<T>; jsonSchema: string }
-  | { jsonSchema: string }
-  | { schema: z.Schema<T> };
+  | { jsonSchema: string };

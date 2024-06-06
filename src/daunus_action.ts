@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { v4 } from "@lukeed/uuid/secure";
-import { UnknownKeysParam, ZodRawShape, ZodTypeAny, z } from "zod";
+import { z } from "zod";
 
 import { resolveParams } from "./resolve_params";
 import {
@@ -169,17 +169,8 @@ export const $action =
     const actionWithOptions: DaunusActionWithParams<T, ErrorParams<T, P>, E> = {
       ...action,
       noParams: () => action,
-      withParams: <
-        W extends ZodRawShape,
-        U extends UnknownKeysParam,
-        C extends ZodTypeAny,
-        O,
-        I,
-        Z,
-        B,
-        Q
-      >(
-        iSchema: z.ZodObject<W, U, C, O, I>,
+      withParams: <I, Z, B, Q>(
+        iSchema: z.ZodType<I>,
         meta?: {
           openapi?: {
             method?:
