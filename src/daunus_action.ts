@@ -11,7 +11,8 @@ import {
   DaunusActionWithParams,
   DaunusCtx,
   DaunusParams,
-  DaunusReadable
+  DaunusReadable,
+  Method
 } from "./types";
 import { isException, parseResult } from "./helpers";
 
@@ -177,15 +178,7 @@ export const $action =
         iSchema: z.ZodType<I>,
         meta?: {
           openapi?: {
-            method?:
-              | "get"
-              | "post"
-              | "put"
-              | "delete"
-              | "patch"
-              | "head"
-              | "options"
-              | "trace";
+            method?: Method;
             contentType?: string;
             params?: Z;
             body?: B;

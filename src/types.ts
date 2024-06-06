@@ -11,6 +11,16 @@ export type DaunusInput<T> = z.ZodType<T>;
 
 export type DaunusCtx = Map<any, any>;
 
+export type Method =
+  | "get"
+  | "post"
+  | "put"
+  | "delete"
+  | "patch"
+  | "head"
+  | "options"
+  | "trace";
+
 export type ResolveDaunusVar<T> =
   T extends DaunusVar<infer U>
     ? U extends DaunusVar<infer Z>
@@ -146,17 +156,9 @@ export type DaunusActionWithInput<I, Z, B, Q, D, P, E> = {
   meta: {
     iSchema: Zod.ZodType<I>;
     openapi?: {
-      method?:
-        | "get"
-        | "post"
-        | "put"
-        | "delete"
-        | "patch"
-        | "head"
-        | "options"
-        | "trace";
+      method?: Method;
       contentType?: string;
-      params?: Z;
+      path?: Z;
       body?: B;
       query?: Q;
     };
@@ -171,17 +173,9 @@ export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
     iSchema: DaunusInput<I>,
     meta?: {
       openapi?: {
-        method?:
-          | "get"
-          | "post"
-          | "put"
-          | "delete"
-          | "patch"
-          | "head"
-          | "options"
-          | "trace";
+        method?: Method;
         contentType?: string;
-        params?: Z;
+        path?: Z;
         body?: B;
         query?: Q;
       };

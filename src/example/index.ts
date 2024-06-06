@@ -12,7 +12,7 @@ const res = struct({ success: true, data: $var(input, "id") });
 
 export default res.withParams(input, {
   openapi: {
-    params: {
+    path: {
       id: $var(input, "id")
     }
   }

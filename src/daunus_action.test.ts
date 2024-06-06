@@ -52,14 +52,14 @@ describe("$query", () => {
 
     const res = test.withParams(input, {
       openapi: {
-        params: {
+        path: {
           id: $var(input, "id")
         }
       }
     });
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
-      '{"params":{"id":"<% id %>"}}'
+      '{"path":{"id":"<% id %>"}}'
     );
   });
 
