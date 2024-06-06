@@ -1,5 +1,5 @@
 import { $input, condition, $var, exit, z, struct, $fn } from "..";
-import { DaunusError } from "../../dist";
+import { DaunusException } from "../../dist";
 
 const input = $input({
   did: z.string().describe("Decentralized Identifier token")
@@ -11,7 +11,7 @@ const magicMeta = struct(
       return { email: "test@example.com" };
     }
 
-    return new DaunusError(403, "Forbidden");
+    return new DaunusException(403, "Forbidden");
   })
 );
 

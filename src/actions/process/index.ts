@@ -11,8 +11,8 @@ const process = $action(
       for (const action of list) {
         res = await runAction(ctx, action);
 
-        if (res.error) {
-          return res.error;
+        if (res.exception) {
+          return res.exception;
         }
       }
 

@@ -1,22 +1,23 @@
-import { Equal, Expect, DaunusError } from "../../types";
+import { Equal, Expect, DaunusException } from "../../types";
 
 import exit from "./index";
 
 describe("wait", () => {
   it("should exit with message and status", async () => {
     const action = exit({
-      status: 403,
-      message: "Forbidden"
+      status: 200,
+      data: {
+        success: true
+      }
     });
 
     const res = await action.run();
 
-    expect(res.error).toBeInstanceOf(DaunusError);
-    expect(res.error).toHaveProperty("message", "Forbidden");
-    expect(res.error).toHaveProperty("status", 403);
+    expect(res.exception).toBeInstanceOf(DaunusException);
+    expect(res.exception).toHaveProperty("status", 200);
 
-    type A = typeof res.error;
+    type A = typeof res.exception;
 
-    type res = Expect<Equal<A, DaunusError<403, unknown>>>;
+    type res = Expect<Equal<A, DaunusException<200, { success: boolean }>>>;
   });
 });

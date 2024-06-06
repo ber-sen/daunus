@@ -3,7 +3,7 @@ import { z } from "zod";
 import { $input } from "./daunus_helpers";
 import { resolveParams } from "./resolve_params";
 import { $var } from "./daunus_var";
-import { DaunusError, DaunusVar, Equal, Expect } from "./types";
+import { DaunusException, DaunusVar, Equal, Expect } from "./types";
 import { exit, struct, $action } from ".";
 
 const setContext = (value?: object) => {
@@ -82,7 +82,7 @@ describe("$var", () => {
         },
         () => () => {
           if (Math.random() > 0.5) {
-            return new DaunusError(404, "Not found");
+            return new DaunusException(404, "Not found");
           }
 
           return { message: "Found" };
@@ -95,7 +95,7 @@ describe("$var", () => {
 
       type A = Awaited<typeof test>;
 
-      type test = Expect<Equal<A, string | DaunusError<404, undefined>>>;
+      type test = Expect<Equal<A, string | DaunusException<404, string>>>;
     });
 
     it("should pass errors on method selector", () => {
@@ -105,7 +105,7 @@ describe("$var", () => {
         },
         () => () => {
           if (Math.random() > 0.5) {
-            return new DaunusError(404, "Not found");
+            return new DaunusException(404, { message: "Not found" });
           }
 
           return { message: "Found" };
@@ -114,11 +114,16 @@ describe("$var", () => {
 
       const action = actionWithError({});
 
-      const test = $var(action, ($v) => $v.message)(new Map());
+      const test = $var(action)(new Map());
 
       type A = Awaited<typeof test>;
 
-      type test = Expect<Equal<A, string | DaunusError<404, undefined>>>;
+      type test = Expect<
+        Equal<
+          A,
+          { message: string } | DaunusException<404, { message: string }>
+        >
+      >;
     });
 
     it("should pass the error in struct", async () => {
@@ -129,7 +134,7 @@ describe("$var", () => {
         () => () => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
-            return new DaunusError(404);
+            return new DaunusException(404);
           }
 
           return { message: "Found" };
@@ -148,7 +153,7 @@ describe("$var", () => {
 
       expect(res).toStrictEqual({
         data: undefined,
-        error: new DaunusError(404)
+        exception: new DaunusException(404)
       });
     });
 
@@ -160,7 +165,7 @@ describe("$var", () => {
         () => (_: string) => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
-            return new DaunusError(403);
+            return new DaunusException(403);
           }
 
           return { message: "Found" };
@@ -173,7 +178,7 @@ describe("$var", () => {
 
       expect(res).toStrictEqual({
         data: undefined,
-        error: new DaunusError(403)
+        exception: new DaunusException(403)
       });
     });
 
@@ -187,12 +192,12 @@ describe("$var", () => {
       type A = Awaited<typeof res>;
 
       type res = Expect<
-        Equal<A, { data: never; error: DaunusError<403, unknown> }>
+        Equal<A, { data: never; exception: DaunusException<403, unknown> }>
       >;
 
       expect(res).toStrictEqual({
         data: undefined,
-        error: new DaunusError(403)
+        exception: new DaunusException(403)
       });
     });
 
@@ -204,7 +209,7 @@ describe("$var", () => {
         () => () => {
           // eslint-disable-next-line no-constant-condition
           if (true) {
-            return new DaunusError(404);
+            return new DaunusException(404);
           }
 
           return { message: "Found" };
@@ -230,12 +235,12 @@ describe("$var", () => {
       type A = Awaited<typeof res>;
 
       type res = Expect<
-        Equal<A, { data: number; error: DaunusError<404, undefined> }>
+        Equal<A, { data: number; exception: DaunusException<404, undefined> }>
       >;
 
       expect(res).toStrictEqual({
         data: undefined,
-        error: new DaunusError(404)
+        exception: new DaunusException(404)
       });
     });
   });

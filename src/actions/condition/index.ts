@@ -1,4 +1,4 @@
-import { isError } from "../../helpers";
+import { isException } from "../../helpers";
 import { resolveAction } from "../../resolve_action";
 import { $action } from "../../daunus_action";
 
@@ -24,7 +24,7 @@ const condition = $action(
     }: ConditionParams<P, T, C>) => {
       const condition = await parseParams(ctx, await resolveAction(ctx, $if));
 
-      if (!isError(condition) && condition) {
+      if (!isException(condition) && condition) {
         return (await parseParams(ctx, await resolveAction(ctx, $then))) as P;
       }
 

@@ -1,9 +1,9 @@
 import { z } from "./zod";
 
 export type DaunusVar<T> =
-  DaunusExcludeError<T> extends never
+  DaunusExcludeException<T> extends never
     ? T
-    : DaunusExcludeError<T> & ((ctx: DaunusCtx) => Promise<T>);
+    : DaunusExcludeException<T> & ((ctx: DaunusCtx) => Promise<T>);
 
 export type DaunusParams<T> = T; // TODO: fix type
 
@@ -43,11 +43,11 @@ export type ResolveDaunusVarData<T> =
           : string
     : T extends DaunusVar<infer U>
       ? U extends DaunusVar<infer Z>
-        ? DaunusExcludeError<Z>
+        ? DaunusExcludeException<Z>
         : U extends Array<infer A>
           ? Array<ResolveDaunusVarData<A>>
-          : U extends DaunusError<any, any>
-            ? DaunusExcludeError<U>
+          : U extends DaunusException<any, any>
+            ? DaunusExcludeException<U>
             : U extends object
               ? {
                   [K in keyof U]: ResolveDaunusVarData<U[K]>;
@@ -57,49 +57,49 @@ export type ResolveDaunusVarData<T> =
         ? Array<ResolveDaunusVarData<A>>
         : T extends Date
           ? T
-          : T extends DaunusError<any, any>
-            ? DaunusExcludeError<T>
+          : T extends DaunusException<any, any>
+            ? DaunusExcludeException<T>
             : T extends object
               ? {
                   [K in keyof T]: ResolveDaunusVarData<T[K]>;
                 }
               : T;
 
-export type ResolveDaunusVarError<T> =
+export type ResolveDaunusVarExceptions<T> =
   T extends DaunusVar<infer U>
     ? U extends DaunusVar<infer Z>
-      ? DaunusGetErrors<Z>
+      ? DaunusGetExceptions<Z>
       : U extends Array<infer A>
-        ? Array<ResolveDaunusVarError<A>>
-        : U extends DaunusError<any, any>
-          ? DaunusGetErrors<U>
+        ? Array<ResolveDaunusVarExceptions<A>>
+        : U extends DaunusException<any, any>
+          ? DaunusGetExceptions<U>
           : U extends object
             ? {
-                [K in keyof U]: ResolveDaunusVarError<U[K]>;
+                [K in keyof U]: ResolveDaunusVarExceptions<U[K]>;
               }
             : never
     : T extends Array<infer A>
-      ? Array<ResolveDaunusVarError<A>>
+      ? Array<ResolveDaunusVarExceptions<A>>
       : T extends Date
         ? T
-        : T extends DaunusError<any, any>
+        : T extends DaunusException<any, any>
           ? T
           : T extends object
             ? {
-                [K in keyof T]: ResolveDaunusVarError<T[K]>;
+                [K in keyof T]: ResolveDaunusVarExceptions<T[K]>;
               }
             : never;
 
-export type ExtractDaunusErrors<T> =
-  T extends DaunusError<any, any>
+export type ExtractDaunusExceptions<T> =
+  T extends DaunusException<any, any>
     ? T
     : T extends Array<infer A>
       ? never
       : T extends object
         ? {
-            [K in keyof T]: T[K] extends DaunusError<any, any>
+            [K in keyof T]: T[K] extends DaunusException<any, any>
               ? T[K]
-              : ExtractDaunusErrors<T[K]>;
+              : ExtractDaunusExceptions<T[K]>;
           }[keyof T]
         : never;
 
@@ -110,9 +110,9 @@ export type DaunusActionInfo<D, P> = {
   type: string;
   params: any;
   data?: ResolveDaunusVarData<D>;
-  error?: NonUndefined<
-    | ExtractDaunusErrors<ResolveDaunusVarError<D>>
-    | ExtractDaunusErrors<ResolveDaunusVarError<P>>
+  exception?: NonUndefined<
+    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<D>>
+    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
   >;
 };
 
@@ -129,9 +129,9 @@ export type DaunusAction<T, P, E = {}> = {
     options?: DaunusActionRunOptions<T, P>
   ) => Promise<{
     data: ResolveDaunusVarData<T>;
-    error: NonUndefined<
-      | ExtractDaunusErrors<ResolveDaunusVarError<T>>
-      | ExtractDaunusErrors<ResolveDaunusVarError<P>>
+    exception: NonUndefined<
+      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
+      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
     >;
   }>;
 };
@@ -189,9 +189,11 @@ export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   ) => DaunusActionWithInput<I, Z, B, Q, D, P, E>;
 };
 
-export type DaunusExcludeError<T> = T extends DaunusError<any, any> ? never : T;
+export type DaunusExcludeException<T> =
+  T extends DaunusException<any, any> ? never : T;
 
-export type DaunusGetErrors<T> = T extends DaunusError<any, any> ? T : never;
+export type DaunusGetExceptions<T> =
+  T extends DaunusException<any, any> ? T : never;
 
 export type DaunusInferReturn<
   T extends
@@ -211,14 +213,12 @@ export type DaunusInferInput<
     ? Parameters<T["input"]>[0]
     : never;
 
-export class DaunusError<S extends number, D = undefined> extends Error {
+export class DaunusException<S extends number, D = undefined> extends Error {
   public status: S;
   public data?: D;
 
-  constructor(status: S, message?: string, data?: D) {
-    super(message);
-
-    this.name = "DaunusError";
+  constructor(status: S, data?: D) {
+    super("daunus_exception");
     this.status = status;
     this.data = data;
   }
@@ -258,9 +258,15 @@ type WaitParams =
       until: Date;
     };
 
-export class Wait extends DaunusError<102, WaitParams> {
+export class Wait extends DaunusException<102, WaitParams> {
   constructor(params: WaitParams) {
-    super(102, "Wait", params);
+    super(102, params);
+  }
+}
+
+export class Return extends DaunusException<200, WaitParams> {
+  constructor(params: WaitParams) {
+    super(200, params);
   }
 }
 
@@ -271,8 +277,8 @@ export type Equal<X, Y> =
     ? true
     : false;
 
-export type ErrorParams<T, P> =
-  ExtractDaunusErrors<T> extends never ? P : ExtractDaunusErrors<T>;
+export type ExceptionParams<T, P> =
+  ExtractDaunusExceptions<T> extends never ? P : ExtractDaunusExceptions<T>;
 
 export type DaunusSchema<T> =
   | z.Schema<T>

@@ -1,7 +1,7 @@
 import { $input } from "./daunus_helpers";
 import { struct } from "./actions";
 import { $var } from "./daunus_var";
-import { DaunusError, DaunusInferInput, DaunusInferReturn } from "./types";
+import { DaunusException, DaunusInferInput, DaunusInferReturn } from "./types";
 import { z } from "./zod";
 import { $action } from "./daunus_action";
 
@@ -39,7 +39,7 @@ describe("$query", () => {
     type A = DaunusInferReturn<typeof res>;
 
     type test = Expect<
-      Equal<A, { data: { success: boolean; data: string }; error: never }>
+      Equal<A, { data: { success: boolean; data: string }; exception: never }>
     >;
   });
 
@@ -74,13 +74,13 @@ describe("$query", () => {
 
     type A = DaunusInferReturn<typeof test>;
 
-    type test = Expect<Equal<A, { data: number; error: never }>>;
+    type test = Expect<Equal<A, { data: number; exception: never }>>;
   });
 
   it("Should work with array", () => {
     const test = $action({ type: "test" }, () => (payload: string) => {
       if (Math.random() > 0.5) {
-        return new DaunusError(500, "Server Error");
+        return new DaunusException(500, "Server Error");
       }
 
       return [{ name: payload }];
@@ -95,7 +95,7 @@ describe("$query", () => {
           data: {
             name: string;
           }[];
-          error: DaunusError<500, undefined>;
+          exception: DaunusException<500, string>;
         }
       >
     >;
@@ -122,7 +122,7 @@ describe("$query", () => {
         A,
         {
           data: string;
-          error: never;
+          exception: never;
         }
       >
     >;
@@ -160,6 +160,6 @@ describe("$query", () => {
 
     type A = DaunusInferReturn<typeof test>;
 
-    type test = Expect<Equal<A, { data: number; error: never }>>;
+    type test = Expect<Equal<A, { data: number; exception: never }>>;
   });
 });

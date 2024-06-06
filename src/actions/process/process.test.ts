@@ -1,5 +1,5 @@
 import { $ctx } from "../../daunus_helpers";
-import { DaunusError } from "../../types";
+import { DaunusException } from "../../types";
 
 import process from "./index";
 
@@ -64,7 +64,7 @@ describe("process", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.error).toStrictEqual(new DaunusError(404));
+    expect(res.exception).toStrictEqual(new DaunusException(404));
   });
 
   it("should work handle errors placeholders", async () => {

@@ -2,7 +2,6 @@ import { $fn, struct, condition, $var, exit } from "../";
 
 const error = exit({
   status: 404,
-  message: "Not found",
   data: {
     error: "Resouce not found"
   }

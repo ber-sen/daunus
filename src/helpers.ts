@@ -1,9 +1,9 @@
 import { get } from "./get";
 import {
   ResolveDaunusVarData,
-  ResolveDaunusVarError,
-  ExtractDaunusErrors,
-  DaunusError,
+  ResolveDaunusVarExceptions,
+  ExtractDaunusExceptions,
+  DaunusException,
   DaunusCtx,
   DaunusVar,
   NonUndefined,
@@ -28,8 +28,8 @@ export const isDaunusPlaceholder = (value: any) =>
 
 export const isArray = (value: any): value is any[] => Array.isArray(value);
 
-export const isError = (value: any): value is DaunusError<any, any> =>
-  value instanceof DaunusError;
+export const isException = (value: any): value is DaunusException<any> =>
+  value instanceof DaunusException || value instanceof Error;
 
 export const isMapLike = (value: any): value is Map<any, any> => {
   return (
@@ -87,19 +87,19 @@ export const resolveDaunusPlaceholder = (
   return interpolated;
 };
 
-function extractDaunusErrors<T>(obj: T): DaunusError<any>[] {
-  const daunusErrors: DaunusError<any>[] = [];
+function extractDaunusExceptions<T>(obj: T): DaunusException<any>[] {
+  const DaunusExceptions: DaunusException<any>[] = [];
 
   if (obj instanceof DaunusReadable) {
-    return daunusErrors;
+    return DaunusExceptions;
   }
 
   function traverseObject(obj: any): void {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const value = obj[key];
-        if (value instanceof DaunusError) {
-          daunusErrors.push(value);
+        if (value instanceof DaunusException) {
+          DaunusExceptions.push(value);
         } else if (typeof value === "object" && value !== null) {
           traverseObject(value);
         }
@@ -108,37 +108,37 @@ function extractDaunusErrors<T>(obj: T): DaunusError<any>[] {
   }
 
   traverseObject(obj);
-  return daunusErrors;
+  return DaunusExceptions;
 }
 
 export const parseResult = <T, P>(
   data: T
 ): {
   data: ResolveDaunusVarData<T>;
-  error: NonUndefined<
-    | ExtractDaunusErrors<ResolveDaunusVarError<T>>
-    | ExtractDaunusErrors<ResolveDaunusVarError<P>>
+  exception: NonUndefined<
+    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
+    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
   >;
 } => {
-  if (isError(data)) {
+  if (isException(data)) {
     return {
       data: undefined as ResolveDaunusVarData<T>,
-      error: data as NonUndefined<
-        | ExtractDaunusErrors<ResolveDaunusVarError<T>>
-        | ExtractDaunusErrors<ResolveDaunusVarError<P>>
+      exception: data as NonUndefined<
+        | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
+        | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
       >
     };
   }
 
   if (isObject(data)) {
-    const errors = extractDaunusErrors(data);
+    const errors = extractDaunusExceptions(data);
 
     if (errors[0]) {
       return {
         data: undefined as ResolveDaunusVarData<T>,
-        error: errors[0] as NonUndefined<
-          | ExtractDaunusErrors<ResolveDaunusVarError<T>>
-          | ExtractDaunusErrors<ResolveDaunusVarError<P>>
+        exception: errors[0] as NonUndefined<
+          | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
+          | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
         >
       };
     }
@@ -146,9 +146,9 @@ export const parseResult = <T, P>(
 
   return {
     data: data as ResolveDaunusVarData<T>,
-    error: undefined as any as NonUndefined<
-      | ExtractDaunusErrors<ResolveDaunusVarError<T>>
-      | ExtractDaunusErrors<ResolveDaunusVarError<P>>
+    exception: undefined as any as NonUndefined<
+      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
+      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
     >
   };
 };

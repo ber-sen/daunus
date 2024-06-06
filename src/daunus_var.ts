@@ -3,14 +3,14 @@ import { ZodObject } from "zod";
 import {
   DaunusAction,
   DaunusCtx,
-  DaunusExcludeError,
+  DaunusExcludeException,
   DaunusActionWithParams,
-  DaunusGetErrors,
+  DaunusGetExceptions,
   DaunusInput,
   DaunusVar
 } from "./types";
 import { Path, TypeAtPath, get } from "./get";
-import { isArray, isError } from "./helpers";
+import { isArray, isException } from "./helpers";
 
 async function getValue(ctx: DaunusCtx, arg: DaunusAction<any, any, any>) {
   if (arg instanceof ZodObject) {
@@ -24,7 +24,7 @@ async function getValue(ctx: DaunusCtx, arg: DaunusAction<any, any, any>) {
   if ("run" in arg) {
     const res = await arg.run(ctx);
 
-    return res.data ?? res.error;
+    return res.data ?? res.exception;
   }
 }
 
@@ -44,35 +44,35 @@ export function $var<I, R>(
   selector: (value: I) => R | Promise<R>
 ): DaunusVar<R>;
 
-export function $var<T, K extends Path<DaunusExcludeError<T>>>(
+export function $var<T, K extends Path<DaunusExcludeException<T>>>(
   arg: DaunusActionWithParams<T, any, any>,
   selector: K
-): DaunusVar<TypeAtPath<DaunusExcludeError<T>, K> | DaunusGetErrors<T>>;
+): DaunusVar<TypeAtPath<DaunusExcludeException<T>, K> | DaunusGetExceptions<T>>;
 
 export function $var<T, R>(
   arg: DaunusActionWithParams<T, any, any>,
   selector: (value: T) => R | Promise<R>
-): DaunusVar<R | DaunusGetErrors<T>>;
+): DaunusVar<R | DaunusGetExceptions<T>>;
 
 export function $var<T>(
   arg: DaunusActionWithParams<T, any, any>,
   selector?: undefined
-): DaunusVar<T | DaunusGetErrors<T>>;
+): DaunusVar<T | DaunusGetExceptions<T>>;
 
-export function $var<T, K extends Path<DaunusExcludeError<T>>>(
+export function $var<T, K extends Path<DaunusExcludeException<T>>>(
   arg: DaunusAction<T, any, any>,
   selector: K
-): DaunusVar<TypeAtPath<DaunusExcludeError<T>, K> | DaunusGetErrors<T>>;
+): DaunusVar<TypeAtPath<DaunusExcludeException<T>, K> | DaunusGetExceptions<T>>;
 
 export function $var<T, R>(
   arg: DaunusAction<T, any, any>,
   selector: (value: T) => R | Promise<R>
-): DaunusVar<R | DaunusGetErrors<T>>;
+): DaunusVar<R | DaunusGetExceptions<T>>;
 
 export function $var<T>(
   arg: DaunusAction<T, any, any>,
   selector?: undefined
-): DaunusVar<T | DaunusGetErrors<T>>;
+): DaunusVar<T | DaunusGetExceptions<T>>;
 
 export function $var<T extends readonly DaunusAction<any, any, any>[], R>(
   arg: T,
@@ -97,7 +97,7 @@ export function $var(arg: any, selector?: any) {
   const $var = async (ctx: DaunusCtx) => {
     const value = await getValue(ctx, arg);
 
-    if (isError(value)) {
+    if (isException(value)) {
       return value;
     }
 

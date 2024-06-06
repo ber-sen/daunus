@@ -1,6 +1,6 @@
 import {
   isArray,
-  isError,
+  isException,
   isObject,
   isDaunusPlaceholder,
   isDaunusVar,
@@ -14,7 +14,7 @@ export const resolveParams = async <T>(
   params: DaunusParams<T>,
   options?: { skipPlaceholders?: boolean }
 ): Promise<T> => {
-  if (isError(params)) {
+  if (isException(params)) {
     return params;
   }
 
