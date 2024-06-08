@@ -59,7 +59,7 @@ describe("$query", () => {
     });
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
-      '{"path":{"id":"<% id %>"}}'
+      '{"method":"post","contentType":"application/json","path":{"id":"<% id %>"}}'
     );
   });
 
@@ -161,5 +161,41 @@ describe("$query", () => {
     type A = DaunusInferReturn<typeof test>;
 
     type test = Expect<Equal<A, { data: number; exception: never }>>;
+  });
+
+  it("Should populate openapi by when struct matches", () => {
+    const input = $input({
+      method: z.literal("post"),
+      contentType: z.literal("json"),
+      body: z.object({ id: z.string() }),
+      query: z.object({ sj: z.string() })
+    });
+
+    const test = struct({ success: true, data: $var(input, "body.id") });
+
+    const res = test.withOpenApi(input);
+
+    expect(JSON.stringify(res.meta.openapi)).toEqual(
+      '{"method":"<% method %>","contentType":"<% contentType %>","body":"<% body %>","query":"<% query %>"}'
+    );
+
+    type A = typeof res.meta.openapi;
+
+    type test = Expect<
+      Equal<
+        A,
+        {
+          method: "post";
+          contentType: "json";
+          path: unknown;
+          body: {
+            id: string;
+          };
+          query: {
+            sj: string;
+          };
+        }
+      >
+    >;
   });
 });

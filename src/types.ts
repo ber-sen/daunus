@@ -152,15 +152,15 @@ export type DaunusWorkflowAction<T> = {
   name?: string;
 };
 
-export type DaunusActionWithInput<I, Z, B, Q, D, P, E> = {
+export type DaunusActionWithInput<I, Z, B, Q, M extends string, T, D, P, E> = {
   meta: {
-    iSchema: Zod.ZodType<I>;
-    openapi?: {
-      method?: Method;
-      contentType?: string;
-      path?: Z;
-      body?: B;
-      query?: Q;
+    iSchema: I;
+    openapi: {
+      method: M;
+      contentType: T;
+      path: Z;
+      body: B;
+      query: Q;
     };
   };
   input: (value: I) => DaunusAction<D, P, E>;
@@ -169,18 +169,44 @@ export type DaunusActionWithInput<I, Z, B, Q, D, P, E> = {
 
 export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   noParams: () => DaunusAction<D, P, E>;
-  withParams: <I, Z, B, Q>(
-    iSchema: DaunusInput<I>,
+  withParams: <I extends z.ZodType<any>, Z, B, Q, T, M extends string>(
+    iSchema: I,
     meta?: {
       openapi?: {
-        method?: Method;
-        contentType?: string;
+        method?: M;
+        contentType?: T;
         path?: Z;
         body?: B;
         query?: Q;
       };
     }
-  ) => DaunusActionWithInput<I, Z, B, Q, D, P, E>;
+  ) => DaunusActionWithInput<I, Z, B, Q, M, T, D, P, E>;
+  withOpenApi: <
+    I extends z.ZodObject<{
+      method?: z.ZodType<M>;
+      contentType?: z.ZodType<T>;
+      path?: Z;
+      body?: B;
+      query?: Q;
+    }>,
+    Z extends Zod.ZodTypeAny,
+    B extends Zod.ZodTypeAny,
+    Q extends Zod.ZodTypeAny,
+    M extends string,
+    T
+  >(
+    iSchema: I
+  ) => DaunusActionWithInput<
+    I,
+    NonNullable<I["shape"]["path"]>["_output"],
+    NonNullable<I["shape"]["body"]>["_output"],
+    NonNullable<I["shape"]["query"]>["_output"],
+    NonNullable<I["shape"]["method"]>["_output"],
+    NonNullable<I["shape"]["contentType"]>["_output"],
+    D,
+    P,
+    E
+  >;
 };
 
 export type DaunusExcludeException<T> =
@@ -192,19 +218,19 @@ export type DaunusGetExceptions<T> =
 export type DaunusInferReturn<
   T extends
     | DaunusAction<any, any, any>
-    | DaunusActionWithInput<any, any, any, any, any, any, any>
+    | DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
 > =
-  T extends DaunusActionWithInput<any, any, any, any, any, any, any>
+  T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
     : T extends DaunusAction<any, any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
 export type DaunusInferInput<
-  T extends DaunusActionWithInput<any, any, any, any, any, any, any>
+  T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
 > =
-  T extends DaunusActionWithInput<any, any, any, any, any, any, any>
-    ? Parameters<T["input"]>[0]
+  T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
+    ? Parameters<T["input"]>[0]["_output"]
     : never;
 
 export class DaunusException<S extends number, D = undefined> extends Error {
