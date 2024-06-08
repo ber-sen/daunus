@@ -152,7 +152,7 @@ export type DaunusWorkflowAction<T> = {
   name?: string;
 };
 
-export type DaunusActionWithInput<I, Z, B, Q, M extends string, T, D, P, E> = {
+export type DaunusActionWithInput<I, Z, B, Q, M, T, D, P, E> = {
   meta: {
     iSchema: I;
     openapi: {
@@ -169,7 +169,7 @@ export type DaunusActionWithInput<I, Z, B, Q, M extends string, T, D, P, E> = {
 
 export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   noParams: () => DaunusAction<D, P, E>;
-  withParams: <I extends z.ZodType<any>, Z, B, Q, T, M extends string>(
+  withParams: <I extends z.ZodType<any>, Z, B, Q, T, M>(
     iSchema: I,
     meta?: {
       openapi?: {
