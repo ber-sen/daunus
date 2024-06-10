@@ -1,3 +1,4 @@
+import { ZodType } from "zod";
 import { z } from "./zod";
 
 export type DaunusVar<T> =
@@ -152,7 +153,17 @@ export type DaunusWorkflowAction<T> = {
   name?: string;
 };
 
-export type DaunusActionWithInput<I, Z, B, Q, M, T, D, P, E> = {
+export type DaunusActionWithInput<
+  I extends ZodType<any>,
+  Z,
+  B,
+  Q,
+  M,
+  T,
+  D,
+  P,
+  E
+> = {
   meta: {
     iSchema: I;
     openapi: {
@@ -163,7 +174,7 @@ export type DaunusActionWithInput<I, Z, B, Q, M, T, D, P, E> = {
       query: Q;
     };
   };
-  input: (value: I) => DaunusAction<D, P, E>;
+  input: (value: I["_type"]) => DaunusAction<D, P, E>;
   rawInput: (value: unknown) => DaunusAction<D, P, E>;
 };
 
@@ -230,7 +241,7 @@ export type DaunusInferInput<
   T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
 > =
   T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
-    ? Parameters<T["input"]>[0]["_output"]
+    ? Parameters<T["input"]>[0]
     : never;
 
 export class DaunusException<S extends number, D = undefined> extends Error {
