@@ -36,12 +36,9 @@ export const $router = <
     }.action;
   };
 
-  const action = $action(
-    { type: "router", ...options },
-    () => (defs: R | undefined) => {
-      return {} as any;
-    }
-  );
+  const action = $action({ type: "router", ...options }, () => () => {
+    return {} as any;
+  });
 
   const router = action(defs).withParams(z.custom<Exclude<AI, typeof Empty>>());
 

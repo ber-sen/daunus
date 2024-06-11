@@ -302,7 +302,7 @@ export interface RouterFactory<
 > extends DaunusActionWithInput<
     Zod.ZodType<Exclude<AI, typeof Empty>>,
     Exclude<AR, typeof Empty>,
-    R | undefined,
+    {},
     {}
   > {
   add: <N extends string, I extends z.AnyZodObject, D, P, E>(
