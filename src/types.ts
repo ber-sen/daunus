@@ -288,3 +288,30 @@ export type DaunusSchema<T> =
   | z.Schema<T>
   | { schema: z.Schema<T>; jsonSchema: string }
   | { jsonSchema: string };
+
+export const Empty = Symbol("Empty");
+export interface RouterFactory<
+  R extends Record<
+    string,
+    {
+      action: DaunusActionWithInput<any, any, any, any>;
+    }
+  >,
+  AI extends any | typeof Empty,
+  AR extends any | typeof Empty
+> extends DaunusActionWithInput<
+    Zod.ZodType<Exclude<AI, typeof Empty>>,
+    Exclude<AR, typeof Empty>,
+    R | undefined,
+    {}
+  > {
+  add: <N extends string, I extends z.AnyZodObject, D, P, E>(
+    name: N,
+    action: DaunusActionWithInput<I, D, P, E>
+  ) => RouterFactory<
+    R & Record<N, { action: DaunusActionWithInput<I, D, P, E> }>,
+    AI | I["_output"],
+    AR | D
+  >;
+  get: <N extends keyof R>(name: N) => R[N]["action"];
+}
