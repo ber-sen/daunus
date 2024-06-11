@@ -35,7 +35,7 @@ describe("$router", () => {
 
     const data = await router.input({ body: { score: 10 } }).run();
 
-    expect(data).toEqual({ score: 10 });
+    expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
 
     type A = DaunusInferReturn<typeof router>;
 

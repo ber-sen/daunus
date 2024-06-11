@@ -26,7 +26,7 @@ export const $router = <
       AR | D
     >(options, {
       ...(defs || ({} as R)),
-      [name]: { route: { action } }
+      [name]: { action }
     });
   };
 
@@ -36,11 +36,31 @@ export const $router = <
     }.action;
   };
 
-  const action = $action({ type: "router", ...options }, () => () => {
-    return {} as any;
-  });
+  const input = z.custom<Exclude<AI, typeof Empty>>();
 
-  const router = action(defs).withParams(z.custom<Exclude<AI, typeof Empty>>());
+  const action = $action(
+    { type: "router", ...options },
+    ({ ctx }) =>
+      async () => {
+        const inputData = ctx.get("input");
+
+        const match = Object.entries(defs || {}).find(([_, item]) => {
+          const { success } = item.action?.meta.iSchema.safeParse(inputData);
+
+          return success;
+        });
+
+        if (match) {
+          const res = await match[1].action.input(inputData).run(ctx);
+
+          return res.data ?? res.exception;
+        }
+
+        return undefined;
+      }
+  );
+
+  const router = action(defs).withParams(input);
 
   return {
     ...router,
