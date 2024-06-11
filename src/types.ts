@@ -12,16 +12,6 @@ export type DaunusInput<T> = z.ZodType<T>;
 
 export type DaunusCtx = Map<any, any>;
 
-export type Method =
-  | "get"
-  | "post"
-  | "put"
-  | "delete"
-  | "patch"
-  | "head"
-  | "options"
-  | "trace";
-
 export type ResolveDaunusVar<T> =
   T extends DaunusVar<infer U>
     ? U extends DaunusVar<infer Z>
@@ -153,25 +143,43 @@ export type DaunusWorkflowAction<T> = {
   name?: string;
 };
 
-export type DaunusActionWithInput<
-  I extends ZodType<any>,
-  Z,
-  B,
-  Q,
-  M,
-  T,
-  D,
-  P,
-  E
-> = {
+export type DaunusOpenApiMethod =
+  | "get"
+  | "post"
+  | "put"
+  | "delete"
+  | "patch"
+  | "head"
+  | "options"
+  | "trace";
+
+export type DaunusOpenApi = z.ZodObject<{
+  method?: z.ZodType<any>;
+  contentType?: z.ZodType<any>;
+  path?: any;
+  body?: any;
+  query?: any;
+}>;
+
+export type DaunusActionWithInput<I extends ZodType<any>, D, P, E> = {
   meta: {
     iSchema: I;
     openapi: {
-      method: M;
-      contentType: T;
-      path: Z;
-      body: B;
-      query: Q;
+      method: I extends DaunusOpenApi
+        ? NonNullable<I["shape"]["method"]>["_output"]
+        : "post";
+      contentType: I extends DaunusOpenApi
+        ? NonNullable<I["shape"]["contentType"]>["_output"]
+        : never;
+      path: I extends DaunusOpenApi
+        ? NonNullable<I["shape"]["path"]>["_output"]
+        : never;
+      body: I extends DaunusOpenApi
+        ? NonNullable<I["shape"]["body"]>["_output"]
+        : never;
+      query: I extends DaunusOpenApi
+        ? NonNullable<I["shape"]["query"]>["_output"]
+        : never;
     };
   };
   input: (value: I["_type"]) => DaunusAction<D, P, E>;
@@ -180,44 +188,9 @@ export type DaunusActionWithInput<
 
 export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   noParams: () => DaunusAction<D, P, E>;
-  withParams: <I extends z.ZodType<any>, Z, B, Q, T, M>(
-    iSchema: I,
-    meta?: {
-      openapi?: {
-        method?: M;
-        contentType?: T;
-        path?: Z;
-        body?: B;
-        query?: Q;
-      };
-    }
-  ) => DaunusActionWithInput<I, Z, B, Q, M, T, D, P, E>;
-  withOpenApi: <
-    I extends z.ZodObject<{
-      method?: z.ZodType<M>;
-      contentType?: z.ZodType<T>;
-      path?: Z;
-      body?: B;
-      query?: Q;
-    }>,
-    Z extends Zod.ZodTypeAny,
-    B extends Zod.ZodTypeAny,
-    Q extends Zod.ZodTypeAny,
-    M extends string,
-    T
-  >(
+  withParams: <I extends z.ZodType<any>>(
     iSchema: I
-  ) => DaunusActionWithInput<
-    I,
-    NonNullable<I["shape"]["path"]>["_output"],
-    NonNullable<I["shape"]["body"]>["_output"],
-    NonNullable<I["shape"]["query"]>["_output"],
-    NonNullable<I["shape"]["method"]>["_output"],
-    NonNullable<I["shape"]["contentType"]>["_output"],
-    D,
-    P,
-    E
-  >;
+  ) => DaunusActionWithInput<I, D, P, E>;
 };
 
 export type DaunusExcludeException<T> =
@@ -229,18 +202,18 @@ export type DaunusGetExceptions<T> =
 export type DaunusInferReturn<
   T extends
     | DaunusAction<any, any, any>
-    | DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
+    | DaunusActionWithInput<any, any, any, any>
 > =
-  T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
+  T extends DaunusActionWithInput<any, any, any, any>
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
     : T extends DaunusAction<any, any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
 export type DaunusInferInput<
-  T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
+  T extends DaunusActionWithInput<any, any, any, any>
 > =
-  T extends DaunusActionWithInput<any, any, any, any, any, any, any, any, any>
+  T extends DaunusActionWithInput<any, any, any, any>
     ? Parameters<T["input"]>[0]
     : never;
 

@@ -11,8 +11,7 @@ import {
   DaunusActionWithParams,
   DaunusCtx,
   DaunusParams,
-  DaunusReadable,
-  Method
+  DaunusReadable
 } from "./types";
 import { isException, parseResult } from "./helpers";
 
@@ -174,54 +173,30 @@ export const $action =
     > = {
       ...action,
       noParams: () => action,
-      withParams: <I extends z.ZodType<any>, Z, B, Q, C, M = string>(
-        iSchema: I,
-        meta?: {
-          openapi?: {
-            method?: M;
-            contentType?: C;
-            path?: Z;
-            body?: B;
-            query?: Q;
-          };
-        }
-      ) => ({
-        meta: {
-          openapi: {
-            method: meta?.openapi?.method ?? "post",
-            contentType: meta?.openapi?.contentType ?? "application/json",
-            path: meta?.openapi?.path,
-            body: meta?.openapi?.body,
-            query: meta?.openapi?.query
-          },
-          iSchema
-        } as any,
-        input: (value: I): DaunusAction<T, ExceptionParams<T, P>, E> => ({
-          ...action,
-          run: makeRun((ctx) => {
-            ctx.set("input", iSchema.parse(value));
-          })
-        }),
-        rawInput: (
-          value: unknown
-        ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
-          ...action,
-          run: makeRun((ctx) => {
-            ctx.set("input", iSchema.parse(value));
-          })
-        })
-      }),
-      withOpenApi: (iSchema) => ({
+      withParams: (iSchema) => ({
         meta: {
           iSchema,
           openapi: {
-            method: iSchema.shape.method ? `<% method %>` : "post",
-            contentType: iSchema.shape.contentType
-              ? `<% contentType %>`
-              : "application/json",
-            path: iSchema.shape.path ? `<% path %>` : undefined,
-            body: iSchema.shape.body ? `<% body %>` : undefined,
-            query: iSchema.shape.query ? `<% query %>` : undefined
+            method:
+              iSchema instanceof z.ZodObject && iSchema.shape.method
+                ? `<% method %>`
+                : "post",
+            contentType:
+              iSchema instanceof z.ZodObject && iSchema.shape.contentType
+                ? `<% contentType %>`
+                : "application/json",
+            path:
+              iSchema instanceof z.ZodObject && iSchema.shape.path
+                ? `<% path %>`
+                : undefined,
+            body:
+              iSchema instanceof z.ZodObject && iSchema.shape.body
+                ? `<% body %>`
+                : undefined,
+            query:
+              iSchema instanceof z.ZodObject && iSchema.shape.query
+                ? `<% query %>`
+                : undefined
           } as any
         },
         input: (value): DaunusAction<T, ExceptionParams<T, P>, E> => ({

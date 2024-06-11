@@ -45,21 +45,15 @@ describe("$query", () => {
 
   it("Should return api props", () => {
     const input = $input({
-      id: z.string()
+      path: z.object({ id: z.string() })
     }).openapi("User");
 
-    const test = struct({ success: true, data: $var(input, "id") });
+    const test = struct({ success: true, data: $var(input, "path.id") });
 
-    const res = test.withParams(input, {
-      openapi: {
-        path: {
-          id: $var(input, "id")
-        }
-      }
-    });
+    const res = test.withParams(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
-      '{"method":"post","contentType":"application/json","path":{"id":"<% id %>"}}'
+      '{"method":"post","contentType":"application/json","path":"<% path %>"}'
     );
   });
 
@@ -173,7 +167,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "body.id") });
 
-    const res = test.withOpenApi(input);
+    const res = test.withParams(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"method":"<% method %>","contentType":"<% contentType %>","body":"<% body %>","query":"<% query %>"}'
