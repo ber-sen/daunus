@@ -10,12 +10,6 @@ const input = $input({
 
 const res = struct({ success: true, data: $var(input, "id") });
 
-const useCase = res.withParams(input, {
-  openapi: {
-    path: {
-      id: $var(input, "id")
-    }
-  }
-});
+const useCase = res.withParams(input);
 
 export default useCase;

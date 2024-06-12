@@ -1,4 +1,3 @@
-import { ZodType } from "zod";
 import { z } from "./zod";
 
 export type DaunusVar<T> =
@@ -161,7 +160,7 @@ export type DaunusOpenApi = z.ZodObject<{
   query?: any;
 }>;
 
-export type DaunusActionWithInput<I extends ZodType<any>, D, P, E> = {
+export type DaunusActionWithInput<I extends z.ZodType<any>, D, P, E> = {
   meta: {
     iSchema: I;
     openapi: {
