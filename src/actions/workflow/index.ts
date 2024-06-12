@@ -11,11 +11,6 @@ type Action =
 interface Workflow {
   name: string;
   id?: string;
-  trigger: {
-    type: string[];
-    name: string;
-    params: object;
-  };
   action?: {
     type: string[];
     params: Action;

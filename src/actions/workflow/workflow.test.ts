@@ -20,11 +20,6 @@ describe("workflow", () => {
             params: $query(($) => `Foo ${$.struct.data.name}`)
           }
         ]
-      },
-      trigger: {
-        name: "endpoint",
-        type: ["endpoint"],
-        params: { method: "post" }
       }
     });
 
@@ -54,11 +49,6 @@ describe("workflow", () => {
             params: $query(($) => `Foo\n${$.csv.data}`)
           }
         ]
-      },
-      trigger: {
-        name: "endpoint",
-        type: ["endpoint"],
-        params: { method: "post" }
       }
     });
 
