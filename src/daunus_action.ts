@@ -15,7 +15,7 @@ import {
 } from "./types";
 import { isException, parseResult } from "./helpers";
 
-const ulid = ulidFactory();
+const ulid = ulidFactory({ monotonic: false });
 
 export const $action =
   <P, O, E = {}, T = O>(
