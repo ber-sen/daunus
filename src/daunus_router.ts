@@ -1,5 +1,5 @@
 import { $action } from "./daunus_action";
-import { DaunusActionWithInput, Empty, RouterFactory } from "./types";
+import { DaunusActionWithInput, RouterFactory } from "./types";
 import { z } from "./zod";
 
 export const $router = <
@@ -10,8 +10,8 @@ export const $router = <
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
   > = {},
-  AI extends any | typeof Empty = typeof Empty,
-  AR extends any | typeof Empty = typeof Empty
+  AI extends any | undefined = undefined,
+  AR extends any | undefined = undefined
 >(
   options: { name?: string } = {},
   defs?: R
@@ -36,7 +36,7 @@ export const $router = <
     }.action;
   };
 
-  const input = z.custom<Exclude<AI, typeof Empty>>();
+  const input = z.custom<Exclude<AI, undefined>>();
 
   const action = $action(
     { type: "router", ...options },
