@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { v4 } from "@lukeed/uuid/secure";
+import { ulidFactory } from "ulid-workers";
 import { z } from "zod";
 
 import { resolveParams } from "./resolve_params";
@@ -14,6 +14,8 @@ import {
   DaunusReadable
 } from "./types";
 import { isException, parseResult } from "./helpers";
+
+const ulid = ulidFactory();
 
 export const $action =
   <P, O, E = {}, T = O>(
@@ -63,7 +65,7 @@ export const $action =
       skipLog?: boolean;
     }
   ) => {
-    const name: string = actionCtx?.name || args.name || v4();
+    const name: string = actionCtx?.name || args.name || ulid();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
     const actionInfo: DaunusActionInfo<T, ExceptionParams<T, P>> = {
