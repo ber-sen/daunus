@@ -1,6 +1,6 @@
 {
   "name": "daunus",
-  "version": "0.1.70",
+  "version": "0.1.71",
   "description": "Yet another typescript framework",
   "scripts": {
     "test": "jest",
@@ -34,6 +34,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "ulid-workers": "^2.1.0",
+    "ulidx": "^2.3.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

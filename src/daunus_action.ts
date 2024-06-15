@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { ulidFactory } from "ulid-workers";
+import { ulid } from "ulidx";
 import { z } from "zod";
 
 import { resolveParams } from "./resolve_params";
@@ -14,8 +14,6 @@ import {
   DaunusReadable
 } from "./types";
 import { isException, parseResult } from "./helpers";
-
-const ulid = ulidFactory({ monotonic: false });
 
 export const $action =
   <P, O, E = {}, T = O>(
