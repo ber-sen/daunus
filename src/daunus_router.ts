@@ -14,6 +14,7 @@ export const $router = <
   AR extends any | undefined = undefined
 >(
   options: { name?: string } = {},
+  input: Array<z.ZodAny> = [],
   defs?: R
 ): RouterFactory<R, AI, AR> => {
   const add = <N extends string, I extends z.AnyZodObject, D, P, E>(
@@ -24,7 +25,7 @@ export const $router = <
       R & Record<N, { action: DaunusActionWithInput<I, D, P, E> }>,
       AI | I["_output"],
       AR | D
-    >(options, {
+    >(options, [...input.filter(Boolean), action.meta.iSchema] as any, {
       ...(defs || ({} as R)),
       [name]: { action }
     });
@@ -35,8 +36,6 @@ export const $router = <
       ...defs![name]
     }.action;
   };
-
-  const input = z.custom<Exclude<AI, undefined>>();
 
   const action = $action(
     { type: "router", ...options },
@@ -60,7 +59,7 @@ export const $router = <
       }
   );
 
-  const router = action(defs).withParams(input);
+  const router = action(defs).withParams(z.union([...(input as any)] as any));
 
   return {
     ...router,

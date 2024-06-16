@@ -35,6 +35,14 @@ describe("$router", () => {
 
     const data = await router.input({ body: { score: 10 } }).run();
 
+    expect(() => router.meta.iSchema.parse({ trip: false })).toThrow();
+    expect(() =>
+      router.meta.iSchema.parse({ body: { score: "test" } })
+    ).toThrow();
+    expect(() =>
+      router.meta.iSchema.parse({ body: { score: 4 } })
+    ).not.toThrow();
+
     expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
 
     type A = DaunusInferReturn<typeof router>;
