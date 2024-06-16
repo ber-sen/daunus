@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { z } from "zod";
 
+import { v4 } from "@lukeed/uuid";
 import { resolveParams } from "./resolve_params";
 import {
   ExceptionParams,
@@ -13,8 +14,6 @@ import {
   DaunusReadable
 } from "./types";
 import { isException, parseResult } from "./helpers";
-
-let conter = 0;
 
 export const $action =
   <P, O, E = {}, T = O>(
@@ -64,7 +63,7 @@ export const $action =
       skipLog?: boolean;
     }
   ) => {
-    const name: string = actionCtx?.name || args.name || `action_${conter++}`;
+    const name: string = actionCtx?.name || args.name || v4();
     const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
     const actionInfo: DaunusActionInfo<T, ExceptionParams<T, P>> = {
