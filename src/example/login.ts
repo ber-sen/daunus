@@ -1,5 +1,13 @@
-import { $input, condition, $var, exit, z, struct, $fn } from "..";
-import { DaunusException } from "../../dist";
+import {
+  $input,
+  condition,
+  $var,
+  exit,
+  z,
+  struct,
+  $fn,
+  DaunusException
+} from "..";
 
 const input = $input({
   did: z.string().describe("Decentralized Identifier token")

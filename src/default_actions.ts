@@ -7,8 +7,10 @@ import serial from "./actions/serial";
 import task from "./actions/task";
 import exit from "./actions/exit";
 import csv from "./actions/csv";
+import define from "./actions/define";
 
 export const DEFAULT_ACTIONS = {
+  define,
   struct,
   condition,
   response,

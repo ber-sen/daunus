@@ -58,4 +58,33 @@ describe("workflow", () => {
       "Foo\nhello,foo\r\nworld,bar\r\nworld 2,bar 2"
     );
   });
+
+  it("should work with condition", async () => {
+    const action = workflow({
+      name: "Foo",
+      action: {
+        type: ["process"],
+        params: [
+          {
+            name: "item",
+            type: ["define"],
+            params: { name: "Foo" }
+          },
+          {
+            type: ["condition"],
+            params: {
+              if: $query(($) => $.item.data.name === "Foo"),
+              do: {
+                success: true
+              }
+            }
+          }
+        ]
+      }
+    });
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual({ success: true });
+  });
 });
