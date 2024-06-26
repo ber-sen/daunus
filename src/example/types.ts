@@ -1,4 +1,8 @@
-import { $fn, struct, condition, $var, exit } from "../";
+import { $fn, condition, $var, exit, define } from "../";
+
+const isSuccess = define($fn(() => Math.random() > 0.5));
+
+const success = define({ success: true });
 
 const error = exit({
   status: 404,
@@ -7,14 +11,10 @@ const error = exit({
   }
 });
 
-const random = struct($fn(() => Math.random()));
-
-const success = struct({ success: true });
-
 const res = condition({
-  if: $var(random, (val) => val > 0),
+  if: $var(isSuccess),
   do: $var(success),
   else: $var(error)
 });
 
-export default error.noParams();
+export default res.noParams();
