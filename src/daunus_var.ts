@@ -7,7 +7,8 @@ import {
   DaunusActionWithParams,
   DaunusGetExceptions,
   DaunusInput,
-  DaunusVar
+  DaunusVar,
+  ResolveDaunusVar
 } from "./types";
 import { Path, TypeAtPath, get } from "./get";
 import { isArray, isException } from "./helpers";
@@ -51,7 +52,7 @@ export function $var<T, K extends Path<DaunusExcludeException<T>>>(
 
 export function $var<T, R>(
   arg: DaunusActionWithParams<T, any, any>,
-  selector: (value: T) => R | Promise<R>
+  selector: (value: ResolveDaunusVar<T>) => R | Promise<R>
 ): DaunusVar<R | DaunusGetExceptions<T>>;
 
 export function $var<T>(
@@ -66,7 +67,7 @@ export function $var<T, K extends Path<DaunusExcludeException<T>>>(
 
 export function $var<T, R>(
   arg: DaunusAction<T, any, any>,
-  selector: (value: T) => R | Promise<R>
+  selector: (value: ResolveDaunusVar<T>) => R | Promise<R>
 ): DaunusVar<R | DaunusGetExceptions<T>>;
 
 export function $var<T>(

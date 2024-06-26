@@ -201,46 +201,38 @@ describe("$var", () => {
       });
     });
 
-    it("should pass the error in other actions", async () => {
-      const actionWithError = $action(
-        {
-          type: "test"
-        },
-        () => () => {
-          // eslint-disable-next-line no-constant-condition
-          if (true) {
-            return new DaunusException(404);
-          }
+    it("should work with nested", async () => {
+      const nested = struct({ number: 403 });
 
-          return { message: "Found" };
-        }
-      );
+      const input = struct({ status: $var(nested) });
 
-      const instanceWithError = actionWithError({});
-
-      const container = $action(
-        {
-          type: "test"
-        },
-        () =>
-          <P extends string>(payload: P) => {
-            return payload.length;
-          }
-      );
-
-      const action = container($var(instanceWithError, "message"));
+      const action = struct($var(input, (i) => i));
 
       const res = await action.run();
 
       type A = Awaited<typeof res>;
 
       type res = Expect<
-        Equal<A, { data: number; exception: DaunusException<404, undefined> }>
+        Equal<
+          A,
+          {
+            data: {
+              status: {
+                number: number;
+              };
+            };
+            exception: never;
+          }
+        >
       >;
 
       expect(res).toStrictEqual({
-        data: undefined,
-        exception: new DaunusException(404)
+        data: {
+          status: {
+            number: 403
+          }
+        },
+        exception: undefined
       });
     });
   });
