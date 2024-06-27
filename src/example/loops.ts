@@ -13,19 +13,21 @@ const input = $input({
 }).openapi("Items");
 
 // @ts-ignore
-const items = iterate($var(input, "body"));
+const items = $iterate($var(input, "body"));
 
 // @ts-ignore
-const itemsWithName = sendToSlack({
-  channel: "#general",
-  // @ts-ignore
-  text: $var(items, "value.text")
-});
+const notifySlackChannal = sendToSlack(
+  {
+    channel: "#general",
+    // @ts-ignore
+    text: $var(items, "value.text")
+  },
+  { scope: items }
+);
 
 // @ts-ignore
-const action = map({
-  iterate: $var(items),
-  do: $var(itemsWithName)
+const action = items.map({
+  each: $var(notifySlackChannal)
 });
 
 const useCase = action.withParams(input);
