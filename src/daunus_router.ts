@@ -75,6 +75,7 @@ export const $router = <
   return {
     ...router,
     add,
-    get
+    get,
+    defs: defs as R
   };
 };

@@ -314,4 +314,5 @@ export interface RouterFactory<
     AR | D
   >;
   get: <N extends keyof R>(name: N) => R[N]["action"];
+  defs: R;
 }
