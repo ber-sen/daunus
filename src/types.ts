@@ -294,6 +294,7 @@ export interface RouterFactory<
     string,
     {
       action: DaunusActionWithInput<any, any, any, any>;
+      input: any;
     }
   >,
   AI extends any | undefined,

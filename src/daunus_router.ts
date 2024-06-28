@@ -7,6 +7,7 @@ export const $router = <
     string,
     {
       action: DaunusActionWithInput<any, any, any, any>;
+      input: any;
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
   > = {},
@@ -25,23 +26,18 @@ export const $router = <
     name: N,
     action: DaunusActionWithInput<I, D, P, E>
   ) => {
+    const newInput = options.createInput
+      ? options.createInput(action, name)
+      : action.meta.iSchema;
+
     return $router<
       R & Record<N, { action: DaunusActionWithInput<I, D, P, E> }>,
       AI | I["_output"],
       AR | D
-    >(
-      options,
-      [
-        ...input.filter(Boolean),
-        options.createInput
-          ? options.createInput(action, name)
-          : action.meta.iSchema
-      ] as any,
-      {
-        ...(defs || ({} as R)),
-        [name]: { action }
-      }
-    );
+    >(options, [...input.filter(Boolean), newInput] as any, {
+      ...(defs || ({} as R)),
+      [name]: { action, input: newInput }
+    });
   };
 
   const get = <N extends keyof R>(name: N): R[N]["action"] => {
@@ -54,17 +50,17 @@ export const $router = <
     { type: "router", ...options },
     ({ ctx }) =>
       async () => {
-        const inputData = options.parseInput
-          ? options.parseInput(ctx.get("input"))
-          : ctx.get("input");
-
         const match = Object.entries(defs || {}).find(([_, item]) => {
-          const { success } = item.action?.meta.iSchema.safeParse(inputData);
+          const { success } = item.input.safeParse(ctx.get("input"));
 
           return success;
         });
 
         if (match) {
+          const inputData = options.parseInput
+            ? options.parseInput(ctx.get("input"))
+            : ctx.get("input");
+
           const res = await match[1].action.input(inputData).run(ctx);
 
           return res.data ?? res.exception;
