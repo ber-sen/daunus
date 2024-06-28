@@ -63,4 +63,63 @@ describe("$router", () => {
       >
     >;
   });
+
+  it("should work with simple inputs", async () => {
+    const userInput = $input({ firstName: z.string() });
+
+    const user = struct({ name: "user" }).withParams(userInput);
+
+    const gameInput = $input({ score: z.number() });
+
+    const game = struct({ score: $var(gameInput, "score") }).withParams(
+      gameInput
+    );
+
+    const errorInput = $input({ error: z.boolean() });
+
+    const error = exit({
+      status: 404
+    }).withParams(errorInput);
+
+    const makeApi = {
+      createInput: (action: any, name: any) => {
+        return z.object({
+          path: z.literal(`/${name}`),
+          body: action.meta.iSchema
+        });
+      },
+      parseInput: (action: any) => {
+        return action.body;
+      }
+    };
+
+    const router = $router(makeApi)
+      .add("user", user)
+      .add("game", game)
+      .add("error", error);
+
+    const data = await router
+      .rawInput({ path: "/game", body: { score: 10 } })
+      .run();
+
+    expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
+
+    type A = DaunusInferReturn<typeof router>;
+
+    type data = Expect<
+      Equal<
+        A,
+        {
+          data:
+            | {
+                name: string;
+              }
+            | {
+                score: number;
+              };
+          exception: DaunusException<404, unknown>;
+        }
+      >
+    >;
+  });
 });

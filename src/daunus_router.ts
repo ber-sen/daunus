@@ -13,7 +13,11 @@ export const $router = <
   AI extends any | undefined = undefined,
   AR extends any | undefined = undefined
 >(
-  options: { name?: string } = {},
+  options: {
+    name?: string;
+    createInput?: (action: any, name: string) => any;
+    parseInput?: (object: any) => any;
+  } = {},
   input: Array<z.ZodAny> = [],
   defs?: R
 ): RouterFactory<R, AI, AR> => {
@@ -25,10 +29,19 @@ export const $router = <
       R & Record<N, { action: DaunusActionWithInput<I, D, P, E> }>,
       AI | I["_output"],
       AR | D
-    >(options, [...input.filter(Boolean), action.meta.iSchema] as any, {
-      ...(defs || ({} as R)),
-      [name]: { action }
-    });
+    >(
+      options,
+      [
+        ...input.filter(Boolean),
+        options.createInput
+          ? options.createInput(action, name)
+          : action.meta.iSchema
+      ] as any,
+      {
+        ...(defs || ({} as R)),
+        [name]: { action }
+      }
+    );
   };
 
   const get = <N extends keyof R>(name: N): R[N]["action"] => {
@@ -41,7 +54,9 @@ export const $router = <
     { type: "router", ...options },
     ({ ctx }) =>
       async () => {
-        const inputData = ctx.get("input");
+        const inputData = options.parseInput
+          ? options.parseInput(ctx.get("input"))
+          : ctx.get("input");
 
         const match = Object.entries(defs || {}).find(([_, item]) => {
           const { success } = item.action?.meta.iSchema.safeParse(inputData);

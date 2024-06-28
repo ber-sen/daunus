@@ -173,8 +173,9 @@ export const $action =
     > = {
       ...action,
       noParams: () => action,
-      withParams: (iSchema) => ({
+      withParams: (iSchema, meta) => ({
         meta: {
+          ...meta,
           iSchema,
           openapi: {
             method:

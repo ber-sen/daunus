@@ -188,7 +188,8 @@ export type DaunusActionWithInput<I extends z.ZodType<any>, D, P, E> = {
 export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
   noParams: () => DaunusAction<D, P, E>;
   withParams: <I extends z.ZodType<any>>(
-    iSchema: I
+    iSchema: I,
+    meta?: object
   ) => DaunusActionWithInput<I, D, P, E>;
 };
 
