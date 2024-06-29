@@ -186,11 +186,11 @@ export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
 };
 
 export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, P, E> & {
-  createRoute: <I extends z.ZodType<any> = z.ZodUndefined>(
+  createRoute<I extends z.ZodType<any>>(
     iSchema: I,
     meta?: object
-  ) => DaunusRoute<D, P, E, I>;
-  createNoInputRoute: (meta?: object) => DaunusRoute<D, P, E, z.ZodUndefined>;
+  ): DaunusRoute<D, P, E, I>;
+  createRoute(iSchema?: undefined, meta?: object): DaunusAction<D, P, E>;
 };
 
 export type DaunusExcludeException<T> =
@@ -287,7 +287,7 @@ export interface RouterFactory<
   R extends Record<
     string,
     {
-      route: DaunusRoute<any, any, any, any>;
+      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>;
       input: any;
     }
   >,
@@ -297,16 +297,22 @@ export interface RouterFactory<
     Exclude<AR, undefined>,
     {},
     {},
-    Zod.ZodType<Exclude<AI, undefined>>
+    z.ZodType<Exclude<AI, undefined>>
   > {
-  add: <N extends string, D, P, E, I extends z.ZodTypeAny = z.ZodUndefined>(
+  add<N extends string, D, P, E, I extends z.ZodTypeAny = z.ZodUndefined>(
     name: N,
     route: DaunusRoute<D, P, E, I>
-  ) => RouterFactory<
+  ): RouterFactory<
     R & Record<N, { route: DaunusRoute<D, P, E, I> }>,
     AI | I["_output"],
     AR | D
   >;
-  get: <N extends keyof R>(name: N) => R[N]["route"];
+
+  add<N extends string, D, P, E>(
+    name: N,
+    route: DaunusAction<D, P, E>
+  ): RouterFactory<R & Record<N, { route: DaunusAction<D, P, E> }>, AI, AR | D>;
+
+  get<N extends keyof R>(name: N): R[N]["route"];
   defs: R;
 }

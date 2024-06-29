@@ -1,5 +1,5 @@
 import { $input } from "./daunus_helpers";
-import { struct } from "./actions";
+import { define, struct } from "./actions";
 import { $var } from "./daunus_var";
 import { DaunusException, DaunusInferInput, DaunusInferReturn } from "./types";
 import { z } from "./zod";
@@ -191,5 +191,17 @@ describe("$query", () => {
         }
       >
     >;
+  });
+
+  it("Should work with create route", async () => {
+    const test = define({ success: true }).createRoute();
+
+    const { data } = await test.run();
+
+    expect(data).toEqual({ success: true });
+
+    type A = typeof data;
+
+    type test = Expect<Equal<A, { success: boolean }>>;
   });
 });

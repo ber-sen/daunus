@@ -1,4 +1,6 @@
+import { DaunusAction } from "../dist";
 import { $action } from "./daunus_action";
+import { isDaunusRoute } from "./helpers";
 import { DaunusRoute, RouterFactory } from "./types";
 import { z } from "./zod";
 
@@ -6,7 +8,7 @@ export const $router = <
   R extends Record<
     string,
     {
-      route: DaunusRoute<any, any, any, any>;
+      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>;
       input: any;
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -22,21 +24,30 @@ export const $router = <
   input: Array<z.ZodAny> = [],
   defs?: R
 ): RouterFactory<R, AI, AR> => {
-  const add = <N extends string, D, P, E, I extends z.ZodTypeAny>(
-    name: N,
-    route: DaunusRoute<D, P, E, I>
+  const add = (
+    name: string,
+    route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>
   ) => {
+    if (isDaunusRoute(route)) {
+      const newInput = options.createInput
+        ? options.createInput(route, name)
+        : route.meta.iSchema;
+
+      return $router(options, [...input.filter(Boolean), newInput], {
+        ...(defs || ({} as R)),
+        [name]: { route, input: newInput }
+      });
+    }
+
+    // Here, route is a DaunusAction
     const newInput = options.createInput
       ? options.createInput(route, name)
-      : route.meta.iSchema;
+      : z.undefined();
 
-    return $router<
-      R & Record<N, { route: DaunusRoute<D, P, E, I> }>,
-      AI | I["_output"],
-      AR | D
-    >(options, [...input.filter(Boolean), newInput] as any, {
+    return $router(options, [...input.filter(Boolean), newInput], {
       ...(defs || ({} as R)),
-      [name]: { route, input: newInput }
+      // eslint-disable-next-line object-shorthand
+      [name]: { route: route, input: newInput }
     });
   };
 
@@ -61,7 +72,10 @@ export const $router = <
             ? options.parseInput(ctx.get("input"))
             : ctx.get("input");
 
-          const res = await match[1].route.input(inputData).run(ctx);
+          const res =
+            "input" in match[1].route
+              ? await match[1].route.input(inputData).run(ctx)
+              : await match[1].route.run(ctx);
 
           return res.data ?? res.exception;
         }
@@ -77,5 +91,5 @@ export const $router = <
     add,
     get,
     defs: defs as R
-  };
+  } as any;
 };

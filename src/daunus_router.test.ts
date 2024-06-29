@@ -69,11 +69,7 @@ describe("$router", () => {
 
     const user = struct({ name: "user" }).createRoute(userInput);
 
-    const gameInput = $input({ score: z.number() });
-
-    const game = struct({ score: $var(gameInput, "score") }).createRoute(
-      gameInput
-    );
+    const game = struct({ score: 10 }).createRoute();
 
     const errorInput = $input({ error: z.boolean() });
 
@@ -85,7 +81,7 @@ describe("$router", () => {
       createInput: (action: any, name: any) => {
         return z.object({
           path: z.literal(`/${name}`),
-          body: action.meta.iSchema
+          body: action?.meta?.iSchema || z.undefined()
         });
       },
       parseInput: (action: any) => {
@@ -98,9 +94,7 @@ describe("$router", () => {
       .add("game", game)
       .add("error", error);
 
-    const data = await router
-      .rawInput({ path: "/game", body: { score: 10 } })
-      .run();
+    const data = await router.rawInput({ path: "/game" }).run();
 
     expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
 
