@@ -8,7 +8,12 @@ export const resolveAction = async <T>(
   name?: string
 ) => {
   if (isAction(action)) {
-    await runAction(ctx, name ? { ...action, name } : action);
+    const { data, exception } = await runAction(
+      ctx,
+      name ? { ...action, name } : action
+    );
+
+    return data || exception;
   }
 
   return action;

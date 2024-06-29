@@ -71,11 +71,20 @@ describe("workflow", () => {
             params: { name: "Foo" }
           },
           {
+            name: "res",
             type: ["condition"],
             params: {
               if: $query(($) => $.item.data.name === "Foo"),
               do: {
-                success: true
+                name: "item2",
+                type: ["process"],
+                params: [
+                  {
+                    name: "item3",
+                    type: ["define"],
+                    params: { success: true }
+                  }
+                ]
               }
             }
           }
