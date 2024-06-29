@@ -1,7 +1,6 @@
-import { DaunusAction } from "../dist";
 import { $action } from "./daunus_action";
 import { isDaunusRoute } from "./helpers";
-import { DaunusRoute, RouterFactory } from "./types";
+import { DaunusRoute, RouterFactory, DaunusAction } from "./types";
 import { z } from "./zod";
 
 export const $router = <
