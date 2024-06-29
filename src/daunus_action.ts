@@ -172,54 +172,51 @@ export const $action =
       E
     > = {
       ...action,
-      createRoute: (iSchema: any, meta: any) =>
-        iSchema
-          ? {
-              meta: {
-                ...meta,
-                iSchema,
-                openapi: {
-                  method:
-                    iSchema instanceof z.ZodObject && iSchema.shape.method
-                      ? `<% method %>`
-                      : "post",
-                  contentType:
-                    iSchema instanceof z.ZodObject && iSchema.shape.contentType
-                      ? `<% contentType %>`
-                      : "application/json",
-                  path:
-                    iSchema instanceof z.ZodObject && iSchema.shape.path
-                      ? `<% path %>`
-                      : undefined,
-                  body:
-                    iSchema instanceof z.ZodObject && iSchema.shape.body
-                      ? `<% body %>`
-                      : undefined,
-                  query:
-                    iSchema instanceof z.ZodObject && iSchema.shape.query
-                      ? `<% query %>`
-                      : undefined
-                }
-              },
-              input: (
-                value: any
-              ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
-                ...action,
-                run: makeRun((ctx) => {
-                  ctx.set("input", iSchema?.parse(value));
-                })
-              }),
-              rawInput: (
-                value: unknown
-              ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
-                ...action,
-                run: makeRun((ctx) => {
-                  ctx.set("input", iSchema?.parse(value));
-                })
-              })
+      createRoute: (iSchema?: any) => ({
+        ...(!iSchema && action),
+        ...(iSchema && {
+          meta: {
+            iSchema,
+            openapi: {
+              method:
+                iSchema instanceof z.ZodObject && iSchema.shape.method
+                  ? `<% method %>`
+                  : "post",
+              contentType:
+                iSchema instanceof z.ZodObject && iSchema.shape.contentType
+                  ? `<% contentType %>`
+                  : "application/json",
+              path:
+                iSchema instanceof z.ZodObject && iSchema.shape.path
+                  ? `<% path %>`
+                  : undefined,
+              body:
+                iSchema instanceof z.ZodObject && iSchema.shape.body
+                  ? `<% body %>`
+                  : undefined,
+              query:
+                iSchema instanceof z.ZodObject && iSchema.shape.query
+                  ? `<% query %>`
+                  : undefined
             }
-          : action
-    } as any;
+          },
+          input: (value: any): DaunusAction<T, ExceptionParams<T, P>, E> => ({
+            ...action,
+            run: makeRun((ctx) => {
+              ctx.set("input", iSchema?.parse(value));
+            })
+          }),
+          rawInput: (
+            value: unknown
+          ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
+            ...action,
+            run: makeRun((ctx) => {
+              ctx.set("input", iSchema?.parse(value));
+            })
+          })
+        })
+      })
+    };
 
     return actionWithOptions;
   };

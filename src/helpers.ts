@@ -46,7 +46,7 @@ export const isMapLike = (value: any): value is Map<any, any> => {
 export function isDaunusRoute(
   route: any
 ): route is DaunusRoute<any, any, any, any> {
-  return route && route.meta && route.meta.iSchema; // Adjust this check as per your actual structure
+  return route && route.meta && route.meta.iSchema;
 }
 
 export const isAction = <T>(obj: T): obj is T & { type: [string] } => {

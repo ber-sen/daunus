@@ -45,6 +45,11 @@ export function $var<I, R>(
   selector: (value: I) => R | Promise<R>
 ): DaunusVar<R>;
 
+export function $var<I>(
+  arg: DaunusInput<I>,
+  selector?: undefined
+): DaunusVar<I>;
+
 export function $var<T, K extends Path<DaunusExcludeException<T>>>(
   arg: DaunusActionWithOptions<T, any, any>,
   selector: K

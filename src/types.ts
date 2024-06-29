@@ -186,11 +186,8 @@ export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
 };
 
 export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, P, E> & {
-  createRoute<I extends z.ZodType<any>>(
-    iSchema: I,
-    meta?: object
-  ): DaunusRoute<D, P, E, I>;
-  createRoute(iSchema?: undefined, meta?: object): DaunusAction<D, P, E>;
+  createRoute<I extends z.ZodType<any>>(iSchema: I): DaunusRoute<D, P, E, I>;
+  createRoute(): DaunusAction<D, P, E>;
 };
 
 export type DaunusExcludeException<T> =
