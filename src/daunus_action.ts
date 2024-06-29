@@ -8,10 +8,10 @@ import {
   DaunusAction,
   DaunusActionInfo,
   DaunusActionRunOptions,
-  DaunusActionWithParams,
   DaunusCtx,
   DaunusParams,
-  DaunusReadable
+  DaunusReadable,
+  DaunusActionWithOptions
 } from "./types";
 import { isException, parseResult } from "./helpers";
 
@@ -166,14 +166,13 @@ export const $action =
       run: makeRun()
     };
 
-    const actionWithOptions: DaunusActionWithParams<
+    const actionWithOptions: DaunusActionWithOptions<
       T,
       ExceptionParams<T, P>,
       E
     > = {
       ...action,
-      noParams: () => action,
-      withParams: (iSchema, meta) => ({
+      createRoute: (iSchema, meta) => ({
         meta: {
           ...meta,
           iSchema,
@@ -203,7 +202,7 @@ export const $action =
         input: (value): DaunusAction<T, ExceptionParams<T, P>, E> => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set("input", iSchema.parse(value));
+            ctx.set("input", iSchema?.parse(value));
           })
         }),
         rawInput: (
@@ -211,7 +210,34 @@ export const $action =
         ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
           ...action,
           run: makeRun((ctx) => {
-            ctx.set("input", iSchema.parse(value));
+            ctx.set("input", iSchema?.parse(value));
+          })
+        })
+      }),
+      createNoInputRoute: (meta) => ({
+        meta: {
+          ...meta,
+          iSchema: z.undefined(),
+          openapi: {
+            method: "post",
+            contentType: "application/json",
+            path: undefined,
+            body: undefined,
+            query: undefined
+          } as any
+        },
+        input: (value): DaunusAction<T, ExceptionParams<T, P>, E> => ({
+          ...action,
+          run: makeRun((ctx) => {
+            ctx.set("input", value);
+          })
+        }),
+        rawInput: (
+          value: unknown
+        ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
+          ...action,
+          run: makeRun((ctx) => {
+            ctx.set("input", value);
           })
         })
       })

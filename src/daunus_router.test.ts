@@ -14,11 +14,11 @@ describe("$router", () => {
   it("should work with multiple routes", async () => {
     const userInput = $input({ body: z.object({ firstName: z.string() }) });
 
-    const user = struct({ name: "user" }).withParams(userInput);
+    const user = struct({ name: "user" }).createRoute(userInput);
 
     const gameInput = $input({ body: z.object({ score: z.number() }) });
 
-    const game = struct({ score: $var(gameInput, "body.score") }).withParams(
+    const game = struct({ score: $var(gameInput, "body.score") }).createRoute(
       gameInput
     );
 
@@ -26,7 +26,7 @@ describe("$router", () => {
 
     const error = exit({
       status: 404
-    }).withParams(errorInput);
+    }).createRoute(errorInput);
 
     const router = $router()
       .add("user", user)
@@ -35,12 +35,12 @@ describe("$router", () => {
 
     const data = await router.input({ body: { score: 10 } }).run();
 
-    expect(() => router.meta.iSchema.parse({ trip: false })).toThrow();
+    expect(() => router.meta.iSchema?.parse({ trip: false })).toThrow();
     expect(() =>
-      router.meta.iSchema.parse({ body: { score: "test" } })
+      router.meta.iSchema?.parse({ body: { score: "test" } })
     ).toThrow();
     expect(() =>
-      router.meta.iSchema.parse({ body: { score: 4 } })
+      router.meta.iSchema?.parse({ body: { score: 4 } })
     ).not.toThrow();
 
     expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
@@ -67,11 +67,11 @@ describe("$router", () => {
   it("should work with simple inputs", async () => {
     const userInput = $input({ firstName: z.string() });
 
-    const user = struct({ name: "user" }).withParams(userInput);
+    const user = struct({ name: "user" }).createRoute(userInput);
 
     const gameInput = $input({ score: z.number() });
 
-    const game = struct({ score: $var(gameInput, "score") }).withParams(
+    const game = struct({ score: $var(gameInput, "score") }).createRoute(
       gameInput
     );
 
@@ -79,7 +79,7 @@ describe("$router", () => {
 
     const error = exit({
       status: 404
-    }).withParams(errorInput);
+    }).createRoute(errorInput);
 
     const makeApi = {
       createInput: (action: any, name: any) => {

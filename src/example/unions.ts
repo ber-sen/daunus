@@ -37,6 +37,6 @@ const action = condition({
   do: $var(res)
 });
 
-const useCase = action.withParams(originalInput);
+const useCase = action.createRoute(originalInput);
 
 export default useCase;

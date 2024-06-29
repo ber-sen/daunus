@@ -35,4 +35,4 @@ const res = condition({
   else: $var(notFound)
 });
 
-export default res.withParams(input);
+export default res.createRoute(input);

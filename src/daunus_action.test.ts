@@ -20,7 +20,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     type A = DaunusInferInput<typeof res>;
 
@@ -34,7 +34,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     type A = DaunusInferReturn<typeof res>;
 
@@ -50,7 +50,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "path.id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"method":"post","contentType":"application/json","path":"<% path %>"}'
@@ -167,7 +167,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "body.id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"method":"<% method %>","contentType":"<% contentType %>","body":"<% body %>","query":"<% query %>"}'

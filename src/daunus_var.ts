@@ -4,7 +4,7 @@ import {
   DaunusAction,
   DaunusCtx,
   DaunusExcludeException,
-  DaunusActionWithParams,
+  DaunusActionWithOptions,
   DaunusGetExceptions,
   DaunusInput,
   DaunusVar,
@@ -46,17 +46,17 @@ export function $var<I, R>(
 ): DaunusVar<R>;
 
 export function $var<T, K extends Path<DaunusExcludeException<T>>>(
-  arg: DaunusActionWithParams<T, any, any>,
+  arg: DaunusActionWithOptions<T, any, any>,
   selector: K
 ): DaunusVar<TypeAtPath<DaunusExcludeException<T>, K> | DaunusGetExceptions<T>>;
 
 export function $var<T, R>(
-  arg: DaunusActionWithParams<T, any, any>,
+  arg: DaunusActionWithOptions<T, any, any>,
   selector: (value: ResolveDaunusVar<T>) => R | Promise<R>
 ): DaunusVar<R | DaunusGetExceptions<T>>;
 
 export function $var<T>(
-  arg: DaunusActionWithParams<T, any, any>,
+  arg: DaunusActionWithOptions<T, any, any>,
   selector?: undefined
 ): DaunusVar<T | DaunusGetExceptions<T>>;
 
