@@ -10,6 +10,6 @@ const input = $input({
 
 const res = define({ success: true, data: $var(input, "id") });
 
-const useCase = res.withParams(input);
+const useCase = res.createRoute(input);
 
 export default useCase;

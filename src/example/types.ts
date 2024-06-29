@@ -1,4 +1,4 @@
-import { $fn, condition, $var, exit, define } from "../";
+import { $fn, condition, $var, exit, define, z } from "../";
 
 const isSuccess = define($fn(() => Math.random() > 0.5));
 
@@ -17,4 +17,4 @@ const res = condition({
   else: $var(error)
 });
 
-export default res.noParams();
+export default res.createRoute(z.undefined());

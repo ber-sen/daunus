@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { DaunusAction } from "../dist";
 import { get } from "./get";
 import {
   ResolveDaunusVarData,
@@ -7,7 +9,8 @@ import {
   DaunusCtx,
   DaunusVar,
   NonUndefined,
-  DaunusReadable
+  DaunusReadable,
+  DaunusRoute
 } from "./types";
 
 export const isObject = (value: any): value is object =>
@@ -39,6 +42,12 @@ export const isMapLike = (value: any): value is Map<any, any> => {
     typeof value.get === "function"
   );
 };
+
+export function isDaunusRoute(
+  route: any
+): route is DaunusRoute<any, any, any, any> {
+  return route && route.meta && route.meta.iSchema; // Adjust this check as per your actual structure
+}
 
 export const isAction = <T>(obj: T): obj is T & { type: [string] } => {
   return (

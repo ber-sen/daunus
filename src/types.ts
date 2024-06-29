@@ -160,7 +160,7 @@ export type DaunusOpenApi = z.ZodObject<{
   query?: any;
 }>;
 
-export type DaunusActionWithInput<I extends z.ZodType<any>, D, P, E> = {
+export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
   meta: {
     iSchema: I;
     openapi: {
@@ -185,12 +185,12 @@ export type DaunusActionWithInput<I extends z.ZodType<any>, D, P, E> = {
   rawInput: (value: unknown) => DaunusAction<D, P, E>;
 };
 
-export type DaunusActionWithParams<D, P, E> = DaunusAction<D, P, E> & {
-  noParams: () => DaunusAction<D, P, E>;
-  withParams: <I extends z.ZodType<any>>(
+export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, P, E> & {
+  createRoute<I extends z.ZodType<any>>(
     iSchema: I,
     meta?: object
-  ) => DaunusActionWithInput<I, D, P, E>;
+  ): DaunusRoute<D, P, E, I>;
+  createRoute(iSchema?: undefined, meta?: object): DaunusAction<D, P, E>;
 };
 
 export type DaunusExcludeException<T> =
@@ -200,22 +200,16 @@ export type DaunusGetExceptions<T> =
   T extends DaunusException<any, any> ? T : never;
 
 export type DaunusInferReturn<
-  T extends
-    | DaunusAction<any, any, any>
-    | DaunusActionWithInput<any, any, any, any>
+  T extends DaunusAction<any, any, any> | DaunusRoute<any, any, any, any>
 > =
-  T extends DaunusActionWithInput<any, any, any, any>
+  T extends DaunusRoute<any, any, any, any>
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
     : T extends DaunusAction<any, any, any>
       ? Awaited<ReturnType<T["run"]>>
       : never;
 
-export type DaunusInferInput<
-  T extends DaunusActionWithInput<any, any, any, any>
-> =
-  T extends DaunusActionWithInput<any, any, any, any>
-    ? Parameters<T["input"]>[0]
-    : never;
+export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
+  T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never;
 
 export class DaunusException<S extends number, D = undefined> extends Error {
   public status: S;
@@ -293,26 +287,32 @@ export interface RouterFactory<
   R extends Record<
     string,
     {
-      action: DaunusActionWithInput<any, any, any, any>;
+      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>;
       input: any;
     }
   >,
   AI extends any | undefined,
   AR extends any | undefined
-> extends DaunusActionWithInput<
-    Zod.ZodType<Exclude<AI, undefined>>,
+> extends DaunusRoute<
     Exclude<AR, undefined>,
     {},
-    {}
+    {},
+    z.ZodType<Exclude<AI, undefined>>
   > {
-  add: <N extends string, I extends z.AnyZodObject, D, P, E>(
+  add<N extends string, D, P, E, I extends z.ZodTypeAny = z.ZodUndefined>(
     name: N,
-    action: DaunusActionWithInput<I, D, P, E>
-  ) => RouterFactory<
-    R & Record<N, { action: DaunusActionWithInput<I, D, P, E> }>,
+    route: DaunusRoute<D, P, E, I>
+  ): RouterFactory<
+    R & Record<N, { route: DaunusRoute<D, P, E, I> }>,
     AI | I["_output"],
     AR | D
   >;
-  get: <N extends keyof R>(name: N) => R[N]["action"];
+
+  add<N extends string, D, P, E>(
+    name: N,
+    route: DaunusAction<D, P, E>
+  ): RouterFactory<R & Record<N, { route: DaunusAction<D, P, E> }>, AI, AR | D>;
+
+  get<N extends keyof R>(name: N): R[N]["route"];
   defs: R;
 }

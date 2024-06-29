@@ -1,5 +1,5 @@
 import { $input } from "./daunus_helpers";
-import { struct } from "./actions";
+import { define, struct } from "./actions";
 import { $var } from "./daunus_var";
 import { DaunusException, DaunusInferInput, DaunusInferReturn } from "./types";
 import { z } from "./zod";
@@ -20,7 +20,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     type A = DaunusInferInput<typeof res>;
 
@@ -34,7 +34,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     type A = DaunusInferReturn<typeof res>;
 
@@ -50,7 +50,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "path.id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"method":"post","contentType":"application/json","path":"<% path %>"}'
@@ -167,7 +167,7 @@ describe("$query", () => {
 
     const test = struct({ success: true, data: $var(input, "body.id") });
 
-    const res = test.withParams(input);
+    const res = test.createRoute(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"method":"<% method %>","contentType":"<% contentType %>","body":"<% body %>","query":"<% query %>"}'
@@ -191,5 +191,17 @@ describe("$query", () => {
         }
       >
     >;
+  });
+
+  it("Should work with create route", async () => {
+    const test = define({ success: true }).createRoute();
+
+    const { data } = await test.run();
+
+    expect(data).toEqual({ success: true });
+
+    type A = typeof data;
+
+    type test = Expect<Equal<A, { success: boolean }>>;
   });
 });

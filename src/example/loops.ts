@@ -30,6 +30,6 @@ const action = items.map({
   each: $var(notifySlackChannal)
 });
 
-const useCase = action.withParams(input);
+const useCase = action.createRoute(input);
 
 export default useCase;
