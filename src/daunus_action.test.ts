@@ -204,4 +204,15 @@ describe("$query", () => {
 
     type test = Expect<Equal<A, { success: boolean }>>;
   });
+
+  it("Should pass meta", () => {
+    const action = $action(
+      { type: "foo", meta: { foo: "baz" } },
+      () => (params: string) => {
+        return params;
+      }
+    )("");
+
+    expect(action.actionMeta).toEqual({ foo: "baz" });
+  });
 });

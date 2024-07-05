@@ -124,6 +124,7 @@ export type DaunusActionRunOptions<T, P> = {
 export type DaunusAction<T, P, E = {}> = {
   name: string;
   envSchema?: z.Schema<E>;
+  actionMeta?: object;
   run: (
     ctx?: DaunusCtx,
     options?: DaunusActionRunOptions<T, P>

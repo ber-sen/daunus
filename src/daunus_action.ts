@@ -27,6 +27,7 @@ export const $action =
       skipPlaceholders?: boolean;
       envSchema?: z.Schema<E>;
       container?: (parmas: P) => T;
+      meta?: object;
     },
     fn: ({
       ctx,
@@ -163,7 +164,8 @@ export const $action =
       ...actionCtx,
       name,
       envSchema: args.envSchema,
-      run: makeRun()
+      run: makeRun(),
+      actionMeta: args.meta
     };
 
     const actionWithOptions: DaunusActionWithOptions<
