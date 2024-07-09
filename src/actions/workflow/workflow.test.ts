@@ -67,7 +67,7 @@ describe("workflow", () => {
         params: [
           {
             name: "item",
-            type: ["define"],
+            type: ["struct"],
             params: { name: "Foo" }
           },
           {
@@ -81,7 +81,7 @@ describe("workflow", () => {
                 params: [
                   {
                     name: "item3",
-                    type: ["define"],
+                    type: ["item"],
                     params: { success: true }
                   }
                 ]

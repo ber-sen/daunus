@@ -3,7 +3,7 @@ import { z } from "zod";
 import { condition } from "../actions";
 import { $input } from "../daunus_helpers";
 import { $var } from "../daunus_var";
-import define from "../actions/define";
+import struct from "../actions/struct";
 
 const originalInput = $input({
   body: z.union([
@@ -18,7 +18,7 @@ const originalInput = $input({
   ])
 }).openapi("User");
 
-const input = define({
+const input = struct({
   isString: $var(originalInput, ($) =>
     $.body.type === "string" ? $.body : undefined
   ),
@@ -27,7 +27,7 @@ const input = define({
   )
 });
 
-const res = define({
+const res = struct({
   success: true,
   data: $var(input, (i) => i.isString?.text)
 });

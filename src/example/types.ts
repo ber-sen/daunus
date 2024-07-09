@@ -1,8 +1,8 @@
-import { $fn, condition, $var, exit, define, z } from "../";
+import { $fn, condition, $var, exit, z, struct } from "../";
 
-const isSuccess = define($fn(() => Math.random() > 0.5));
+const isSuccess = struct($fn(() => Math.random() > 0.5));
 
-const success = define({ success: true });
+const success = struct({ success: true });
 
 const error = exit({
   status: 404,

@@ -1,6 +1,5 @@
 export { default as condition } from "./condition";
 export { default as struct } from "./struct";
-export { default as define } from "./define";
 export { default as task } from "./task";
 export { default as process } from "./process";
 export { default as parallel } from "./parallel";
