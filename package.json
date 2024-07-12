@@ -1,6 +1,6 @@
 {
   "name": "daunus",
-  "version": "0.1.84",
+  "version": "0.1.85",
   "description": "Yet another typescript framework",
   "scripts": {
     "test": "jest",

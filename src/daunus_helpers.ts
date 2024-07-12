@@ -9,4 +9,4 @@ export const $ctx = (value?: object): Map<any, any> =>
 export const $input = z.object;
 
 export const $httpInput = <T extends ZodRawShape>(shape: T) =>
-  z.object({ _type: z.literal("http"), ...shape });
+  z.object({ _type: z.literal("http").catch("http"), ...shape });
