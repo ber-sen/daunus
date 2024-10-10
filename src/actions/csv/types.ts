@@ -1,5 +1,5 @@
 export interface CSVParams<T> {
-  rows: T[];
+  rows: ReadableStream<T>;
   columns?: Column<T, keyof T>[];
 }
 

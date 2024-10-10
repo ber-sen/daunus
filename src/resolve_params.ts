@@ -1,3 +1,4 @@
+import { ReadableStream } from "isomorphic-web-streams";
 import {
   isArray,
   isException,
@@ -14,6 +15,10 @@ export const resolveParams = async <T>(
   params: DaunusParams<T>,
   options?: { skipPlaceholders?: boolean }
 ): Promise<T> => {
+  if (params instanceof ReadableStream) {
+    return params;
+  }
+
   if (isException(params)) {
     return params;
   }

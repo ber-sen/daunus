@@ -9,13 +9,16 @@ const requiresQuoteRegex = /[\n\r",]/;
 export async function writeRows<T>(
   writer: WritableStreamDefaultWriter,
   rows: T[],
-  columns: Column<T, keyof T>[]
+  columns: Column<T, keyof T>[],
+  writeColumns?: boolean
 ) {
   const text = new TextEncoder();
   const utf8 = text.encode.bind(text);
   const write = writer.write.bind(writer);
 
-  await write(utf8(columns.map((c) => encodeValue(c.label)).join(delimiter)));
+  if (writeColumns) {
+    await write(utf8(columns.map((c) => encodeValue(c.label)).join(delimiter)));
+  }
 
   for (const row of rows) {
     await write(utf8(rowDelimiter));

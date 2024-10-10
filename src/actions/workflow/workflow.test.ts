@@ -35,13 +35,22 @@ describe("workflow", () => {
         type: ["process"],
         params: [
           {
+            name: "file",
+            type: ["struct"],
+            params: new ReadableStream({
+              start(controller) {
+                controller.enqueue({ name: "Alice", age: 30 });
+                controller.enqueue({ name: "Bob", age: 25 });
+                controller.enqueue({ name: "Charlie", age: 35 });
+                controller.close();
+              }
+            })
+          },
+          {
             name: "csv",
             type: ["csv"],
             params: {
-              rows: [
-                { hello: "world", foo: "bar" },
-                { hello: "world 2", foo: "bar 2" }
-              ]
+              rows: $query(($) => $.file.data)
             }
           },
           {
@@ -57,7 +66,7 @@ describe("workflow", () => {
     const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual(
-      "Foo\nhello,foo\r\nworld,bar\r\nworld 2,bar 2"
+      "Foo\nname,age\r\nAlice,30\r\nBob,25\r\nCharlie,35"
     );
   });
 

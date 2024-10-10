@@ -34,7 +34,6 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "@lukeed/uuid": "^2.0.1",
-    "isomorphic-streams": "^1.0.3",
     "isomorphic-web-streams": "^0.1.0",
     "zod": "^3.22.4"
   },

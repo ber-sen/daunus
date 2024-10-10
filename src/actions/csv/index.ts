@@ -11,18 +11,33 @@ const csv = $action(
 
       (async () => {
         const writer = writable.getWriter();
+        const reader = rows.getReader();
 
-        if (rows.length > 0) {
-          if (!columns) {
-            columns = Object.keys(rows[0]).map((key) => ({
-              key: key as keyof T,
-              label: key,
-              format: (x: any) => x
-            }));
+        try {
+          let rowResult = await reader.read();
+
+          if (!rowResult.done) {
+            if (!columns) {
+              columns = Object.keys(rowResult.value).map((key) => ({
+                key: key as keyof T,
+                label: key,
+                format: (x: any) => x
+              }));
+            }
+
+            await writeRows(writer, [], columns, true);
+
+            while (!rowResult.done) {
+              const row = rowResult.value;
+              await writeRows(writer, [row], columns);
+              rowResult = await reader.read();
+            }
           }
-          await writeRows(writer, rows, columns);
+        } catch (error) {
+          console.error("Error reading from input stream:", error);
+        } finally {
+          await writer.close();
         }
-        await writer.close();
       })();
 
       return readable;
