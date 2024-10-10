@@ -10,7 +10,7 @@ describe("encode", () => {
       ]
     }).run($ctx());
 
-    expect(action.data).toStrictEqual(
+    expect(await new Response(action.data).text()).toStrictEqual(
       "hello,foo\r\nworld,bar\r\nworld 2,bar 2"
     );
   });
@@ -21,7 +21,7 @@ describe("encode", () => {
         { hello: "world", foo: "bar" },
         { hello: "world 2", foo: "bar 2" }
       ]
-    }).run($ctx({ pass_strems: true }));
+    }).run($ctx());
 
     expect(await new Response(action.data).text()).toStrictEqual(
       "hello,foo\r\nworld,bar\r\nworld 2,bar 2"

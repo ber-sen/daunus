@@ -1,5 +1,3 @@
-import { z } from "zod";
-import { DaunusAction } from "../dist";
 import { get } from "./get";
 import {
   ResolveDaunusVarData,
@@ -9,7 +7,6 @@ import {
   DaunusCtx,
   DaunusVar,
   NonUndefined,
-  DaunusReadable,
   DaunusRoute
 } from "./types";
 
@@ -99,7 +96,7 @@ export const resolveDaunusPlaceholder = (
 function extractDaunusExceptions<T>(obj: T): DaunusException<any>[] {
   const DaunusExceptions: DaunusException<any>[] = [];
 
-  if (obj instanceof DaunusReadable) {
+  if (obj instanceof ReadableStream) {
     return DaunusExceptions;
   }
 

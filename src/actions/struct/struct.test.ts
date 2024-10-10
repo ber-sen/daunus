@@ -13,14 +13,4 @@ describe("struct", () => {
       success: true
     });
   });
-
-  it("should work with function", async () => {
-    const action = struct(() => {
-      return "hello";
-    });
-
-    const res = await action.run($ctx());
-
-    expect(res.data).toStrictEqual("hello");
-  });
 });

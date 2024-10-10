@@ -33,14 +33,8 @@ export type ResolveDaunusVar<T> =
           : T;
 
 export type ResolveDaunusVarData<T> =
-  T extends DaunusReadable<infer Z>
-    ? Z extends "text"
-      ? string
-      : Z extends "arrayBuffer"
-        ? ArrayBuffer
-        : Z extends "blob"
-          ? Blob
-          : string
+  T extends ReadableStream<infer Z>
+    ? ReadableStream<Z>
     : T extends DaunusVar<infer U>
       ? U extends DaunusVar<infer Z>
         ? DaunusExcludeException<Z>
@@ -217,32 +211,6 @@ export class DaunusException<S extends number, D = undefined> extends Error {
     super("daunus_exception");
     this.status = status;
     this.data = data;
-  }
-}
-
-export class DaunusReadable<T extends "text" | "arrayBuffer" | "blob"> {
-  public readable: ReadableStream<any>;
-  public type: "text" | "arrayBuffer" | "blob";
-
-  constructor(readable: ReadableStream<any>, type: T) {
-    this.readable = readable;
-    this.type = type;
-  }
-
-  parse() {
-    if (this.type === "text") {
-      return new Response(this.readable).text();
-    }
-
-    if (this.type === "arrayBuffer") {
-      return new Response(this.readable).arrayBuffer();
-    }
-
-    if (this.type === "blob") {
-      return new Response(this.readable).blob();
-    }
-
-    return new Response(this.readable).text();
   }
 }
 

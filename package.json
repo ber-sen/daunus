@@ -3,7 +3,7 @@
   "version": "0.1.86",
   "description": "Yet another typescript framework",
   "scripts": {
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --no-cache",
     "prettier": "prettier -w src",
     "lint": "eslint --ext .ts,.js . && prettier -c src",
     "build": "unbuild",
@@ -34,6 +34,8 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "@lukeed/uuid": "^2.0.1",
+    "isomorphic-streams": "^1.0.3",
+    "isomorphic-web-streams": "^0.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

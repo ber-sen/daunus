@@ -10,7 +10,6 @@ import {
   DaunusActionRunOptions,
   DaunusCtx,
   DaunusParams,
-  DaunusReadable,
   DaunusActionWithOptions
 } from "./types";
 import { isException, parseResult } from "./helpers";
@@ -124,17 +123,9 @@ export const $action =
             return parseValue;
           };
 
-          const rawValue = parseResult<T, ExceptionParams<T, P>>(
+          const value = parseResult<T, ExceptionParams<T, P>>(
             (await runFn()) as T
           );
-
-          const value: typeof rawValue =
-            !ctx.get("pass_streams") && rawValue.data instanceof DaunusReadable
-              ? {
-                  data: await rawValue.data.parse(),
-                  exception: rawValue.exception
-                }
-              : (rawValue as any);
 
           ctx.set(name, value);
 

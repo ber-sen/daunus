@@ -1,5 +1,5 @@
+import { TransformStream } from "isomorphic-web-streams";
 import { $action } from "../../daunus_action";
-import { DaunusReadable } from "../../types";
 import { writeRows } from "./lib";
 import { CSVParams } from "./types";
 
@@ -25,7 +25,7 @@ const csv = $action(
         await writer.close();
       })();
 
-      return new DaunusReadable(readable, "text");
+      return readable;
     }
 );
 

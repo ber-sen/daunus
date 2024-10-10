@@ -46,7 +46,9 @@ describe("workflow", () => {
           },
           {
             type: ["struct"],
-            params: $query(($) => `Foo\n${$.csv.data}`)
+            params: $query(
+              async ($) => `Foo\n${await new Response($.csv.data).text()}`
+            )
           }
         ]
       }
@@ -81,7 +83,7 @@ describe("workflow", () => {
                 params: [
                   {
                     name: "item3",
-                    type: ["item"],
+                    type: ["struct"],
                     params: { success: true }
                   }
                 ]
