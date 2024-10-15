@@ -1,7 +1,9 @@
 import { runAction } from "../../run_action";
 import { $action } from "../../daunus_action";
-import { DaunusWorkflowAction } from "../../types";
-import { DaunusActionWithOptions } from "../../../dist";
+import {
+  type DaunusActionWithOptions,
+  type DaunusWorkflowAction
+} from "../../types";
 
 const loop = $action(
   { type: "loop", skipParse: true },
@@ -15,8 +17,8 @@ const loop = $action(
       action: DaunusWorkflowAction<T> | DaunusActionWithOptions<T, unknown, {}>;
       itemName?: string;
     }) => {
-      const res = list.map(async (item) => {
-        ctx.set(itemName, item);
+      const res = list.map(async (value, index) => {
+        ctx.set(itemName, { value, index });
 
         const res =
           "run" in action

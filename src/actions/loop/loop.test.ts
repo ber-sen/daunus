@@ -12,7 +12,7 @@ describe("loop", () => {
         itemName: "item",
         action: {
           type: ["struct"],
-          params: $query(($) => $.item as number)
+          params: $query(($) => $.item.value as number)
         }
       },
       { name: "items" }
@@ -28,7 +28,7 @@ describe("loop", () => {
       {
         list: [1, 2],
         itemName: "item",
-        action: struct({ foo: $query(($) => $.item as number) })
+        action: struct({ foo: $query(($) => $.item.value as number) })
       },
       { name: "items" }
     );
