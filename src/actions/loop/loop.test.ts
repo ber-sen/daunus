@@ -2,11 +2,11 @@ import { struct } from "..";
 import { $query } from "../..";
 import { $ctx } from "../../daunus_helpers";
 
-import map from "./index";
+import loop from "./index";
 
-describe("map", () => {
+describe("loop", () => {
   it("should work for basic example", async () => {
-    const action = map(
+    const action = loop(
       {
         list: [1, 2],
         itemName: "item",
@@ -24,7 +24,7 @@ describe("map", () => {
   });
 
   it("should work with $action", async () => {
-    const action = map(
+    const action = loop(
       {
         list: [1, 2],
         itemName: "item",

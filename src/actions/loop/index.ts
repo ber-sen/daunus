@@ -3,8 +3,8 @@ import { $action } from "../../daunus_action";
 import { DaunusWorkflowAction } from "../../types";
 import { DaunusActionWithOptions } from "../../../dist";
 
-const map = $action(
-  { type: "map", skipParse: true },
+const loop = $action(
+  { type: "loop", skipParse: true },
   ({ ctx }) =>
     async <T>({
       list,
@@ -34,4 +34,4 @@ const map = $action(
     }
 );
 
-export default map;
+export default loop;

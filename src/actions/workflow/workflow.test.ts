@@ -107,4 +107,36 @@ describe("workflow", () => {
 
     expect(res.data).toStrictEqual({ success: true });
   });
+
+  it("should work with loops", async () => {
+    const action = workflow({
+      name: "Foo",
+      action: {
+        type: ["process"],
+        params: [
+          {
+            name: "item",
+            type: ["struct"],
+            params: { name: "Foo" }
+          },
+          {
+            name: "res",
+            type: ["loop"],
+            params: {
+              list: [1, 2],
+              itemName: "item",
+              action: {
+                type: ["struct"],
+                params: "<% $.item %>"
+              }
+            }
+          }
+        ]
+      }
+    });
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual([1, 2]);
+  });
 });

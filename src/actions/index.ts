@@ -9,3 +9,4 @@ export { default as exit } from "./exit";
 export { default as wait } from "./wait";
 export { default as workflow } from "./workflow";
 export { default as csv } from "./csv";
+export { default as loop } from "./loop";
