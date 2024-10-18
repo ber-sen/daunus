@@ -16,7 +16,7 @@ const loop = $action(
       list: Array<any>;
       /**
        * Action
-       * @ref https://daunus.com/schema/action
+       * @ref https://taskwish.vercel.app/schema/action.json
        */
       action: DaunusWorkflowAction<T> | DaunusActionWithOptions<T, unknown, {}>;
       itemName?: string;
