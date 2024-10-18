@@ -19,12 +19,21 @@ export const $action =
     args: {
       type: string;
       name?: string;
+      /**
+       * @ref https://taskwish.vercel.app/schema/paramsSchema.json
+       **/
       paramsSchema?: z.Schema<P>;
       skipParse?: boolean;
       parseResponse?: boolean;
       skipLog?: boolean;
       skipPlaceholders?: boolean;
+      /**
+       * @ref https://taskwish.vercel.app/schema/env.json
+       **/
       envSchema?: z.Schema<E>;
+      /**
+       * @ref https://taskwish.vercel.app/schema/container.json
+       **/
       container?: (parmas: P) => T;
       meta?: object;
     },
@@ -34,6 +43,9 @@ export const $action =
       env
     }: {
       ctx: DaunusCtx;
+      /**
+       * @ref https://taskwish.vercel.app/schema/parseParams.json
+       **/
       parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
       env: E;
     }) => (params: P) => Promise<O> | O,
