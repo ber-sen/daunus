@@ -37,18 +37,22 @@ export const $action =
       container?: (parmas: P) => T;
       meta?: object;
     },
+    /**
+     * @ref https://taskwish.vercel.app/schema/fn.json
+     **/
     fn: ({
       ctx,
       parseParams,
       env
     }: {
       ctx: DaunusCtx;
-      /**
-       * @ref https://taskwish.vercel.app/schema/parseParams.json
-       **/
+
       parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
       env: E;
     }) => (params: P) => Promise<O> | O,
+    /**
+     * @ref https://taskwish.vercel.app/schema/container.json
+     **/
     container: (
       // Deprecated
       r: ({
