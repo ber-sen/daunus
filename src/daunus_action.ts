@@ -20,7 +20,7 @@ export const $action =
       type: string;
       name?: string;
       /**
-       * @ref https://taskwish.vercel.app/schema/paramsSchema.json
+       * @ref https://taskwish.vercel.app/schema/action.json
        **/
       paramsSchema?: z.Schema<P>;
       skipParse?: boolean;
@@ -28,17 +28,17 @@ export const $action =
       skipLog?: boolean;
       skipPlaceholders?: boolean;
       /**
-       * @ref https://taskwish.vercel.app/schema/env.json
+       * @ref https://taskwish.vercel.app/schema/action.json
        **/
       envSchema?: z.Schema<E>;
       /**
-       * @ref https://taskwish.vercel.app/schema/container.json
+       * @ref https://taskwish.vercel.app/schema/action.json
        **/
       container?: (parmas: P) => T;
       meta?: object;
     },
     /**
-     * @ref https://taskwish.vercel.app/schema/fn.json
+     * @ref https://taskwish.vercel.app/schema/action.json
      **/
     fn: ({
       ctx,
@@ -51,7 +51,7 @@ export const $action =
       env: E;
     }) => (params: P) => Promise<O> | O,
     /**
-     * @ref https://taskwish.vercel.app/schema/container.json
+     * @ref https://taskwish.vercel.app/schema/action.json
      **/
     container: (
       // Deprecated
@@ -74,6 +74,9 @@ export const $action =
       r(options)(params) as T | Promise<T>
   ) =>
   (
+    /**
+     * @ref https://taskwish.vercel.app/schema/action.json
+     **/
     params: DaunusParams<P>,
     actionCtx?: {
       name?: string;
