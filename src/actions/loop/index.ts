@@ -14,6 +14,10 @@ const loop = $action(
       itemName = "item"
     }: {
       list: Array<any>;
+      /**
+       * Action
+       * @ref https://daunus.com/schema/action
+       */
       action: DaunusWorkflowAction<T> | DaunusActionWithOptions<T, unknown, {}>;
       itemName?: string;
     }) => {
