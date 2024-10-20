@@ -38,17 +38,46 @@ function $loop<
   L extends Array<any>,
   I extends string = "item",
   S extends Record<string, any> = {}
->({ itemName = "item" as I }: { list: L; itemName?: I }, initialScope?: S) {
-  return $steps(initialScope).add(itemName!, () => {
+>(
+  { itemVariable = "item" as I }: { list: L; itemVariable?: I },
+  initialScope?: S
+) {
+  return $steps(initialScope).add(itemVariable!, () => {
     return { value: {} as any as keyof L, index: {} as number };
   });
 }
 
+function $if<C, S extends Record<string, any> = {}>(
+  { condition }: { condition: C },
+  initialScope?: S
+) {
+  return {
+    isTrue: () => {
+      return $steps(initialScope).add("condition", () => {
+        return condition as Exclude<
+          typeof condition,
+          false | "" | undefined | null
+        >;
+      });
+    }
+  };
+}
+
+const init: { name: string } | { trip: string } = [
+  { name: "asdasd" },
+  { trip: "asda" }
+][0];
+
 const lorem = $steps()
+  .add("init", () => init)
   .add("lorem", () => struct([{ asd: true }, 2, 3]))
-  .add("loop", ($) =>
-    $loop({ list: $.lorem.data }, $)
-      .add("ipsum", ($) => struct($.lorem.data))
-      .add("trip", ($) => struct($.item.value))
+  .add("condition", ($) =>
+    $if({ condition: "name" in $.init && $.init }, $)
+      .isTrue()
+      .add("loop", ($) =>
+        $loop({ list: $.lorem.data }, $)
+          .add("ipsum", ($) => struct($.condition))
+          .add("trip", ($) => struct($.item.value))
+      )
   )
   .add("trip2", () => struct({ name: "test" }));
