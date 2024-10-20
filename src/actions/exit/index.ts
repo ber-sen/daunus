@@ -1,18 +1,20 @@
 import { $action } from "../../daunus_action";
-import { DaunusException } from "../../types";
+import { DaunusException, DaunusActionWithOptions } from "../../types";
 
-export interface ExitParams<S extends number, D = undefined> {
+export default function exit<S extends number>(params: {
   status: S;
-  data?: D;
+}): DaunusActionWithOptions<DaunusException<S, undefined>, {}, {}>;
+
+export default function exit<S extends number, D>(params: {
+  status: S;
+  data: D;
+}): DaunusActionWithOptions<DaunusException<S, D>, {}, {}>;
+
+export default function exit(params: any) {
+  return $action(
+    {
+      type: "exit"
+    },
+    () => () => new DaunusException(params.status, params.data)
+  )(params);
 }
-
-const exit = $action(
-  {
-    type: "exit"
-  },
-  () =>
-    <S extends number, D>(params: ExitParams<S, D>) =>
-      new DaunusException<S, D>(params.status, params.data)
-);
-
-export default exit;

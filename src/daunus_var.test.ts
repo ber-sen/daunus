@@ -192,7 +192,7 @@ describe("$var", () => {
       type A = Awaited<typeof res>;
 
       type res = Expect<
-        Equal<A, { data: never; exception: DaunusException<403, unknown> }>
+        Equal<A, { data: never; exception: DaunusException<403, undefined> }>
       >;
 
       expect(res).toStrictEqual({

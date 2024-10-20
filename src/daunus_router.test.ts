@@ -43,7 +43,7 @@ describe("$router", () => {
       router.meta.iSchema?.parse({ body: { score: 4 } })
     ).not.toThrow();
 
-    expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
+    expect(data).toEqual({ data: { score: 10 }, exception: undefined });
 
     type A = DaunusInferReturn<typeof router>;
 
@@ -58,7 +58,7 @@ describe("$router", () => {
             | {
                 score: number;
               };
-          exception: DaunusException<404, unknown>;
+          exception: DaunusException<404, undefined>;
         }
       >
     >;
@@ -96,7 +96,7 @@ describe("$router", () => {
 
     const data = await router.rawInput({ path: "/game" }).run();
 
-    expect(data).toEqual({ data: { score: 10 }, exeption: undefined });
+    expect(data).toEqual({ data: { score: 10 }, exception: undefined });
 
     type A = DaunusInferReturn<typeof router>;
 
@@ -111,7 +111,7 @@ describe("$router", () => {
             | {
                 score: number;
               };
-          exception: DaunusException<404, unknown>;
+          exception: DaunusException<404, undefined>;
         }
       >
     >;

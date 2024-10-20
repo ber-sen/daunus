@@ -203,12 +203,11 @@ export type DaunusInferReturn<
 export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
   T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never;
 
-export class DaunusException<S extends number, D = undefined> extends Error {
+export class DaunusException<S extends number, D = undefined> {
   public status: S;
-  public data?: D;
+  public data: D;
 
-  constructor(status: S, data?: D) {
-    super("daunus_exception");
+  constructor(status: S, data = undefined as D) {
     this.status = status;
     this.data = data;
   }
