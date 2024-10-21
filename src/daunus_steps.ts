@@ -103,6 +103,7 @@ function $if<C, G extends Record<string, any> = {}>(
       return $steps(initialScope).add(
         "condition",
         () => {
+          // WIP
           return condition as Exclude<
             typeof condition,
             false | "" | undefined | null
