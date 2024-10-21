@@ -68,7 +68,7 @@ function $steps<
         global: {
           ...scope.global,
           [name]: result
-        },
+        } as Overwrite<G, N>,
         local: {
           ...scope.local,
           [name]: result
@@ -83,7 +83,7 @@ function $steps<
 
   return {
     scope,
-    add: add as any,
+    add,
     get
   };
 }
