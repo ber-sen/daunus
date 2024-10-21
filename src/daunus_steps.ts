@@ -15,29 +15,39 @@ class Scope<
   }
 }
 
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
+type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
+
+type DisableSameName<N, L> = N extends keyof L ? never : N;
+
 interface StepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > {
   scope: Scope<G, L>;
+
   add<T extends StepFactory, N extends string>(
-    name: N extends keyof L ? never : N,
-    fn: ($: G) => T
+    name: DisableSameName<N, L>,
+    fn: ($: Prettify<G>) => T
     // fix
-  ): StepFactory<G & Record<N, string>, L & Record<N, T>>;
+  ): StepFactory<Overwrite<G, N> & Record<N, string>, L & Record<N, T>>;
+
   add<T extends DaunusAction<any, any, any>, N extends string>(
-    name: N extends keyof L ? never : N,
-    fn: ($: G) => T
-  ): StepFactory<G & Record<N, DaunusInferReturn<T>>, L & Record<N, T>>;
+    name: DisableSameName<N, L>,
+    fn: ($: Prettify<G>) => T
+  ): StepFactory<
+    Overwrite<G, N> & Record<N, DaunusInferReturn<T>>,
+    L & Record<N, T>
+  >;
+
   add<T, N extends string>(
-    name: N extends keyof L ? never : N,
-    fn: ($: G) => T
-  ): StepFactory<G & Record<N, T>, L & Record<N, T>>;
-  add<T, N extends string>(
-    name: N extends keyof L ? never : N,
-    fn: ($: G) => T,
-    override?: boolean
-  ): StepFactory<Omit<G, N> & Record<N, T>, L & Record<N, T>>;
+    name: DisableSameName<N, L>,
+    fn: ($: Prettify<G>) => T
+  ): StepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>>;
+
   get<N extends keyof L>(name: N): L[N];
 }
 
@@ -73,13 +83,13 @@ function $steps<
 
   return {
     scope,
-    add,
+    add: add as any,
     get
   };
 }
 
 function $loop<
-  A extends Array<any>,
+  A extends Array<any> | readonly any[],
   I extends string = "item",
   G extends Record<string, any> = {}
 >(
@@ -100,27 +110,19 @@ function $if<C, G extends Record<string, any> = {}>(
 ) {
   return {
     isTrue: () => {
-      return $steps(initialScope).add(
-        "condition",
-        () => {
-          // WIP
-          return condition as Exclude<
-            typeof condition,
-            false | "" | undefined | null
-          >;
-        },
-        true
-      );
+      return $steps(initialScope).add("condition", () => {
+        // WIP
+        return condition as Exclude<
+          typeof condition,
+          false | "" | undefined | null
+        >;
+      });
     },
     isFalse: () => {
-      return $steps(initialScope).add(
-        "condition",
-        () => {
-          // WIP
-          return condition as Exclude<typeof condition, true | object | number>;
-        },
-        true
-      );
+      return $steps(initialScope).add("condition", () => {
+        // WIP
+        return condition as Exclude<typeof condition, true | object | number>;
+      });
     }
   };
 }
@@ -134,11 +136,14 @@ const steps = $steps()
     $if({ condition: $.input.name === "foo" }, $)
       .isTrue()
 
+      .add("list", () => [1, 2, 4] as const)
+
       .add("loop", ($) =>
         $loop({ list: $.list }, $)
           .iterate()
 
           .add("ipsum", ($) => struct($.condition))
+
           .add("trip", ($) => struct($.item.value))
       )
   );
