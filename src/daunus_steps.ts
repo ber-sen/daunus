@@ -57,10 +57,17 @@ function $if<C, S extends Record<string, any> = {}>(
   return {
     isTrue: () => {
       return $steps(initialScope).add("condition", () => {
+        // WIP
         return condition as Exclude<
           typeof condition,
           false | "" | undefined | null
         >;
+      });
+    },
+    isFalse: () => {
+      return $steps(initialScope).add("condition", () => {
+        // WIP
+        return condition as Exclude<typeof condition, true | object | number>;
       });
     }
   };
@@ -77,7 +84,7 @@ const lorem = $steps()
       .add("loop", ($) =>
         $loop({ list: $.lorem.data }, $)
           .iterate()
-          .add("ipsum", ($) => struct($.condition.name))
+          .add("ipsum", ($) => struct($.condition))
           .add("trip", ($) => struct($.item.value))
       )
   )
