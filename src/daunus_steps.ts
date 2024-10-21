@@ -63,10 +63,7 @@ function $if<C, S extends Record<string, any> = {}>(
   };
 }
 
-const init: { name: string } | { trip: string } = [
-  { name: "asdasd" },
-  { trip: "asda" }
-][0];
+let init: { name: string } | { trip: string };
 
 const lorem = $steps()
   .add("init", () => init)
@@ -76,7 +73,7 @@ const lorem = $steps()
       .isTrue()
       .add("loop", ($) =>
         $loop({ list: $.lorem.data }, $)
-          .add("ipsum", ($) => struct($.condition))
+          .add("ipsum", ($) => struct($.condition.name))
           .add("trip", ($) => struct($.item.value))
       )
   )
