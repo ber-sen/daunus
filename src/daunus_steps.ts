@@ -88,7 +88,7 @@ function $loop<
 ) {
   return {
     iterate: () =>
-      $steps(initialScope).add(itemVariable!, () => {
+      $steps(initialScope).add(itemVariable, () => {
         return { value: {} as any as keyof A, index: {} as number };
       })
   };
@@ -137,7 +137,7 @@ const lorem = $steps()
       .add("test", ($) => $.lorem)
       .add("test2", () => 3)
   )
-  .add("condition", () => struct("test"))
+  .add("condition66", () => struct("test"))
   .add("condition2", ($) =>
     $if({ condition: "name" in $.init && $.init }, $)
       .isTrue()
@@ -148,7 +148,7 @@ const lorem = $steps()
           .add("trip", ($) => struct($.item.value))
       )
   )
-  .add("trip2", ($) => struct({ name: $.condition }))
+  .add("trip2", ($) => struct({ name: $.condition66 }))
   .add("condition3", ($) =>
     $if({ condition: "name" in $.init && $.init }, $)
       .isTrue()
@@ -169,15 +169,15 @@ const lorem = $steps()
           .add("trip", ($) => struct($.item.value))
       )
   )
-
-  .add("condition4", ($) =>
-    $if({ condition: "name" in $.init && $.init }, $)
+  .add("condition", ($) =>
+    $if({ condition: Boolean($.init) }, $)
       .isTrue()
-      .add("loop2", ($) =>
+      .add("loop", ($) =>
         $loop({ list: $.lorem.data }, $)
           .iterate()
           .add("ipsum", ($) => struct($.condition))
           .add("trip", ($) => struct($.item.value))
       )
   )
+
   .add("trip24", ($) => struct({ name: "ads" }));
