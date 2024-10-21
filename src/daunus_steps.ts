@@ -125,59 +125,20 @@ function $if<C, G extends Record<string, any> = {}>(
   };
 }
 
-let init: { name: string } | { trip: string };
+const steps = $steps()
+  .add("input", () => ({ name: "foo" }))
 
-const lorem = $steps()
-  .add("init", () => init)
-  .add("lorem", () => struct([1, 2, 3]))
-  .add("lorem3", () => struct([1, 2, 3]))
-  .add("lorem2", () => struct([1, 2, 3]))
-  .add("sub1", ($) =>
-    $steps($)
-      .add("test", ($) => $.lorem)
-      .add("test2", () => 3)
-  )
-  .add("condition66", () => struct("test"))
-  .add("condition2", ($) =>
-    $if({ condition: "name" in $.init && $.init }, $)
-      .isTrue()
-      .add("loop2", ($) =>
-        $loop({ list: $.lorem.data }, $)
-          .iterate()
-          .add("ipsum", ($) => struct($.condition))
-          .add("trip", ($) => struct($.item.value))
-      )
-  )
-  .add("trip2", ($) => struct({ name: $.condition66 }))
-  .add("condition3", ($) =>
-    $if({ condition: "name" in $.init && $.init }, $)
-      .isTrue()
-      .add("loop2", ($) =>
-        $loop({ list: $.lorem.data }, $)
-          .iterate()
-          .add("ipsum", ($) => struct($.condition))
-          .add("trip", ($) => struct($.item.value))
-      )
-  )
-  .add("condition5", ($) =>
-    $if({ condition: "name" in $.init && $.init }, $)
-      .isTrue()
-      .add("loop2", ($) =>
-        $loop({ list: $.lorem.data }, $)
-          .iterate()
-          .add("ipsum", ($) => struct($.condition))
-          .add("trip", ($) => struct($.item.value))
-      )
-  )
+  .add("list", () => [1, 2, 3])
+
   .add("condition", ($) =>
-    $if({ condition: Boolean($.init) }, $)
+    $if({ condition: $.input.name === "foo" }, $)
       .isTrue()
+
       .add("loop", ($) =>
-        $loop({ list: $.lorem.data }, $)
+        $loop({ list: $.list }, $)
           .iterate()
+
           .add("ipsum", ($) => struct($.condition))
           .add("trip", ($) => struct($.item.value))
       )
-  )
-
-  .add("trip24", ($) => struct({ name: "ads" }));
+  );
