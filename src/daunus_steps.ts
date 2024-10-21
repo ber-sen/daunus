@@ -42,9 +42,12 @@ function $loop<
   { itemVariable = "item" as I }: { list: L; itemVariable?: I },
   initialScope?: S
 ) {
-  return $steps(initialScope).add(itemVariable!, () => {
-    return { value: {} as any as keyof L, index: {} as number };
-  });
+  return {
+    iterate: () =>
+      $steps(initialScope).add(itemVariable!, () => {
+        return { value: {} as any as keyof L, index: {} as number };
+      })
+  };
 }
 
 function $if<C, S extends Record<string, any> = {}>(
@@ -73,6 +76,7 @@ const lorem = $steps()
       .isTrue()
       .add("loop", ($) =>
         $loop({ list: $.lorem.data }, $)
+          .iterate()
           .add("ipsum", ($) => struct($.condition.name))
           .add("trip", ($) => struct($.item.value))
       )
