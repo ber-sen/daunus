@@ -1,30 +1,69 @@
+import { DaunusInferReturn } from "../dist";
 import { struct } from "./actions";
-import {
-  ResolveDaunusVarData,
-  DaunusGetExceptions,
-  DaunusAction
-} from "./types";
+import { DaunusAction } from "./types";
 
-type StepsContext<T extends Record<any, any>> = {
-  [TKey in keyof T]: T[TKey] extends DaunusAction<infer R, any, any>
-    ? { data: ResolveDaunusVarData<R>; exception: DaunusGetExceptions<R> }
-    : T[TKey];
-};
+class Scope<
+  G extends Record<string, any> = {},
+  L extends Record<string, any> = {}
+> {
+  public global: G;
+  public local: L;
 
-function $steps<S extends Record<string, any> = {}>(initialScope?: S) {
-  const scope: S = initialScope || ({} as S);
+  constructor({ global, local }: { global?: G; local?: L }) {
+    this.global = global ?? ({} as G);
+    this.local = local ?? ({} as L);
+  }
+}
 
-  function add<T, N extends string>(name: N, fn: ($: StepsContext<S>) => T) {
-    const result = fn(scope);
+interface StepFactory<
+  G extends Record<string, any> = {},
+  L extends Record<string, any> = {}
+> {
+  scope: Scope<G, L>;
+  add<T extends StepFactory, N extends string>(
+    name: N,
+    fn: ($: G) => T
+    // fix
+  ): StepFactory<G & Record<N, string>, L & Record<N, T>>;
+  add<T extends DaunusAction<any, any, any>, N extends string>(
+    name: N,
+    fn: ($: G) => T
+  ): StepFactory<G & Record<N, DaunusInferReturn<T>>, L & Record<N, T>>;
+  add<T, N extends string>(
+    name: N,
+    fn: ($: G) => T
+  ): StepFactory<G & Record<N, T>, L & Record<N, T>>;
+  get<N extends keyof L>(name: N): L[N];
+}
 
-    return $steps<S & Record<N, T>>({
-      ...scope,
-      [name]: result
-    });
+function $steps<
+  G extends Record<string, any> = {},
+  L extends Record<string, any> = {}
+>(initialScope?: Scope<G, L> | G): StepFactory<G, L> {
+  const scope =
+    initialScope instanceof Scope
+      ? initialScope
+      : new Scope<G, L>({ global: initialScope });
+
+  function add<T, N extends string>(name: N, fn: ($: G) => T) {
+    const result = fn(scope.global);
+
+    return $steps(
+      new Scope({
+        global: {
+          ...scope.global,
+          [name]: result
+        },
+        local: {
+          ...scope.local,
+          [name]: result
+        }
+      })
+    );
   }
 
-  function get<N extends keyof S>(name: N): S[N] {
-    return scope[name];
+  function get<N extends keyof L>(name: N): L[N] {
+    return scope.local[name];
   }
 
   return {
@@ -35,29 +74,28 @@ function $steps<S extends Record<string, any> = {}>(initialScope?: S) {
 }
 
 function $loop<
-  L extends Array<any>,
+  A extends Array<any>,
   I extends string = "item",
-  S extends Record<string, any> = {}
+  G extends Record<string, any> = {}
 >(
-  { itemVariable = "item" as I }: { list: L; itemVariable?: I },
-  initialScope?: S
+  { itemVariable = "item" as I }: { list: A; itemVariable?: I },
+  initialScope?: G
 ) {
   return {
     iterate: () =>
       $steps(initialScope).add(itemVariable!, () => {
-        return { value: {} as any as keyof L, index: {} as number };
+        return { value: {} as any as keyof A, index: {} as number };
       })
   };
 }
 
-function $if<C, S extends Record<string, any> = {}>(
+function $if<C, G extends Record<string, any> = {}>(
   { condition }: { condition: C },
-  initialScope?: S
+  initialScope?: G
 ) {
   return {
     isTrue: () => {
       return $steps(initialScope).add("condition", () => {
-        // WIP
         return condition as Exclude<
           typeof condition,
           false | "" | undefined | null
@@ -77,15 +115,65 @@ let init: { name: string } | { trip: string };
 
 const lorem = $steps()
   .add("init", () => init)
-  .add("lorem", () => struct([{ asd: true }, 2, 3]))
+  .add("lorem", () => struct([1, 2, 3]))
+  .add("lorem", () => struct([1, 2, 3]))
+  .add("lorem", () => struct([1, 2, 3]))
+  .add("sub1", ($) =>
+    $steps($)
+      .add("test", ($) => $.lorem)
+      .add("test2", () => 3)
+  )
   .add("condition", ($) =>
     $if({ condition: "name" in $.init && $.init }, $)
       .isTrue()
-      .add("loop", ($) =>
+      .add("loop2", ($) =>
         $loop({ list: $.lorem.data }, $)
           .iterate()
           .add("ipsum", ($) => struct($.condition))
           .add("trip", ($) => struct($.item.value))
       )
   )
-  .add("trip2", () => struct({ name: "test" }));
+  .add("condition1", ($) =>
+    $if({ condition: "name" in $.init && $.init }, $)
+      .isTrue()
+      .add("loop2", ($) =>
+        $loop({ list: $.lorem.data }, $)
+          .iterate()
+          .add("ipsum", ($) => struct($.condition))
+          .add("trip", ($) => struct($.item.value))
+      )
+  )
+
+  .add("condition2", ($) =>
+    $if({ condition: "name" in $.init && $.init }, $)
+      .isTrue()
+      .add("loop2", ($) =>
+        $loop({ list: $.lorem.data }, $)
+          .iterate()
+          .add("ipsum", ($) => struct($.condition))
+          .add("trip", ($) => struct($.item.value))
+      )
+  )
+
+  .add("condition3", ($) =>
+    $if({ condition: "name" in $.init && $.init }, $)
+      .isTrue()
+      .add("loop2", ($) =>
+        $loop({ list: $.lorem.data }, $)
+          .iterate()
+          .add("ipsum", ($) => struct($.condition))
+          .add("trip", ($) => struct($.item.value))
+      )
+  )
+
+  .add("condition4", ($) =>
+    $if({ condition: "name" in $.init && $.init }, $)
+      .isTrue()
+      .add("loop2", ($) =>
+        $loop({ list: $.lorem.data }, $)
+          .iterate()
+          .add("ipsum", ($) => struct($.item.value))
+          .add("trip", ($) => struct($.item.value))
+      )
+  )
+  .add("trip2", ($) => struct({ name: "ads" }));
