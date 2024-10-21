@@ -21,20 +21,20 @@ interface StepFactory<
 > {
   scope: Scope<G, L>;
   add<T extends StepFactory, N extends string>(
-    name: N,
+    name: N extends keyof L ? never : N,
     fn: ($: G) => T
     // fix
   ): StepFactory<G & Record<N, string>, L & Record<N, T>>;
   add<T extends DaunusAction<any, any, any>, N extends string>(
-    name: N,
+    name: N extends keyof L ? never : N,
     fn: ($: G) => T
   ): StepFactory<G & Record<N, DaunusInferReturn<T>>, L & Record<N, T>>;
   add<T, N extends string>(
-    name: N,
+    name: N extends keyof L ? never : N,
     fn: ($: G) => T
   ): StepFactory<G & Record<N, T>, L & Record<N, T>>;
   add<T, N extends string>(
-    name: N,
+    name: N extends keyof L ? never : N,
     fn: ($: G) => T,
     override?: boolean
   ): StepFactory<Omit<G, N> & Record<N, T>, L & Record<N, T>>;
@@ -129,25 +129,14 @@ let init: { name: string } | { trip: string };
 const lorem = $steps()
   .add("init", () => init)
   .add("lorem", () => struct([1, 2, 3]))
-  .add("lorem", () => struct([1, 2, 3]))
-  .add("lorem", () => struct([1, 2, 3]))
+  .add("lorem3", () => struct([1, 2, 3]))
+  .add("lorem2", () => struct([1, 2, 3]))
   .add("sub1", ($) =>
     $steps($)
       .add("test", ($) => $.lorem)
       .add("test2", () => 3)
   )
   .add("condition", () => struct("test"))
-  .add("condition", ($) =>
-    $if({ condition: "name" in $.init && $.init }, $)
-      .isTrue()
-      .add("loop2", ($) =>
-        $loop({ list: $.lorem.data }, $)
-          .iterate()
-          .add("ipsum", ($) => struct($.condition))
-          .add("trip", ($) => struct($.item.value))
-      )
-  )
-  .add("trip2", ($) => struct({ name: $.condition }))
   .add("condition2", ($) =>
     $if({ condition: "name" in $.init && $.init }, $)
       .isTrue()
@@ -158,7 +147,18 @@ const lorem = $steps()
           .add("trip", ($) => struct($.item.value))
       )
   )
-  .add("condition", ($) =>
+  .add("trip2", ($) => struct({ name: $.condition }))
+  .add("condition3", ($) =>
+    $if({ condition: "name" in $.init && $.init }, $)
+      .isTrue()
+      .add("loop2", ($) =>
+        $loop({ list: $.lorem.data }, $)
+          .iterate()
+          .add("ipsum", ($) => struct($.condition))
+          .add("trip", ($) => struct($.item.value))
+      )
+  )
+  .add("condition5", ($) =>
     $if({ condition: "name" in $.init && $.init }, $)
       .isTrue()
       .add("loop2", ($) =>
@@ -179,4 +179,4 @@ const lorem = $steps()
           .add("trip", ($) => struct($.item.value))
       )
   )
-  .add("trip2", ($) => struct({ name: "ads" }));
+  .add("trip24", ($) => struct({ name: "ads" }));
