@@ -1,6 +1,6 @@
-import { DaunusInferReturn } from "../dist";
 import { exit, struct } from "./actions";
-import { DaunusAction } from "./types";
+import { DaunusAction, DaunusException, DaunusInferReturn } from "./types";
+import { $action } from ".";
 
 class Scope<
   G extends Record<string, any> = {},
@@ -16,7 +16,7 @@ class Scope<
 }
 
 type Prettify<T> = {
-  [K in keyof T]: T[K];
+  [K in keyof T]: T[K] extends Record<any, any> ? Prettify<T[K]> : T[K];
 } & {};
 
 type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
@@ -39,7 +39,22 @@ interface StepFactory<
     name: DisableSameName<N, L>,
     fn: ($: Prettify<G>) => T
   ): StepFactory<
-    Overwrite<G, N> & Record<N, DaunusInferReturn<T>>,
+    DaunusInferReturn<T>["data"] extends never
+      ? DaunusInferReturn<T>["exception"] extends never
+        ? Overwrite<G, N>
+        : Overwrite<G, N> &
+            Record<
+              "exceptions",
+              Record<N, DaunusInferReturn<T>["exception"] | undefined>
+            >
+      : DaunusInferReturn<T>["exception"] extends never
+        ? Overwrite<G, N> & Record<N, DaunusInferReturn<T>["data"]>
+        : Overwrite<G, N> &
+            Record<N, DaunusInferReturn<T>["data"]> &
+            Record<
+              "exceptions",
+              Record<N, DaunusInferReturn<T>["exception"] | undefined>
+            >,
     L & Record<N, T>
   >;
 
@@ -60,7 +75,7 @@ function $steps<
       ? initialScope
       : new Scope<G, L>({ global: initialScope });
 
-  function add<T, N extends string>(name: N, fn: ($: G) => T) {
+  function add<T, N extends string>(name: N, fn: ($: G) => T): any {
     const result = fn(scope.global);
 
     return $steps(
@@ -147,13 +162,21 @@ const steps = $steps()
 
   .add("list", () => [1, 2, 3])
 
+  .add("actionNoError", () => struct({ status: 500 }))
+
   .add("error", () => exit({ status: 500 }))
+
+  .add("couldHaveError", () =>
+    Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
+  )
 
   .add("condition", ($) =>
     $if({ condition: $.input.name === "foo" }, $)
       .isTrue()
 
       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
+
+      .add("asdasd", ($) => $.exceptions.couldHaveError?.data)
 
       .add("loop", ($) =>
         $loop({ list: $.list }, $)
