@@ -1,5 +1,5 @@
 import { DaunusInferReturn } from "../dist";
-import { struct } from "./actions";
+import { exit, struct } from "./actions";
 import { DaunusAction } from "./types";
 
 class Scope<
@@ -99,7 +99,10 @@ function $loop<
   return {
     iterate: () =>
       $steps(initialScope).add(itemVariable, () => {
-        return { value: {} as any as keyof A, index: {} as number };
+        return {
+          value: {} as any as A[number],
+          index: {} as number
+        };
       })
   };
 }
@@ -127,23 +130,40 @@ function $if<C, G extends Record<string, any> = {}>(
   };
 }
 
+const credentials = {
+  get: (name: string) => {
+    return struct({ API_KEY: "asda" });
+  }
+};
+
+const actions = {
+  trigger: (type: string, params: any, credentials?: any) => {
+    return struct(params);
+  }
+};
+
 const steps = $steps()
   .add("input", () => ({ name: "foo" }))
 
   .add("list", () => [1, 2, 3])
 
+  .add("error", () => exit({ status: 500 }))
+
   .add("condition", ($) =>
     $if({ condition: $.input.name === "foo" }, $)
       .isTrue()
 
-      .add("list", () => [1, 2, 4] as const)
+      .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
       .add("loop", ($) =>
         $loop({ list: $.list }, $)
           .iterate()
 
-          .add("ipsum", ($) => struct($.condition))
-
-          .add("trip", ($) => struct($.item.value))
+          .add("send slack message", ($) =>
+            actions.trigger("takswish.slack.send_message", {
+              channel: "#general",
+              text: `#${$.item.value}`
+            })
+          )
       )
   );
