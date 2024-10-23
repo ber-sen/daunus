@@ -45,7 +45,7 @@ interface StepFactory<
 
   add(...params: any): any;
 
-  run(): any;
+  run(): Promise<any>;
 }
 
 interface DefaultStepFactory<
@@ -55,16 +55,16 @@ interface DefaultStepFactory<
 > extends StepFactory<G, L> {
   add<T extends DefaultStepFactory<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatScope<G>) => T
+    fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
-    Overwrite<G, N> & Record<N, ReturnType<T["run"]>>,
+    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     L & Record<N, T>,
     N
   >;
 
   add<T extends DaunusAction<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatScope<G>) => T
+    fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     DaunusInferReturn<T>["data"] extends never
       ? DaunusInferReturn<T>["exception"] extends never
@@ -88,10 +88,14 @@ interface DefaultStepFactory<
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatScope<G>) => T
-  ): DefaultStepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>, N>;
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): DefaultStepFactory<
+    Overwrite<G, N> & Record<N, Awaited<T>>,
+    L & Record<N, T>,
+    N
+  >;
 
-  run(): N extends string ? L[N] : undefined;
+  run(): N extends string ? Promise<L[N]> : Promise<undefined>;
 }
 
 interface ParallelStepFactory<
@@ -100,10 +104,10 @@ interface ParallelStepFactory<
 > extends StepFactory<G, L> {
   add<T, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatScope<G>) => T
+    fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelStepFactory<G, L & Record<N, T>>;
 
-  run(): FormatScope<L>;
+  run(): Promise<FormatScope<L>>;
 }
 
 function toCamelCase(input: string): string {
@@ -133,7 +137,10 @@ export function $steps<
   }): T extends "parallel"
     ? ParallelStepFactory<G, L>
     : DefaultStepFactory<G, L, N> {
-    function add<T, N extends string>(name: N, fn: ($: FormatScope<G>) => T) {
+    function add<T, N extends string>(
+      name: N,
+      fn: ($: FormatScope<G>) => T | Promise<T>
+    ) {
       const result = (scope: any) => {
         return fn(scope);
       };
@@ -146,41 +153,43 @@ export function $steps<
             [toCamelCase(name)]: result
           }
         })
-      ).setOptions(options) as any;
+      ).setOptions(options);
     }
 
     function get<N extends keyof L>(name: Extract<N, string>): L[N] {
       return scope.local[toCamelCase(name)];
     }
 
-    function run() {
+    async function run() {
       if (!Object.keys(scope.local)?.at(-1)) {
         return undefined;
       }
 
       if (options.type === "parallel") {
-        const promises = Object.values(scope.local).map((action) => {
-          const res = action(scope.global);
+        const promises = Object.values(scope.local).map(async (action) => {
+          const res = await action(scope.global);
 
           if (isStepFactory(res)) {
-            return res.run();
+            return await res.run();
           }
 
           return res;
         });
 
+        const res = await Promise.all(promises);
+
         return Object.fromEntries(
-          Object.keys(scope.local).map((key, index) => [key, promises[index]])
+          Object.keys(scope.local).map((key, index) => [key, res[index]])
         );
       }
 
       const res: any[] = [];
 
       for (const [name, action] of Object.entries(scope.local)) {
-        let value = action(scope.global);
+        let value = await action(scope.global);
 
         if (isStepFactory(value)) {
-          value = value.run();
+          value = await value.run();
         }
 
         scope.global = { ...scope.global, [name]: value };
@@ -190,7 +199,7 @@ export function $steps<
       return res.at(-1);
     }
 
-    return { scope, run, add, get };
+    return { scope, run, add, get } as any;
   }
 
   return { ...setOptions({ type: "default" }), setOptions };

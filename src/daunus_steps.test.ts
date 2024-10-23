@@ -26,15 +26,15 @@ describe("$steps", () => {
     >;
   });
 
-  it("should work with one step", () => {
+  it("should work with one step", async () => {
     const steps = $steps().add("first step", () => ({
       foo: "bar"
     }));
 
-    expect(steps.run()).toEqual({ foo: "bar" });
+    expect(await steps.run()).toEqual({ foo: "bar" });
   });
 
-  it("should return the return value of last key by default", () => {
+  it("should return the return value of last key by default", async () => {
     const steps = $steps()
       .add("first step", () => ({
         foo: "bar"
@@ -42,10 +42,10 @@ describe("$steps", () => {
 
       .add("second step", ($) => $);
 
-    expect(steps.run()).toEqual({ firstStep: { foo: "bar" } });
+    expect(await steps.run()).toEqual({ firstStep: { foo: "bar" } });
   });
 
-  it("should return the return value of last key by default in nested", () => {
+  it("should return the return value of last key by default in nested", async () => {
     const steps = $steps()
       .add("nested", ($) =>
         $steps($)
@@ -58,7 +58,7 @@ describe("$steps", () => {
 
       .add("return", ($) => $.nested);
 
-    expect(steps.run()).toEqual("bar");
+    expect(await steps.run()).toEqual("bar");
   });
 
   it("should display proper types for parallel ", () => {
@@ -77,7 +77,7 @@ describe("$steps", () => {
       )
       .add("return", ($) => $.parallel);
 
-    type A = ReturnType<(typeof steps)["run"]>;
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>;
 
     type steps = Expect<
       Equal<
@@ -94,7 +94,7 @@ describe("$steps", () => {
     >;
   });
 
-  it("should return the all values if type is parallel", () => {
+  it("should return the all values if type is parallel", async () => {
     const steps = $steps()
       .add("input", () => [1, 2, 3])
 
@@ -111,13 +111,13 @@ describe("$steps", () => {
 
       .add("return", ($) => $.parallel);
 
-    expect(steps.run()).toEqual({
+    expect(await steps.run()).toEqual({
       firstStep: { foo: "bar" },
       secondStep: [1, 2, 3]
     });
   });
 
-  it("should work with nested steps inside parallel", () => {
+  it("should work with nested steps inside parallel", async () => {
     const steps = $steps()
       .add("input", () => [1, 2, 3])
 
@@ -141,7 +141,77 @@ describe("$steps", () => {
 
       .add("return", ($) => $.parallel);
 
-    expect(steps.run()).toEqual({
+    expect(await steps.run()).toEqual({
+      firstStep: { foo: "bar" },
+      secondStep: [1, 2, 3]
+    });
+  });
+
+  it("should resolve promises", async () => {
+    const steps = $steps()
+      .add("nested", ($) =>
+        $steps($)
+          .add("nested", () =>
+            Promise.resolve({
+              foo: "bar"
+            })
+          )
+
+          .add("second step", ($) => $.nested.foo)
+      )
+
+      .add("return", ($) => $.nested);
+
+    expect(await steps.run()).toEqual("bar");
+  });
+
+  it("should resolve nested values inside promuse ", async () => {
+    const steps = $steps()
+      .add("nested", ($) =>
+        $steps($)
+          .add("sub", ($) =>
+            Promise.resolve($steps($).add("sub", () => [1, 2, 3]))
+          )
+
+          .add("second step", ($) => $.sub)
+      )
+
+      .add("return", ($) => $.nested);
+
+    expect(await steps.run()).toEqual([1, 2, 3]);
+  });
+
+  it("should resolve promises in parallel", async () => {
+    const steps = $steps()
+      .add("input", () => Promise.resolve([1, 2, 3]))
+
+      .add("parallel", ($) =>
+        $steps($)
+          .setOptions({ type: "parallel" })
+
+          .add("first step", () =>
+            Promise.resolve({
+              foo: "bar"
+            })
+          )
+
+          .add("second step", ($) =>
+            Promise.resolve(
+              $steps($)
+                .add("nested", () =>
+                  Promise.resolve({
+                    foo: $.input
+                  })
+                )
+
+                .add("second step", ($) => $.nested.foo)
+            )
+          )
+      )
+
+      .add("return", ($) => $.parallel);
+
+    expect(await steps.run()).toEqual({
       firstStep: { foo: "bar" },
       secondStep: [1, 2, 3]
     });
