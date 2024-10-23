@@ -110,6 +110,11 @@ interface ParallelStepFactory<
   run(): Promise<FormatScope<L>>;
 }
 
+interface StepOptions {
+  type: "default" | "parallel" | "serial";
+  extend?: {};
+}
+
 function toCamelCase(input: string): string {
   return input
     .replace(/[\s!,._-]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
@@ -132,9 +137,9 @@ export function $steps<
       ? initialScope
       : new Scope<G, L>({ global: initialScope });
 
-  function setOptions<T extends "parallel" | "default">(options: {
-    type?: T;
-  }): T extends "parallel"
+  function setOptions<T extends StepOptions>(
+    options: T
+  ): T["type"] extends "parallel"
     ? ParallelStepFactory<G, L>
     : DefaultStepFactory<G, L, N> {
     function add<T, N extends string>(
@@ -229,20 +234,26 @@ function $if<C, G extends Record<string, any> = {}>(
   initialScope?: G
 ) {
   return {
-    isTrue: () => {
-      return $steps(initialScope).add("condition", () => {
-        // WIP
-        return condition as Exclude<
-          typeof condition,
-          false | "" | undefined | null
-        >;
-      });
+    isTrue: <P extends StepOptions>({ steps }: { steps: P }) => {
+      return $steps(initialScope).setOptions(steps);
     },
+    // isTrue: () => {
+
+    //   return $steps(initialScope).add("condition", () => {
+    //     // WIP
+    //     return condition as Exclude<
+    //       typeof condition,
+    //       false | "" | undefined | null
+    //     >;
+    //   });
+    // },
     isFalse: () => {
-      return $steps(initialScope).add("condition", () => {
-        // WIP
-        return condition as Exclude<typeof condition, true | object | number>;
-      });
+      return $steps(initialScope)
+        .setOptions({ type: "default" })
+        .add("condition", () => {
+          // WIP
+          return condition as Exclude<typeof condition, true | object | number>;
+        });
     }
   };
 }
@@ -262,7 +273,7 @@ const actions = {
 // const steps = $steps()
 //   .add("input", () => ({ name: "foo" }))
 
-//   .add("list", () => [1, 2, 3])
+//   // .add("list", () => [1, 2, 3])
 
 //   .add("actionNoError", () => struct({ status: 500 }))
 
@@ -274,11 +285,11 @@ const actions = {
 
 //   .add("condition", ($) =>
 //     $if({ condition: $.input.name === "foo" }, $)
-//       .isTrue()
+//       .isTrue({ steps: { type: "default" } })
 
 //       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-//       .add("asdasd", ($) => $.exceptions.couldHaveError?.data)
+//       .add("asdasd", ($) => $.list)
 
 //       .add("loop", ($) =>
 //         $loop({ list: $.list }, $)
