@@ -1,4 +1,4 @@
-import { exit, struct } from "./actions";
+import { struct } from "./actions";
 import { DaunusAction, DaunusInferReturn } from "./types";
 
 class Scope<
@@ -37,15 +37,26 @@ type DisableSameName<N, L> = N extends keyof L ? never : N;
 
 interface StepFactory<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {},
-  N extends keyof L | undefined = undefined
+  L extends Record<string, any> = {}
 > {
   scope: Scope<FormatScope<G>, FormatScope<L>>;
 
-  add<T extends StepFactory<any, any, any>, N extends string>(
+  get<N extends keyof L>(name: N): L[N];
+
+  add(...params: any): any;
+
+  run(): any;
+}
+
+interface DefaultStepFactory<
+  G extends Record<string, any> = {},
+  L extends Record<string, any> = {},
+  N extends keyof L | undefined = undefined
+> extends StepFactory<G, L> {
+  add<T extends DefaultStepFactory<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => T
-  ): StepFactory<
+  ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, ReturnType<T["run"]>>,
     L & Record<N, T>,
     N
@@ -54,7 +65,7 @@ interface StepFactory<
   add<T extends DaunusAction<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => T
-  ): StepFactory<
+  ): DefaultStepFactory<
     DaunusInferReturn<T>["data"] extends never
       ? DaunusInferReturn<T>["exception"] extends never
         ? Overwrite<G, N>
@@ -78,11 +89,21 @@ interface StepFactory<
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => T
-  ): StepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>, N>;
-
-  get<N extends keyof L>(name: N): L[N];
+  ): DefaultStepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>, N>;
 
   run(): N extends string ? L[N] : undefined;
+}
+
+interface ParallelStepFactory<
+  G extends Record<string, any> = {},
+  L extends Record<string, any> = {}
+> extends StepFactory<G, L> {
+  add<T, N extends string>(
+    name: DisableSameName<N, L>,
+    fn: ($: FormatScope<G>) => T
+  ): ParallelStepFactory<G, L & Record<N, T>>;
+
+  run(): FormatScope<L>;
 }
 
 function toCamelCase(input: string): string {
@@ -99,7 +120,9 @@ export function $steps<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
   N extends string = ""
->(initialScope?: Scope<G, L> | G): StepFactory<G, L> {
+>(
+  initialScope?: Scope<G, L> | G
+): DefaultStepFactory<G, L> & { setOptions: typeof setOptions } {
   const scope =
     initialScope instanceof Scope
       ? initialScope
@@ -140,7 +163,19 @@ export function $steps<
     return lastStep;
   }
 
+  function setOptions<
+    T extends "parallel" | "default",
+    N extends string = ""
+  >(options: {
+    type: T;
+  }): T extends "parallel"
+    ? ParallelStepFactory<G, L>
+    : DefaultStepFactory<G, L, N> {
+    return { scope, run, add, get } as any;
+  }
+
   return {
+    setOptions,
     scope,
     run,
     add,
