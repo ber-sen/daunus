@@ -61,7 +61,7 @@ describe("$steps", () => {
     expect(steps.run()).toEqual("bar");
   });
 
-  it("should diplay proper types for parallel ", () => {
+  it("should display proper types for parallel ", () => {
     const steps = $steps()
       .add("input", () => [1, 2, 3] as const)
 
@@ -107,6 +107,36 @@ describe("$steps", () => {
           }))
 
           .add("second step", ($) => $.input)
+      )
+
+      .add("return", ($) => $.parallel);
+
+    expect(steps.run()).toEqual({
+      firstStep: { foo: "bar" },
+      secondStep: [1, 2, 3]
+    });
+  });
+
+  it("should work with nested steps inside parallel", () => {
+    const steps = $steps()
+      .add("input", () => [1, 2, 3])
+
+      .add("parallel", ($) =>
+        $steps($)
+          .setOptions({ type: "parallel" })
+
+          .add("first step", () => ({
+            foo: "bar"
+          }))
+
+          .add("second step", ($) =>
+            $steps($)
+              .add("nested", () => ({
+                foo: $.input
+              }))
+
+              .add("second step", ($) => $.nested.foo)
+          )
       )
 
       .add("return", ($) => $.parallel);

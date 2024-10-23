@@ -159,28 +159,35 @@ export function $steps<
       }
 
       if (options.type === "parallel") {
-        const res = Object.values(scope.local).map((item) =>
-          item(scope.global)
-        );
+        const promises = Object.values(scope.local).map((action) => {
+          const res = action(scope.global);
+
+          if (isStepFactory(res)) {
+            return res.run();
+          }
+
+          return res;
+        });
 
         return Object.fromEntries(
-          Object.keys(scope.local).map((key, index) => [key, res[index]])
+          Object.keys(scope.local).map((key, index) => [key, promises[index]])
         );
       }
 
-      let res: any = null;
+      const res: any[] = [];
 
       for (const [name, action] of Object.entries(scope.local)) {
-        res = action(scope.global);
+        let value = action(scope.global);
 
-        if (isStepFactory(res)) {
-          return res.run();
+        if (isStepFactory(value)) {
+          value = value.run();
         }
 
-        scope.global = { ...scope.global, [name]: res };
+        scope.global = { ...scope.global, [name]: value };
+        res.push(value);
       }
 
-      return res;
+      return res.at(-1);
     }
 
     return { scope, run, add, get };
