@@ -85,4 +85,27 @@ describe("$steps", () => {
       >
     >;
   });
+
+  it("should return the all values if type is parallel", () => {
+    const steps = $steps()
+      .add("input", () => [1, 2, 3])
+
+      .add("parallel", ($) =>
+        $steps($)
+          .setOptions({ type: "parallel" })
+
+          .add("first step", () => ({
+            foo: "bar"
+          }))
+
+          .add("second step", ($) => $.input)
+      )
+
+      .add("return", ($) => $.parallel);
+
+    expect(steps.run()).toEqual({
+      firstStep: { foo: "bar" },
+      secondStep: [1, 2, 3]
+    });
+  });
 });

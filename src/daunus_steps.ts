@@ -128,59 +128,54 @@ export function $steps<
       ? initialScope
       : new Scope<G, L>({ global: initialScope });
 
-  function add<T, N extends string>(name: N, fn: ($: FormatScope<G>) => T) {
-    const result = fn(scope.global);
-
-    return $steps(
-      new Scope({
-        global: {
-          ...scope.global,
-          [toCamelCase(name)]: result
-        } as Overwrite<G, N>,
-        local: {
-          ...scope.local,
-          [toCamelCase(name)]: result
-        }
-      })
-    );
-  }
-
-  function get<N extends keyof L>(name: Extract<N, string>): L[N] {
-    return scope.local[toCamelCase(name)];
-  }
-
-  function run() {
-    if (!Object.keys(scope.local)?.at(-1)) {
-      return undefined;
-    }
-
-    const lastStep = scope.local[Object.keys(scope.local).at(-1) as N];
-
-    if (isStepFactory(lastStep)) {
-      return lastStep.run();
-    }
-
-    return lastStep;
-  }
-
-  function setOptions<
-    T extends "parallel" | "default",
-    N extends string = ""
-  >(options: {
-    type: T;
+  function setOptions<T extends "parallel" | "default">(options: {
+    type?: T;
   }): T extends "parallel"
     ? ParallelStepFactory<G, L>
     : DefaultStepFactory<G, L, N> {
-    return { scope, run, add, get } as any;
+    function add<T, N extends string>(name: N, fn: ($: FormatScope<G>) => T) {
+      const result = fn(scope.global);
+
+      return $steps(
+        new Scope({
+          global: {
+            ...scope.global,
+            [toCamelCase(name)]: result
+          },
+          local: {
+            ...scope.local,
+            [toCamelCase(name)]: result
+          }
+        })
+      ).setOptions(options) as any;
+    }
+
+    function get<N extends keyof L>(name: Extract<N, string>): L[N] {
+      return scope.local[toCamelCase(name)];
+    }
+
+    function run() {
+      if (!Object.keys(scope.local)?.at(-1)) {
+        return undefined;
+      }
+
+      if (options.type === "parallel") {
+        return scope.local;
+      }
+
+      const lastStep = scope.local[Object.keys(scope.local).at(-1) as N];
+
+      if (isStepFactory(lastStep)) {
+        return lastStep.run();
+      }
+
+      return lastStep;
+    }
+
+    return { scope, run, add, get };
   }
 
-  return {
-    setOptions,
-    scope,
-    run,
-    add,
-    get
-  };
+  return { ...setOptions({ type: "default" }), setOptions };
 }
 
 function $loop<
