@@ -26,26 +26,34 @@ describe("$steps", () => {
     >;
   });
 
+  it("should work with one step", () => {
+    const steps = $steps().add("first step", () => ({
+      foo: "bar"
+    }));
+
+    expect(steps.run()).toEqual({ foo: "bar" });
+  });
+
   it("should return the return value of last key by default", () => {
     const steps = $steps()
       .add("first step", () => ({
         foo: "bar"
       }))
 
-      .add("second step", ($) => $.firstStep.foo);
+      .add("second step", ($) => $);
 
-    expect(steps.run()).toEqual("bar");
+    expect(steps.run()).toEqual({ firstStep: { foo: "bar" } });
   });
 
   it("should return the return value of last key by default in nested", () => {
     const steps = $steps()
       .add("nested", ($) =>
         $steps($)
-          .add("first step", () => ({
+          .add("nested", () => ({
             foo: "bar"
           }))
 
-          .add("second step", ($) => $.firstStep.foo)
+          .add("second step", ($) => $.nested.foo)
       )
 
       .add("return", ($) => $.nested);

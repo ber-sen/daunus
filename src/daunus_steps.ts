@@ -134,14 +134,13 @@ export function $steps<
     ? ParallelStepFactory<G, L>
     : DefaultStepFactory<G, L, N> {
     function add<T, N extends string>(name: N, fn: ($: FormatScope<G>) => T) {
-      const result = fn(scope.global);
+      const result = (scope: any) => {
+        return fn(scope);
+      };
 
       return $steps(
         new Scope({
-          global: {
-            ...scope.global,
-            [toCamelCase(name)]: result
-          },
+          global: scope.global,
           local: {
             ...scope.local,
             [toCamelCase(name)]: result
@@ -160,16 +159,28 @@ export function $steps<
       }
 
       if (options.type === "parallel") {
-        return scope.local;
+        const res = Object.values(scope.local).map((item) =>
+          item(scope.global)
+        );
+
+        return Object.fromEntries(
+          Object.keys(scope.local).map((key, index) => [key, res[index]])
+        );
       }
 
-      const lastStep = scope.local[Object.keys(scope.local).at(-1) as N];
+      let res: any = null;
 
-      if (isStepFactory(lastStep)) {
-        return lastStep.run();
+      for (const [name, action] of Object.entries(scope.local)) {
+        res = action(scope.global);
+
+        if (isStepFactory(res)) {
+          return res.run();
+        }
+
+        scope.global = { ...scope.global, [name]: res };
       }
 
-      return lastStep;
+      return res;
     }
 
     return { scope, run, add, get };
