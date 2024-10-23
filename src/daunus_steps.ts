@@ -14,8 +14,21 @@ class Scope<
   }
 }
 
-type Prettify<T> = {
-  [K in keyof T]: T[K] extends Record<any, any> ? Prettify<T[K]> : T[K];
+type ToCamelCase<T extends string> =
+  T extends `${infer Left}${infer Delimiter}${infer Right}`
+    ? Delimiter extends " " | "_" | "-" | "." | "," | "!"
+      ? `${Left}${Capitalize<ToCamelCase<Right>>}`
+      : `${Left}${ToCamelCase<`${Delimiter}${Right}`>}`
+    : T;
+
+type FormatExceptions<T> = {
+  [K in keyof T as ToCamelCase<Extract<K, string>>]: T[K];
+} & {};
+
+type FormatGlobalScope<T> = {
+  [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exceptions"
+    ? FormatExceptions<T[K]>
+    : T[K];
 } & {};
 
 type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
@@ -30,13 +43,13 @@ interface StepFactory<
 
   add<T extends StepFactory, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: Prettify<G>) => T
+    fn: ($: FormatGlobalScope<G>) => T
     // fix
   ): StepFactory<Overwrite<G, N> & Record<N, string>, L & Record<N, T>>;
 
   add<T extends DaunusAction<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: Prettify<G>) => T
+    fn: ($: FormatGlobalScope<G>) => T
   ): StepFactory<
     DaunusInferReturn<T>["data"] extends never
       ? DaunusInferReturn<T>["exception"] extends never
@@ -59,13 +72,19 @@ interface StepFactory<
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: Prettify<G>) => T
+    fn: ($: FormatGlobalScope<G>) => T
   ): StepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>>;
 
   get<N extends keyof L>(name: N): L[N];
 }
 
-function $steps<
+function toCamelCase(input: string): string {
+  return input
+    .replace(/[\s!,._-]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
+    .replace(/^[A-Z]/, (match) => match.toLowerCase());
+}
+
+export function $steps<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 >(initialScope?: Scope<G, L> | G): StepFactory<G, L> {
@@ -74,25 +93,25 @@ function $steps<
       ? initialScope
       : new Scope<G, L>({ global: initialScope });
 
-  function add<T, N extends string>(name: N, fn: ($: G) => T): any {
+  function add<T, N extends string>(name: N, fn: ($: G) => T) {
     const result = fn(scope.global);
 
     return $steps(
       new Scope({
         global: {
           ...scope.global,
-          [name]: result
+          [toCamelCase(name)]: result
         } as Overwrite<G, N>,
         local: {
           ...scope.local,
-          [name]: result
+          [toCamelCase(name)]: result
         }
       })
     );
   }
 
-  function get<N extends keyof L>(name: N): L[N] {
-    return scope.local[name];
+  function get<N extends keyof L>(name: Extract<N, string>): L[N] {
+    return scope.local[toCamelCase(name)];
   }
 
   return {
@@ -156,36 +175,36 @@ const actions = {
   }
 };
 
-const steps = $steps()
-  .add("input", () => ({ name: "foo" }))
+// const steps = $steps()
+//   .add("input", () => ({ name: "foo" }))
 
-  .add("list", () => [1, 2, 3])
+//   .add("list", () => [1, 2, 3])
 
-  .add("actionNoError", () => struct({ status: 500 }))
+//   .add("actionNoError", () => struct({ status: 500 }))
 
-  .add("error", () => exit({ status: 500 }))
+//   .add("error", () => exit({ status: 500 }))
 
-  .add("couldHaveError", () =>
-    Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
-  )
+//   .add("could have error", () =>
+//     Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
+//   )
 
-  .add("condition", ($) =>
-    $if({ condition: $.input.name === "foo" }, $)
-      .isTrue()
+//   .add("condition", ($) =>
+//     $if({ condition: $.input.name === "foo" }, $)
+//       .isTrue()
 
-      .add("list", () => ["lorem", "ipsum", "dolor"] as const)
+//       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-      .add("asdasd", ($) => $.exceptions.couldHaveError?.data)
+//       .add("asdasd", ($) => $.exceptions.couldHaveError?.data)
 
-      .add("loop", ($) =>
-        $loop({ list: $.list }, $)
-          .iterate()
+//       .add("loop", ($) =>
+//         $loop({ list: $.list }, $)
+//           .iterate()
 
-          .add("send slack message", ($) =>
-            actions.trigger("takswish.slack.send_message", {
-              channel: "#general",
-              text: `#${$.item.value}`
-            })
-          )
-      )
-  );
+//           .add("send slack message", ($) =>
+//             actions.trigger("takswish.slack.send_message", {
+//               channel: "#general",
+//               text: `#${$.item.value}`
+//             })
+//           )
+//       )
+//   );
