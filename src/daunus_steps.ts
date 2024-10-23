@@ -1,6 +1,5 @@
 import { exit, struct } from "./actions";
-import { DaunusAction, DaunusException, DaunusInferReturn } from "./types";
-import { $action } from ".";
+import { DaunusAction, DaunusInferReturn } from "./types";
 
 class Scope<
   G extends Record<string, any> = {},
