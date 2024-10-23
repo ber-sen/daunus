@@ -25,7 +25,7 @@ type FormatExceptions<T> = {
   [K in keyof T as ToCamelCase<Extract<K, string>>]: T[K];
 } & {};
 
-type FormatGlobalScope<T> = {
+export type FormatScope<T> = {
   [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exceptions"
     ? FormatExceptions<T[K]>
     : T[K];
@@ -37,19 +37,23 @@ type DisableSameName<N, L> = N extends keyof L ? never : N;
 
 interface StepFactory<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
+  L extends Record<string, any> = {},
+  N extends keyof L | undefined = undefined
 > {
-  scope: Scope<G, L>;
+  scope: Scope<FormatScope<G>, FormatScope<L>>;
 
-  add<T extends StepFactory, N extends string>(
+  add<T extends StepFactory<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatGlobalScope<G>) => T
-    // fix
-  ): StepFactory<Overwrite<G, N> & Record<N, string>, L & Record<N, T>>;
+    fn: ($: FormatScope<G>) => T
+  ): StepFactory<
+    Overwrite<G, N> & Record<N, ReturnType<T["run"]>>,
+    L & Record<N, T>,
+    N
+  >;
 
   add<T extends DaunusAction<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatGlobalScope<G>) => T
+    fn: ($: FormatScope<G>) => T
   ): StepFactory<
     DaunusInferReturn<T>["data"] extends never
       ? DaunusInferReturn<T>["exception"] extends never
@@ -67,15 +71,18 @@ interface StepFactory<
               "exceptions",
               Record<N, DaunusInferReturn<T>["exception"] | undefined>
             >,
-    L & Record<N, T>
+    L & Record<N, T>,
+    N
   >;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
-    fn: ($: FormatGlobalScope<G>) => T
-  ): StepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>>;
+    fn: ($: FormatScope<G>) => T
+  ): StepFactory<Overwrite<G, N> & Record<N, T>, L & Record<N, T>, N>;
 
   get<N extends keyof L>(name: N): L[N];
+
+  run(): N extends string ? L[N] : undefined;
 }
 
 function toCamelCase(input: string): string {
@@ -84,16 +91,21 @@ function toCamelCase(input: string): string {
     .replace(/^[A-Z]/, (match) => match.toLowerCase());
 }
 
+function isStepFactory(obj: any): obj is StepFactory {
+  return obj.scope instanceof Scope && typeof obj.run === "function";
+}
+
 export function $steps<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
+  L extends Record<string, any> = {},
+  N extends string = ""
 >(initialScope?: Scope<G, L> | G): StepFactory<G, L> {
   const scope =
     initialScope instanceof Scope
       ? initialScope
       : new Scope<G, L>({ global: initialScope });
 
-  function add<T, N extends string>(name: N, fn: ($: G) => T) {
+  function add<T, N extends string>(name: N, fn: ($: FormatScope<G>) => T) {
     const result = fn(scope.global);
 
     return $steps(
@@ -114,8 +126,23 @@ export function $steps<
     return scope.local[toCamelCase(name)];
   }
 
+  function run() {
+    if (!Object.keys(scope.local)?.at(-1)) {
+      return undefined;
+    }
+
+    const lastStep = scope.local[Object.keys(scope.local).at(-1) as N];
+
+    if (isStepFactory(lastStep)) {
+      return lastStep.run();
+    }
+
+    return lastStep;
+  }
+
   return {
     scope,
+    run,
     add,
     get
   };
