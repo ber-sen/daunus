@@ -1,4 +1,4 @@
-import { $steps } from "./daunus_steps";
+import { $steps, StepFactory } from "./daunus_steps";
 
 import { Equal, Expect } from "./types";
 
@@ -43,6 +43,77 @@ describe("$steps", () => {
       .add("second step", ($) => $);
 
     expect(await steps.run()).toEqual({ firstStep: { foo: "bar" } });
+  });
+
+  it("should provide an easy way to extend", () => {
+    const nested = $steps().add("sub", () =>
+      $steps()
+        .add("first step", () => ({ foo: "bar" }))
+
+        .add("second step", ($) => $.firstStep.foo.toString())
+    );
+
+    function toJson(factory: StepFactory<any, any>) {
+      const steps = Object.values(factory.scope.local).map((value) => {
+        const functionValue = value.meta.fn.toString();
+
+        const body = functionValue?.split("=>")?.[1]?.trim();
+
+        const formatJson = body
+          .replace(/(["'])?(\w+)(["'])?:/g, '"$2": ')
+          .replace(`({`, `{`)
+          .replace(/}\)(?=[^}]*$)/, "}")
+          .replace(
+            /("[\dA-Za-z-]+"):\s+([\d$().A-Za-z-]+)/gm,
+            (match: any, key: string, value: string) => {
+              if (value === "true" || value === "false") {
+                return `${key}:${value}`;
+              }
+
+              return Number.isNaN(Number.parseInt(value, 10))
+                ? `${key}:"{{ ${value} }}"`
+                : `${key}:${value}`;
+            }
+          );
+
+        let parsed;
+
+        try {
+          parsed = JSON.parse(formatJson);
+        } catch {
+          parsed = `{{ ${body} }}`;
+        }
+
+        return {
+          type: ["struct"],
+          name: value.meta.name,
+          params: parsed
+        };
+      });
+
+      return {
+        type: ["steps"],
+        params: {
+          steps: [steps]
+        }
+      };
+    }
+
+    expect(toJson(nested.get("sub"))).toEqual({
+      type: ["steps"],
+      params: {
+        steps: [
+          [
+            { type: ["struct"], name: "first step", params: { foo: "bar" } },
+            {
+              type: ["struct"],
+              name: "second step",
+              params: "{{ $.firstStep.foo.toString() }}"
+            }
+          ]
+        ]
+      }
+    });
   });
 
   it("should return the return value of last key by default in nested", async () => {

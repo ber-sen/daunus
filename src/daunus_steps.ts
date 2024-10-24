@@ -35,13 +35,16 @@ type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
 
 type DisableSameName<N, L> = N extends keyof L ? never : N;
 
-interface StepFactory<
+export interface StepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > {
   scope: Scope<FormatScope<G>, FormatScope<L>>;
 
-  get<N extends keyof L>(name: N): L[N];
+  get<N extends keyof L>(
+    name: N,
+    scope?: Record<any, any>
+  ): L[N] & { meta: { fs: () => any; name: string } };
 
   add(...params: any): any;
 
@@ -158,6 +161,11 @@ export function $steps<
         return fn(scope);
       };
 
+      result.meta = {
+        name,
+        fn
+      };
+
       return $steps(
         new Scope({
           global: scope.global,
@@ -169,8 +177,11 @@ export function $steps<
       ).setOptions(options);
     }
 
-    function get<N extends keyof L>(name: Extract<N, string>): L[N] {
-      return scope.local[toCamelCase(name)];
+    function get<N extends keyof L>(
+      name: Extract<N, string>,
+      global?: Record<any, any>
+    ): L[N] {
+      return scope.local[toCamelCase(name)](global);
     }
 
     async function run() {
@@ -250,25 +261,16 @@ function $if<C, G extends Record<string, any> = {}>(
             $steps(initialScope).setOptions(options as P)
         }
       });
+    },
+    isFalse: <P extends StepOptions>(options?: P) => {
+      return $steps(initialScope).setOptions({
+        ...(options as P),
+        extend: {
+          isTrue: <P extends StepOptions>(options?: P) =>
+            $steps(initialScope).setOptions(options as P)
+        }
+      });
     }
-    // isTrue: () => {
-
-    //   return $steps(initialScope).add("condition", () => {
-    //     // WIP
-    //     return condition as Exclude<
-    //       typeof condition,
-    //       false | "" | undefined | null
-    //     >;
-    //   });
-    // },
-    // isFalse: () => {
-    //   return $steps(initialScope)
-    //     .setOptions({ type: "default" })
-    //     .add("condition", () => {
-    //       // WIP
-    //       return condition as Exclude<typeof condition, true | object | number>;
-    //     });
-    // }
   };
 }
 
@@ -284,40 +286,40 @@ const actions = {
   }
 };
 
-// const steps = $steps()
-//   .add("input", () => ({ name: "foo" }))
+const steps = $steps()
+  .add("input", () => ({ name: "foo" }))
 
-//   .add("list", () => [1, 2, 3])
+  .add("list", () => [1, 2, 3])
 
-//   .add("actionNoError", () => struct({ status: 500 }))
+  .add("actionNoError", () => struct({ status: 500 }))
 
-//   .add("error", () => exit({ status: 500 }))
+  // .add("error", () => exit({ status: 500 }))
 
-//   .add("could have error", () =>
-//     Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
-//   )
+  // .add("could have error", () =>
+  //   Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
+  // )
 
-//   .add("condition", ($) =>
-//     $if({ condition: $.input.name === "foo" }, $)
-//       .isTrue()
+  .add("condition", ($) =>
+    $if({ condition: $.input.name === "foo" }, $)
+      .isTrue()
 
-//       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
+      .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-//       .add("asdasd", ($) => 1)
+      .add("asdasd", ($) => 1)
 
-//       .isFalse()
+      .isFalse()
 
-//       .add("asdasd2", ($) => $)
+      .add("asdasd2", ($) => $)
 
-//       .add("loop", ($) =>
-//         $loop({ list: $.list }, $)
-//           .iterate()
+      .add("loop", ($) =>
+        $loop({ list: $.list }, $)
+          .iterate()
 
-//           .add("send slack message", ($) =>
-//             actions.trigger("takswish.slack.send_message", {
-//               channel: "#general",
-//               text: `#${$.item.value}`
-//             })
-//           )
-//       )
-//   );
+          .add("send slack message", ($) =>
+            actions.trigger("takswish.slack.send_message", {
+              channel: "#general",
+              text: `#${$.item.value}`
+            })
+          )
+      )
+  );
