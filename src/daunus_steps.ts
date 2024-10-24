@@ -238,7 +238,7 @@ function $loop<
   initialScope?: G
 ) {
   return {
-    iterate: () =>
+    forEachItem: () =>
       $steps(initialScope).add(itemVariable, () => {
         return {
           value: {} as any as A[number],
@@ -313,7 +313,7 @@ const steps = $steps()
 
       .add("loop", ($) =>
         $loop({ list: $.list }, $)
-          .iterate()
+          .forEachItem()
 
           .add("send slack message", ($) =>
             actions.trigger("takswish.slack.send_message", {
