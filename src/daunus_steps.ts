@@ -51,16 +51,19 @@ interface StepFactory<
 interface DefaultStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
+  E = {},
   N extends keyof L | undefined = undefined
 > extends StepFactory<G, L> {
-  add<T extends DefaultStepFactory<any, any, any>, N extends string>(
+  add<T extends DefaultStepFactory<any, any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     L & Record<N, T>,
+    E,
     N
-  >;
+  > &
+    E;
 
   add<T extends DaunusAction<any, any, any>, N extends string>(
     name: DisableSameName<N, L>,
@@ -83,8 +86,10 @@ interface DefaultStepFactory<
               Record<N, DaunusInferReturn<T>["exception"] | undefined>
             >,
     L & Record<N, T>,
+    E,
     N
-  >;
+  > &
+    E;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -92,26 +97,29 @@ interface DefaultStepFactory<
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     L & Record<N, T>,
+    E,
     N
-  >;
+  > &
+    E;
 
   run(): N extends string ? Promise<L[N]> : Promise<undefined>;
 }
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
+  L extends Record<string, any> = {},
+  E = {}
 > extends StepFactory<G, L> {
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): ParallelStepFactory<G, L & Record<N, T>>;
+  ): ParallelStepFactory<G, L & Record<N, T>, E> & E;
 
   run(): Promise<FormatScope<L>>;
 }
 
 interface StepOptions {
-  type: "default" | "parallel" | "serial";
+  type?: "default" | "parallel" | "serial";
   extend?: {};
 }
 
@@ -140,8 +148,8 @@ export function $steps<
   function setOptions<T extends StepOptions>(
     options: T
   ): T["type"] extends "parallel"
-    ? ParallelStepFactory<G, L>
-    : DefaultStepFactory<G, L, N> {
+    ? ParallelStepFactory<G, L, T["extend"]>
+    : DefaultStepFactory<G, L, T["extend"], N> {
     function add<T, N extends string>(
       name: N,
       fn: ($: FormatScope<G>) => T | Promise<T>
@@ -234,9 +242,15 @@ function $if<C, G extends Record<string, any> = {}>(
   initialScope?: G
 ) {
   return {
-    isTrue: <P extends StepOptions>({ steps }: { steps: P }) => {
-      return $steps(initialScope).setOptions(steps);
-    },
+    isTrue: <P extends StepOptions>(options?: P) => {
+      return $steps(initialScope).setOptions({
+        ...(options as P),
+        extend: {
+          isFalse: <P extends StepOptions>(options?: P) =>
+            $steps(initialScope).setOptions(options as P)
+        }
+      });
+    }
     // isTrue: () => {
 
     //   return $steps(initialScope).add("condition", () => {
@@ -247,14 +261,14 @@ function $if<C, G extends Record<string, any> = {}>(
     //     >;
     //   });
     // },
-    isFalse: () => {
-      return $steps(initialScope)
-        .setOptions({ type: "default" })
-        .add("condition", () => {
-          // WIP
-          return condition as Exclude<typeof condition, true | object | number>;
-        });
-    }
+    // isFalse: () => {
+    //   return $steps(initialScope)
+    //     .setOptions({ type: "default" })
+    //     .add("condition", () => {
+    //       // WIP
+    //       return condition as Exclude<typeof condition, true | object | number>;
+    //     });
+    // }
   };
 }
 
@@ -273,7 +287,7 @@ const actions = {
 // const steps = $steps()
 //   .add("input", () => ({ name: "foo" }))
 
-//   // .add("list", () => [1, 2, 3])
+//   .add("list", () => [1, 2, 3])
 
 //   .add("actionNoError", () => struct({ status: 500 }))
 
@@ -285,11 +299,15 @@ const actions = {
 
 //   .add("condition", ($) =>
 //     $if({ condition: $.input.name === "foo" }, $)
-//       .isTrue({ steps: { type: "default" } })
+//       .isTrue()
 
 //       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-//       .add("asdasd", ($) => $.list)
+//       .add("asdasd", ($) => 1)
+
+//       .isFalse()
+
+//       .add("asdasd2", ($) => $)
 
 //       .add("loop", ($) =>
 //         $loop({ list: $.list }, $)
