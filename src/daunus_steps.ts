@@ -133,7 +133,7 @@ function toCamelCase(input: string): string {
 }
 
 function isStepFactory(obj: any): obj is StepFactory {
-  return obj.scope instanceof Scope && typeof obj.run === "function";
+  return obj && obj.scope instanceof Scope && typeof obj.run === "function";
 }
 
 export function $steps<

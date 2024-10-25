@@ -165,6 +165,15 @@ describe("$steps", () => {
     >;
   });
 
+  it("should work for empty steps", async () => {
+    const steps = $steps()
+      .add("input", () => {})
+
+      .add("return", ($) => true);
+
+    expect(await steps.run()).toEqual(true);
+  });
+
   it("should return the all values if type is parallel", async () => {
     const steps = $steps()
       .add("input", () => [1, 2, 3])
