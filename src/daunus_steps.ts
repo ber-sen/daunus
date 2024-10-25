@@ -3,6 +3,17 @@ import { struct } from "./actions";
 interface Action<T extends string, R> {
   run: ((ctx?: Map<string, any>) => R) & { type: T };
 }
+
+type WorkflowBackoff = "constant" | "linear" | "exponential";
+
+interface StepConfig {
+  retries?: {
+    limit: number;
+    delay: string | number;
+    backoff?: WorkflowBackoff;
+  };
+  timeout?: string | number;
+}
 class Scope<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
@@ -59,6 +70,19 @@ interface DefaultStepFactory<
 > extends StepFactory<G, L>,
     Action<"steps", N extends string ? Promise<L[N]> : Promise<undefined>> {
   // TODO: seperate exceptions
+
+  add<T extends Action<any, any>, N extends string>(
+    name: DisableSameName<N, L>,
+    options: StepConfig,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): DefaultStepFactory<
+    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+    L & Record<N, T>,
+    E,
+    N
+  > &
+    E;
+
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
@@ -95,6 +119,18 @@ interface DefaultStepFactory<
   //   N
   // > &
   //   E;
+
+  add<T, N extends string>(
+    name: DisableSameName<N, L>,
+    options: StepConfig,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): DefaultStepFactory<
+    Overwrite<G, N> & Record<N, Awaited<T>>,
+    L & Record<N, T>,
+    E,
+    N
+  > &
+    E;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -275,14 +311,8 @@ function $if<C, G extends Record<string, any> = {}>(
   };
 }
 
-const credentials = {
-  get: (name: string) => {
-    return struct({ API_KEY: "asda" });
-  }
-};
-
 const actions = {
-  trigger: (type: string, params: any, credentials?: any) => {
+  trigger: (type: string, params: any) => {
     return struct(params);
   }
 };
@@ -317,7 +347,7 @@ const steps = $steps()
           .forEachItem()
 
           .add("send slack message", ($) =>
-            actions.trigger("takswish.slack.send_message", {
+            actions.trigger("takswish.slack.send_message@credentials", {
               channel: "#general",
               text: `#${$.item.value}`
             })
