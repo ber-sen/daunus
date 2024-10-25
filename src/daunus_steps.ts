@@ -1,6 +1,8 @@
 import { struct } from "./actions";
-import { DaunusAction, DaunusInferReturn } from "./types";
 
+interface Action<T extends string, R> {
+  run: ((ctx?: Map<string, any>) => R) & { type: T };
+}
 class Scope<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
@@ -47,8 +49,6 @@ export interface StepFactory<
   ): L[N] & { meta: { fs: () => any; name: string } };
 
   add(...params: any): any;
-
-  run(): Promise<any>;
 }
 
 interface DefaultStepFactory<
@@ -56,8 +56,10 @@ interface DefaultStepFactory<
   L extends Record<string, any> = {},
   E = {},
   N extends keyof L | undefined = undefined
-> extends StepFactory<G, L> {
-  add<T extends DefaultStepFactory<any, any, any, any>, N extends string>(
+> extends StepFactory<G, L>,
+    Action<"steps", N extends string ? Promise<L[N]> : Promise<undefined>> {
+  // TODO: seperate exceptions
+  add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
@@ -68,31 +70,31 @@ interface DefaultStepFactory<
   > &
     E;
 
-  add<T extends DaunusAction<any, any, any>, N extends string>(
-    name: DisableSameName<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultStepFactory<
-    DaunusInferReturn<T>["data"] extends never
-      ? DaunusInferReturn<T>["exception"] extends never
-        ? Overwrite<G, N>
-        : Overwrite<G, N> &
-            Record<
-              "exceptions",
-              Record<N, DaunusInferReturn<T>["exception"] | undefined>
-            >
-      : DaunusInferReturn<T>["exception"] extends never
-        ? Overwrite<G, N> & Record<N, DaunusInferReturn<T>["data"]>
-        : Overwrite<G, N> &
-            Record<N, DaunusInferReturn<T>["data"]> &
-            Record<
-              "exceptions",
-              Record<N, DaunusInferReturn<T>["exception"] | undefined>
-            >,
-    L & Record<N, T>,
-    E,
-    N
-  > &
-    E;
+  // add<T extends DaunusAction<any, any, any>, N extends string>(
+  //   name: DisableSameName<N, L>,
+  //   fn: ($: FormatScope<G>) => Promise<T> | T
+  // ): DefaultStepFactory<
+  //   DaunusInferReturn<T>["data"] extends never
+  //     ? DaunusInferReturn<T>["exception"] extends never
+  //       ? Overwrite<G, N>
+  //       : Overwrite<G, N> &
+  //           Record<
+  //             "exceptions",
+  //             Record<N, DaunusInferReturn<T>["exception"] | undefined>
+  //           >
+  //     : DaunusInferReturn<T>["exception"] extends never
+  //       ? Overwrite<G, N> & Record<N, DaunusInferReturn<T>["data"]>
+  //       : Overwrite<G, N> &
+  //           Record<N, DaunusInferReturn<T>["data"]> &
+  //           Record<
+  //             "exceptions",
+  //             Record<N, DaunusInferReturn<T>["exception"] | undefined>
+  //           >,
+  //   L & Record<N, T>,
+  //   E,
+  //   N
+  // > &
+  //   E;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -104,21 +106,18 @@ interface DefaultStepFactory<
     N
   > &
     E;
-
-  run(): N extends string ? Promise<L[N]> : Promise<undefined>;
 }
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
   E = {}
-> extends StepFactory<G, L> {
+> extends StepFactory<G, L>,
+    Action<"steps.parallel", FormatScope<L>> {
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelStepFactory<G, L & Record<N, T>, E> & E;
-
-  run(): Promise<FormatScope<L>>;
 }
 
 interface StepOptions {
@@ -132,8 +131,8 @@ function toCamelCase(input: string): string {
     .replace(/^[A-Z]/, (match) => match.toLowerCase());
 }
 
-function isStepFactory(obj: any): obj is StepFactory {
-  return obj && obj.scope instanceof Scope && typeof obj.run === "function";
+function isAction<T extends string>(obj: any): obj is Action<T, any> {
+  return obj && typeof obj.run === "function" && obj.run.type;
 }
 
 export function $steps<
@@ -193,7 +192,7 @@ export function $steps<
         const promises = Object.values(scope.local).map(async (action) => {
           const res = await action(scope.global);
 
-          if (isStepFactory(res)) {
+          if (isAction(res)) {
             return await res.run();
           }
 
@@ -212,7 +211,7 @@ export function $steps<
       for (const [name, action] of Object.entries(scope.local)) {
         let value = await action(scope.global);
 
-        if (isStepFactory(value)) {
+        if (isAction(value)) {
           value = await value.run();
         }
 
@@ -222,6 +221,8 @@ export function $steps<
 
       return res.at(-1);
     }
+
+    run.type = options.type === "parallel" ? "steps.parallel" : "steps";
 
     return { scope, run, add, get } as any;
   }
