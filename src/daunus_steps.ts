@@ -69,33 +69,26 @@ type OverwriteParent<
     | Action<any, any>
     | undefined = undefined
 > = {
-  [K in keyof T]: T[K] extends () => DefaultStepFactory<
-    any,
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  [K in keyof T]: T[K] extends () => DefaultStepFactory<any, any, any, any, any>
     ? ReturnType<T[K]> extends DefaultStepFactory<
         infer G,
         infer L,
         infer E,
         infer Y,
-        infer N,
         any
       >
-      ? () => DefaultStepFactory<G, L, E, Y, N, P>
+      ? () => DefaultStepFactory<G, L, E, Y, P>
       : T[K]
     : T[K];
 };
 
+const lastKey: unique symbol = Symbol("lastKey");
+
 interface DefaultStepFactory<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {},
+  L extends Record<any, any> = Record<typeof lastKey, undefined>,
   E = {},
   Y extends string = "steps",
-  N extends string = "",
   P extends
     | (DefaultStepFactory<any, any, any, any, any> & Action<any, any>)
     | Action<any, any>
@@ -104,16 +97,10 @@ interface DefaultStepFactory<
     Action<
       Y,
       Y extends "condition"
-        ? N extends string
-          ? P extends Action<any, any>
-            ? ReturnType<P["run"]> | Promise<L[N]>
-            : Promise<L[N]>
-          : P extends Action<any, any>
-            ? ReturnType<P["run"]> | Promise<L[N]>
-            : Promise<undefined>
-        : N extends string
-          ? Promise<L[N]>
-          : Promise<undefined>
+        ? P extends Action<any, any>
+          ? ReturnType<P["run"]> | Promise<L[typeof lastKey]>
+          : Promise<L[typeof lastKey]>
+        : Promise<L[typeof lastKey]>
     > {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
@@ -121,10 +108,9 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    L & Record<N, T>,
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
     E,
     Y,
-    N,
     P
   > &
     OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
@@ -134,10 +120,9 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    L & Record<N, T>,
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
     E,
     Y,
-    N,
     P
   > &
     OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
@@ -174,10 +159,9 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    L & Record<N, T>,
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
     E,
     Y,
-    N,
     P
   > &
     OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
@@ -187,10 +171,9 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    L & Record<N, T>,
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
     E,
     Y,
-    N,
     P
   > &
     OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
@@ -390,7 +373,7 @@ const steps = $steps()
 
       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-      .add("asdasd", ($) => $)
+      .add("asdasd", ($) => $.list)
 
       .isFalse()
 
