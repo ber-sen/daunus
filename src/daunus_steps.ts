@@ -62,13 +62,16 @@ export interface StepFactory<
   add(...params: any): any;
 }
 
+type CreateAction<T extends string, L, N extends keyof L> = T extends "steps"
+  ? Action<"steps", N extends string ? Promise<L[N]> : Promise<undefined>>
+  : Action<"condition", N extends string ? Promise<L[N]> : Promise<undefined>>;
+
 interface DefaultStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
   E = {},
-  N extends keyof L | undefined = undefined
-> extends StepFactory<G, L>,
-    Action<"steps", N extends string ? Promise<L[N]> : Promise<undefined>> {
+  P extends string = "steps"
+> extends StepFactory<G, L> {
   // TODO: seperate exceptions
 
   add<T extends Action<any, any>, N extends string>(
@@ -79,9 +82,10 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     L & Record<N, T>,
     E,
-    N
+    P
   > &
-    E;
+    E &
+    CreateAction<P, L & Record<N, T>, N>;
 
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
@@ -90,9 +94,10 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     L & Record<N, T>,
     E,
-    N
+    P
   > &
-    E;
+    E &
+    CreateAction<P, L & Record<N, T>, N>;
 
   // add<T extends DaunusAction<any, any, any>, N extends string>(
   //   name: DisableSameName<N, L>,
@@ -128,9 +133,10 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     L & Record<N, T>,
     E,
-    N
+    P
   > &
-    E;
+    E &
+    CreateAction<P, L & Record<N, T>, N>;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -139,9 +145,10 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     L & Record<N, T>,
     E,
-    N
+    P
   > &
-    E;
+    E &
+    CreateAction<P, L & Record<N, T>, N>;
 }
 
 interface ParallelStepFactory<
@@ -174,10 +181,10 @@ function isAction<T extends string>(obj: any): obj is Action<T, any> {
 export function $steps<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
-  N extends string = ""
+  P extends string = "steps"
 >(
   initialScope?: Scope<G, L> | G
-): DefaultStepFactory<G, L> & { setOptions: typeof setOptions } {
+): DefaultStepFactory<G, L, {}, P> & { setOptions: typeof setOptions } {
   const scope =
     initialScope instanceof Scope
       ? initialScope
@@ -187,7 +194,7 @@ export function $steps<
     options: T
   ): T["type"] extends "parallel"
     ? ParallelStepFactory<G, L, T["extend"]>
-    : DefaultStepFactory<G, L, T["extend"], N> {
+    : DefaultStepFactory<G, L, T["extend"], P> {
     function add<T, N extends string>(
       name: N,
       fn: ($: FormatScope<G>) => T | Promise<T>
