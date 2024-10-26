@@ -62,18 +62,59 @@ export interface StepFactory<
   add(...params: any): any;
 }
 
-type CreateAction<T extends string, L, N extends keyof L> = T extends "steps"
-  ? Action<"steps", N extends string ? Promise<L[N]> : Promise<undefined>>
-  : Action<"condition", N extends string ? Promise<L[N]> : Promise<undefined>>;
+type OverwriteParent<
+  T,
+  P extends
+    | (DefaultStepFactory<any, any, any, any, any> & Action<any, any>)
+    | Action<any, any>
+    | undefined = undefined
+> = {
+  [K in keyof T]: T[K] extends () => DefaultStepFactory<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
+    ? ReturnType<T[K]> extends DefaultStepFactory<
+        infer G,
+        infer L,
+        infer E,
+        infer Y,
+        infer N,
+        any
+      >
+      ? () => DefaultStepFactory<G, L, E, Y, N, P>
+      : T[K]
+    : T[K];
+};
 
 interface DefaultStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
   E = {},
-  P extends string = "steps"
-> extends StepFactory<G, L> {
-  // TODO: seperate exceptions
-
+  Y extends string = "steps",
+  N extends string = "",
+  P extends
+    | (DefaultStepFactory<any, any, any, any, any> & Action<any, any>)
+    | Action<any, any>
+    | undefined = undefined
+> extends StepFactory<G, L>,
+    Action<
+      Y,
+      Y extends "condition"
+        ? N extends string
+          ? P extends Action<any, any>
+            ? ReturnType<P["run"]> | Promise<L[N]>
+            : Promise<L[N]>
+          : P extends Action<any, any>
+            ? ReturnType<P["run"]> | Promise<L[N]>
+            : Promise<undefined>
+        : N extends string
+          ? Promise<L[N]>
+          : Promise<undefined>
+    > {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
@@ -82,10 +123,11 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     L & Record<N, T>,
     E,
+    Y,
+    N,
     P
   > &
-    E &
-    CreateAction<P, L & Record<N, T>, N>;
+    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
 
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
@@ -94,10 +136,11 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     L & Record<N, T>,
     E,
+    Y,
+    N,
     P
   > &
-    E &
-    CreateAction<P, L & Record<N, T>, N>;
+    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
 
   // add<T extends DaunusAction<any, any, any>, N extends string>(
   //   name: DisableSameName<N, L>,
@@ -133,10 +176,11 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     L & Record<N, T>,
     E,
+    Y,
+    N,
     P
   > &
-    E &
-    CreateAction<P, L & Record<N, T>, N>;
+    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -145,10 +189,11 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     L & Record<N, T>,
     E,
+    Y,
+    N,
     P
   > &
-    E &
-    CreateAction<P, L & Record<N, T>, N>;
+    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
 }
 
 interface ParallelStepFactory<
@@ -181,10 +226,10 @@ function isAction<T extends string>(obj: any): obj is Action<T, any> {
 export function $steps<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {},
-  P extends string = "steps"
+  Y extends string = "steps"
 >(
   initialScope?: Scope<G, L> | G
-): DefaultStepFactory<G, L, {}, P> & { setOptions: typeof setOptions } {
+): DefaultStepFactory<G, L, {}, Y> & { setOptions: typeof setOptions } {
   const scope =
     initialScope instanceof Scope
       ? initialScope
@@ -194,7 +239,7 @@ export function $steps<
     options: T
   ): T["type"] extends "parallel"
     ? ParallelStepFactory<G, L, T["extend"]>
-    : DefaultStepFactory<G, L, T["extend"], P> {
+    : DefaultStepFactory<G, L, T["extend"], Y> {
     function add<T, N extends string>(
       name: N,
       fn: ($: FormatScope<G>) => T | Promise<T>
@@ -297,21 +342,23 @@ function $if<C, G extends Record<string, any> = {}>(
   initialScope?: G
 ) {
   return {
-    isTrue: <P extends StepOptions>(options?: P) => {
-      return $steps(initialScope).setOptions({
-        ...(options as P),
+    isTrue: () => {
+      return $steps<G, {}, "condition">(initialScope).setOptions({
         extend: {
-          isFalse: <P extends StepOptions>(options?: P) =>
-            $steps(initialScope).setOptions(options as P)
+          isFalse: () =>
+            $steps<G, {}, "condition">(initialScope).setOptions({
+              type: "default"
+            })
         }
       });
     },
-    isFalse: <P extends StepOptions>(options?: P) => {
-      return $steps(initialScope).setOptions({
-        ...(options as P),
+    isFalse: () => {
+      return $steps<G, {}, "condition">(initialScope).setOptions({
         extend: {
-          isTrue: <P extends StepOptions>(options?: P) =>
-            $steps(initialScope).setOptions(options as P)
+          isTrue: () =>
+            $steps<G, {}, "condition">(initialScope).setOptions({
+              type: "default"
+            })
         }
       });
     }
@@ -329,7 +376,7 @@ const steps = $steps()
 
   .add("list", () => [1, 2, 3])
 
-  .add("actionNoError", () => struct({ status: 500 }))
+  // .add("actionNoError", () => struct({ status: 500 }))
 
   // .add("error", () => exit({ status: 500 }))
 
@@ -343,21 +390,23 @@ const steps = $steps()
 
       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-      .add("asdasd", ($) => 1)
+      .add("asdasd", ($) => $)
 
       .isFalse()
 
-      .add("asdasd2", ($) => $)
+      .add("asda", ($) => true as const)
+  )
 
-      .add("loop", ($) =>
-        $loop({ list: $.list }, $)
-          .forEachItem()
+  .add("asdasd2", ($) => $.condition);
 
-          .add("send slack message", ($) =>
-            actions.trigger("takswish.slack.send_message@credentials", {
-              channel: "#general",
-              text: `#${$.item.value}`
-            })
-          )
-      )
-  );
+// .add("loop", ($) =>
+//   $loop({ list: $.list }, $)
+//     .forEachItem()
+
+//     .add("send slack message", ($) =>
+//       actions.trigger("takswish.slack.send_message@credentials", {
+//         channel: "#general",
+//         text: `#${$.item.value}`
+//       })
+//     )
+// )
