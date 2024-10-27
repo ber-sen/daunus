@@ -62,70 +62,29 @@ export interface StepFactory<
   add(...params: any): any;
 }
 
-type OverwriteParent<
-  T,
-  P extends
-    | (DefaultStepFactory<any, any, any, any, any> & Action<any, any>)
-    | Action<any, any>
-    | undefined = undefined
-> = {
-  [K in keyof T]: T[K] extends () => DefaultStepFactory<any, any, any, any, any>
-    ? ReturnType<T[K]> extends DefaultStepFactory<
-        infer G,
-        infer L,
-        infer E,
-        infer Y,
-        any
-      >
-      ? () => DefaultStepFactory<G, L, E, Y, P>
-      : T[K]
-    : T[K];
-};
-
 const lastKey: unique symbol = Symbol("lastKey");
 
 interface DefaultStepFactory<
   G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<typeof lastKey, undefined>,
-  E = {},
-  Y extends string = "steps",
-  P extends
-    | (DefaultStepFactory<any, any, any, any, any> & Action<any, any>)
-    | Action<any, any>
-    | undefined = undefined
+  L extends Record<any, any> = Record<typeof lastKey, undefined>
 > extends StepFactory<G, L>,
-    Action<
-      Y,
-      Y extends "condition"
-        ? P extends Action<any, any>
-          ? ReturnType<P["run"]> | Promise<L[typeof lastKey]>
-          : Promise<L[typeof lastKey]>
-        : Promise<L[typeof lastKey]>
-    > {
+    Action<"steps", Promise<L[typeof lastKey]>> {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
-    E,
-    Y,
-    P
-  > &
-    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+  >;
 
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
-    E,
-    Y,
-    P
-  > &
-    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+  >;
 
   // add<T extends DaunusAction<any, any, any>, N extends string>(
   //   name: DisableSameName<N, L>,
@@ -159,36 +118,27 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
-    E,
-    Y,
-    P
-  > &
-    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+  >;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>,
-    E,
-    Y,
-    P
-  > &
-    OverwriteParent<E, Action<Y, Promise<Awaited<T>>>>;
+    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+  >;
 }
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {},
-  E = {}
+  L extends Record<string, any> = {}
 > extends StepFactory<G, L>,
     Action<"steps.parallel", FormatScope<L>> {
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): ParallelStepFactory<G, L & Record<N, T>, E> & E;
+  ): ParallelStepFactory<G, L & Record<N, T>>;
 }
 
 interface StepOptions {
@@ -208,11 +158,10 @@ function isAction<T extends string>(obj: any): obj is Action<T, any> {
 
 export function $steps<
   G extends Record<string, any> = {},
-  L extends Record<string, any> = {},
-  Y extends string = "steps"
+  L extends Record<string, any> = {}
 >(
   initialScope?: Scope<G, L> | G
-): DefaultStepFactory<G, L, {}, Y> & { setOptions: typeof setOptions } {
+): DefaultStepFactory<G, L> & { setOptions: typeof setOptions } {
   const scope =
     initialScope instanceof Scope
       ? initialScope
@@ -221,8 +170,8 @@ export function $steps<
   function setOptions<T extends StepOptions>(
     options: T
   ): T["type"] extends "parallel"
-    ? ParallelStepFactory<G, L, T["extend"]>
-    : DefaultStepFactory<G, L, T["extend"], Y> {
+    ? ParallelStepFactory<G, L>
+    : DefaultStepFactory<G, L> {
     function add<T, N extends string>(
       name: N,
       fn: ($: FormatScope<G>) => T | Promise<T>
@@ -320,33 +269,33 @@ function $loop<
   };
 }
 
-function $if<C, G extends Record<string, any> = {}>(
-  { condition }: { condition: C },
-  initialScope?: G
-) {
-  return {
-    isTrue: () => {
-      return $steps<G, {}, "condition">(initialScope).setOptions({
-        extend: {
-          isFalse: () =>
-            $steps<G, {}, "condition">(initialScope).setOptions({
-              type: "default"
-            })
-        }
-      });
-    },
-    isFalse: () => {
-      return $steps<G, {}, "condition">(initialScope).setOptions({
-        extend: {
-          isTrue: () =>
-            $steps<G, {}, "condition">(initialScope).setOptions({
-              type: "default"
-            })
-        }
-      });
-    }
-  };
-}
+// function $if<C, G extends Record<string, any> = {}>(
+//   { condition }: { condition: C },
+//   initialScope?: G
+// ) {
+//   return {
+//     isTrue: () => {
+//       return $steps<G, {}, "condition">(initialScope).setOptions({
+//         extend: {
+//           isFalse: () =>
+//             $steps<G, {}, "condition">(initialScope).setOptions({
+//               type: "default"
+//             })
+//         }
+//       });
+//     },
+//     isFalse: () => {
+//       return $steps<G, {}, "condition">(initialScope).setOptions({
+//         extend: {
+//           isTrue: () =>
+//             $steps<G, {}, "condition">(initialScope).setOptions({
+//               type: "default"
+//             })
+//         }
+//       });
+//     }
+//   };
+// }
 
 const actions = {
   trigger: (type: string, params: any) => {
@@ -357,30 +306,30 @@ const actions = {
 const steps = $steps()
   .add("input", () => ({ name: "foo" }))
 
-  .add("list", () => [1, 2, 3])
+  .add("list", () => [1, 2, 3]);
 
-  // .add("actionNoError", () => struct({ status: 500 }))
+// .add("actionNoError", () => struct({ status: 500 }))
 
-  // .add("error", () => exit({ status: 500 }))
+// .add("error", () => exit({ status: 500 }))
 
-  // .add("could have error", () =>
-  //   Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
-  // )
+// .add("could have error", () =>
+//   Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
+// )
 
-  .add("condition", ($) =>
-    $if({ condition: $.input.name === "foo" }, $)
-      .isTrue()
+// .add("condition", ($) =>
+//   $if({ condition: $.input.name === "foo" }, $)
+//     .isTrue()
 
-      .add("list", () => ["lorem", "ipsum", "dolor"] as const)
+//     .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-      .add("asdasd", ($) => $.list)
+//     .add("asdasd", ($) => $.list)
 
-      .isFalse()
+//     .isFalse()
 
-      .add("asda", ($) => true as const)
-  )
+//     .add("asda", ($) => true as const)
+// )
 
-  .add("asdasd2", ($) => $.condition);
+// .add("asdasd2", ($) => $.condition);
 
 // .add("loop", ($) =>
 //   $loop({ list: $.list }, $)
