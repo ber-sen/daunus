@@ -1,5 +1,3 @@
-import { struct } from "./actions";
-
 interface Action<T extends string, R> {
   run: ((ctx?: Map<string, any>) => R) & { type: T };
 }
@@ -52,15 +50,28 @@ type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
 
 type DisableSameName<N, L> = N extends keyof L ? never : N;
 
-export interface StepFactory<
+export interface AbstractStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > {
   scope: Scope<FormatScope<G>, FormatScope<L>>;
 
-  get(name: any, scope?: Record<any, any>): any;
+  get(
+    name: string,
+    scope?: Record<any, any>
+  ): any & { meta: { fs: () => any; name: string } };
 
   add(...params: any): any;
+}
+
+export interface StepFactory<
+  G extends Record<string, any> = {},
+  L extends Record<string, any> = {}
+> extends AbstractStepFactory<G, L> {
+  get<N extends keyof L>(
+    name: N,
+    scope?: Record<any, any>
+  ): L[N] & { meta: { fs: () => any; name: string } };
 }
 
 const resultKey: unique symbol = Symbol("resultKey");
@@ -129,11 +140,6 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
-
-  get<N extends keyof L>(
-    name: N,
-    scope?: Record<any, any>
-  ): L[N] & { meta: { fs: () => any; name: string } };
 }
 
 export type ExtractValuesByKey<T, K extends keyof any> =
@@ -170,7 +176,7 @@ interface DefaultCaseStepFactory<
   C extends string,
   G extends Record<string, any> = {},
   L extends Record<any, any> = Record<C, Record<typeof resultKey, undefined>>
-> extends StepFactory<G, L>,
+> extends AbstractStepFactory<G, L>,
     Action<"caseSteps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
@@ -213,10 +219,10 @@ interface DefaultCaseStepFactory<
   get<N extends keyof L>(
     name: N,
     scope?: Record<any, any>
-  ): StepFactory<G, L[N]>;
+  ): StepFactory<G, L[N]> & { meta: { fs: () => any; name: string } };
 }
 
-// const a = {} as CaseStepFactory<
+// const a = {} as DefaultCaseStepFactory<
 //   "true",
 //   {},
 //   Record<"false", Record<typeof resultKey, number>> &
@@ -225,9 +231,9 @@ interface DefaultCaseStepFactory<
 //     Record<"true", Record<"trip", boolean>>
 // >;
 
-// a.get("true").get("trip")
-
 // a.run()
+
+// a.get("false").get("lorem")
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
@@ -238,11 +244,6 @@ interface ParallelStepFactory<
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelStepFactory<G, L & Record<N, T>>;
-
-  get<N extends keyof L>(
-    name: N,
-    scope?: Record<any, any>
-  ): L[N] & { meta: { fs: () => any; name: string } };
 }
 
 interface StepOptions {
@@ -401,48 +402,42 @@ function $loop<
 //   };
 // }
 
-const actions = {
-  trigger: (type: string, params: any) => {
-    return struct(params);
-  }
-};
+// const actions = {
+//   trigger: (type: string, params: any) => {
+//     return struct(params);
+//   }
+// };
 
-const steps = $steps()
-  .add("input", () => ({ name: "foo" }))
+// const steps = $steps()
+//   .add("input", () => ({ name: "foo" }))
 
-  .add("list", () => [1, 2, 3]);
+//   .add("list", () => [1, 2, 3])
 
-// .add("actionNoError", () => struct({ status: 500 }))
+//   .add("could have error", ($) => $.list)
 
-// .add("error", () => exit({ status: 500 }))
+//   .add("condition", ($) =>
+//     $if({ condition: $.input.name === "foo" }, $)
+//       .isTrue()
 
-// .add("could have error", () =>
-//   Math.random() > 0.5 ? struct({ name: "asd" }) : exit({ status: 500 })
-// )
+//       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
 
-// .add("condition", ($) =>
-//   $if({ condition: $.input.name === "foo" }, $)
-//     .isTrue()
+//       .add("asdasd", ($) => $.list)
 
-//     .add("list", () => ["lorem", "ipsum", "dolor"] as const)
+//       .isFalse()
 
-//     .add("asdasd", ($) => $.list)
+//       .add("asda", ($) => true as const)
+//   )
 
-//     .isFalse()
+//   // .add("asdasd2", ($) => $.condition);
 
-//     .add("asda", ($) => true as const)
-// )
+//   .add("loop", ($) =>
+//     $loop({ list: $.list }, $)
+//       .forEachItem()
 
-// .add("asdasd2", ($) => $.condition);
-
-// .add("loop", ($) =>
-//   $loop({ list: $.list }, $)
-//     .forEachItem()
-
-//     .add("send slack message", ($) =>
-//       actions.trigger("takswish.slack.send_message@credentials", {
-//         channel: "#general",
-//         text: `#${$.item.value}`
-//       })
-//     )
-// )
+//       .add("send slack message", ($) =>
+//         actions.trigger("takswish.slack.send_message@credentials", {
+//           channel: "#general",
+//           text: `#${$.item.value}`
+//         })
+//       )
+//   );
