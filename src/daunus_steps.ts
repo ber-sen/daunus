@@ -160,22 +160,26 @@ export type DeepOmitByPath<
     : T
   : T;
 
-// type ExampleType = Record<
-//   "name",
-//   Record<"something", boolean> & Record<typeof resultKey, string>
-// > &
-//   Record<"lorem", Record<typeof resultKey, number>>;
-
-// type Result = ExtractValuesByKey<ExampleType, typeof resultKey>;
-
-// type DeepOmitResult = NestedFormat<
-//   DeepOmitByPath<ExampleType, ["name", typeof resultKey]>
-// >;
+type OverwriteLocal<T, L extends Record<any, any>> = {
+  [K in keyof T]: T[K] extends (
+    options: any
+  ) => DefaultCaseStepFactory<any, any, any, any>
+    ? ReturnType<T[K]> extends DefaultCaseStepFactory<
+        infer C,
+        infer G,
+        any,
+        infer E
+      >
+      ? () => DefaultCaseStepFactory<C, G, L, E>
+      : T[K]
+    : T[K];
+};
 
 interface DefaultCaseStepFactory<
   C extends string,
   G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<C, Record<typeof resultKey, undefined>>
+  L extends Record<any, any> = Record<C, Record<typeof resultKey, undefined>>,
+  E extends {} = {}
 > extends AbstractStepFactory<G, L>,
     Action<"caseSteps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
   add<T extends Action<any, any>, N extends string>(
@@ -185,8 +189,17 @@ interface DefaultCaseStepFactory<
   ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
+    DeepOmitByPath<L, [C, typeof resultKey]> &
+      Record<C, Record<N, T>> &
+      Record<C, Record<typeof resultKey, T>>,
+    E
+  > &
+    OverwriteLocal<
+      E,
+      DeepOmitByPath<L, [C, typeof resultKey]> &
+        Record<C, Record<N, T>> &
+        Record<C, Record<typeof resultKey, T>>
+    >;
 
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
@@ -194,8 +207,17 @@ interface DefaultCaseStepFactory<
   ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
+    DeepOmitByPath<L, [C, typeof resultKey]> &
+      Record<C, Record<N, T>> &
+      Record<C, Record<typeof resultKey, T>>,
+    E
+  > &
+    OverwriteLocal<
+      E,
+      DeepOmitByPath<L, [C, typeof resultKey]> &
+        Record<C, Record<N, T>> &
+        Record<C, Record<typeof resultKey, T>>
+    >;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -204,8 +226,17 @@ interface DefaultCaseStepFactory<
   ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
+    DeepOmitByPath<L, [C, typeof resultKey]> &
+      Record<C, Record<N, T>> &
+      Record<C, Record<typeof resultKey, T>>,
+    E
+  > &
+    OverwriteLocal<
+      E,
+      DeepOmitByPath<L, [C, typeof resultKey]> &
+        Record<C, Record<N, T>> &
+        Record<C, Record<typeof resultKey, T>>
+    >;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
@@ -213,8 +244,17 @@ interface DefaultCaseStepFactory<
   ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
+    DeepOmitByPath<L, [C, typeof resultKey]> &
+      Record<C, Record<N, T>> &
+      Record<C, Record<typeof resultKey, T>>,
+    E
+  > &
+    OverwriteLocal<
+      E,
+      DeepOmitByPath<L, [C, typeof resultKey]> &
+        Record<C, Record<N, T>> &
+        Record<C, Record<typeof resultKey, T>>
+    >;
 
   get<N extends keyof L>(
     name: N,
@@ -222,18 +262,36 @@ interface DefaultCaseStepFactory<
   ): StepFactory<G, L[N]> & { meta: { fs: () => any; name: string } };
 }
 
-// const a = {} as DefaultCaseStepFactory<
-//   "true",
-//   {},
-//   Record<"false", Record<typeof resultKey, number>> &
-//     Record<"false", Record<"lorem", number>> &
-//     Record<"true", Record<typeof resultKey, boolean>> &
-//     Record<"true", Record<"trip", boolean>>
-// >;
+interface ConditionStepFactory<
+  G extends Record<string, any> = {},
+  L extends Record<any, any> = Record<
+    "true",
+    Record<typeof resultKey, undefined>
+  > &
+    Record<"false", Record<typeof resultKey, undefined>>
+> extends Action<"condition", undefined> {
+  isTrue(): DefaultCaseStepFactory<
+    "true",
+    G,
+    L,
+    { isFalse: () => DefaultCaseStepFactory<"false", G, L> }
+  >;
+  isFalse(): DefaultCaseStepFactory<
+    "false",
+    G,
+    L,
+    { isTrue: () => DefaultCaseStepFactory<"true", G, L> }
+  >;
+}
 
-// a.run()
+const a = {} as ConditionStepFactory;
 
-// a.get("false").get("lorem")
+a.isTrue()
+  .add("lorem", () => [1, 2, 3])
+  .add("asdadasd", ($) => [1])
+  .isFalse()
+  .add("trip", () => true)
+  .run();
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
@@ -355,24 +413,24 @@ export function $steps<
   return { ...setOptions({ type: "default" }), setOptions };
 }
 
-function $loop<
-  A extends Array<any> | readonly any[],
-  I extends string = "item",
-  G extends Record<string, any> = {}
->(
-  { itemVariable = "item" as I }: { list: A; itemVariable?: I },
-  initialScope?: G
-) {
-  return {
-    forEachItem: () =>
-      $steps(initialScope).add(itemVariable, () => {
-        return {
-          value: {} as any as A[number],
-          index: {} as number
-        };
-      })
-  };
-}
+// function $loop<
+//   A extends Array<any> | readonly any[],
+//   I extends string = "item",
+//   G extends Record<string, any> = {}
+// >(
+//   { itemVariable = "item" as I }: { list: A; itemVariable?: I },
+//   initialScope?: G
+// ) {
+//   return {
+//     forEachItem: () =>
+//       $steps(initialScope).add(itemVariable, () => {
+//         return {
+//           value: {} as any as A[number],
+//           index: {} as number
+//         };
+//       })
+//   };
+// }
 
 // function $if<C, G extends Record<string, any> = {}>(
 //   { condition }: { condition: C },
