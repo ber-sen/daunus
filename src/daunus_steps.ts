@@ -38,6 +38,10 @@ type FormatExceptions<T> = {
   [K in keyof T as ToCamelCase<Extract<K, string>>]: T[K];
 } & {};
 
+export type NestedPretty<T> = {
+  [K in keyof T]: NestedPretty<T[K]>;
+} & {};
+
 export type FormatScope<T> = {
   [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exceptions"
     ? FormatExceptions<T[K]>
@@ -137,6 +141,17 @@ export type ExtractValuesByKey<T, K extends keyof any> =
       : { [P in keyof T]: ExtractValuesByKey<T[P], K> }[keyof T]
     : never;
 
+export type DeepOmitByPath<
+  T,
+  Path extends [keyof any, ...any[]]
+> = Path extends [infer Key, ...infer Rest]
+  ? Key extends keyof T
+    ? Rest extends [keyof any, ...any[]]
+      ? { [K in keyof T]: K extends Key ? DeepOmitByPath<T[K], Rest> : T[K] }
+      : Omit<T, Key>
+    : T
+  : T;
+
 // type ExampleType = Record<
 //   "name",
 //   Record<"something", boolean> & Record<typeof resultKey, string>
@@ -144,6 +159,55 @@ export type ExtractValuesByKey<T, K extends keyof any> =
 //   Record<"lorem", Record<typeof resultKey, number>>;
 
 // type Result = ExtractValuesByKey<ExampleType, typeof resultKey>;
+
+// type DeepOmitResult = NestedFormat<
+//   DeepOmitByPath<ExampleType, ["name", typeof resultKey]>
+// >;
+
+interface CaseStepFactory<
+  C extends string,
+  G extends Record<string, any> = {},
+  L extends Record<any, any> = Record<C, Record<typeof resultKey, undefined>>
+> extends StepFactory<G, L>,
+    Action<"steps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
+  add<T extends Action<any, any>, N extends string>(
+    name: DisableSameName<N, L>,
+    options: StepConfig,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): CaseStepFactory<
+    C,
+    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+  >;
+
+  add<T extends Action<any, any>, N extends string>(
+    name: DisableSameName<N, L>,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): CaseStepFactory<
+    C,
+    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+  >;
+
+  add<T, N extends string>(
+    name: DisableSameName<N, L>,
+    options: StepConfig,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): CaseStepFactory<
+    C,
+    Overwrite<G, N> & Record<N, Awaited<T>>,
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+  >;
+
+  add<T, N extends string>(
+    name: DisableSameName<N, L>,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): CaseStepFactory<
+    C,
+    Overwrite<G, N> & Record<N, Awaited<T>>,
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+  >;
+}
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
