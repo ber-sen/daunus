@@ -58,10 +58,7 @@ export interface StepFactory<
 > {
   scope: Scope<FormatScope<G>, FormatScope<L>>;
 
-  get<N extends keyof L>(
-    name: N,
-    scope?: Record<any, any>
-  ): L[N] & { meta: { fs: () => any; name: string } };
+  get(name: any, scope?: Record<any, any>): any;
 
   add(...params: any): any;
 }
@@ -132,6 +129,11 @@ interface DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
     Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
+
+  get<N extends keyof L>(
+    name: N,
+    scope?: Record<any, any>
+  ): L[N] & { meta: { fs: () => any; name: string } };
 }
 
 export type ExtractValuesByKey<T, K extends keyof any> =
@@ -164,17 +166,17 @@ export type DeepOmitByPath<
 //   DeepOmitByPath<ExampleType, ["name", typeof resultKey]>
 // >;
 
-interface CaseStepFactory<
+interface DefaultCaseStepFactory<
   C extends string,
   G extends Record<string, any> = {},
   L extends Record<any, any> = Record<C, Record<typeof resultKey, undefined>>
 > extends StepFactory<G, L>,
-    Action<"steps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
+    Action<"caseSteps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): CaseStepFactory<
+  ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
@@ -183,7 +185,7 @@ interface CaseStepFactory<
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): CaseStepFactory<
+  ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
     Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
@@ -193,7 +195,7 @@ interface CaseStepFactory<
     name: DisableSameName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): CaseStepFactory<
+  ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<T>>,
     Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
@@ -202,12 +204,30 @@ interface CaseStepFactory<
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): CaseStepFactory<
+  ): DefaultCaseStepFactory<
     C,
     Overwrite<G, N> & Record<N, Awaited<T>>,
     Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
+
+  get<N extends keyof L>(
+    name: N,
+    scope?: Record<any, any>
+  ): StepFactory<G, L[N]>;
 }
+
+// const a = {} as CaseStepFactory<
+//   "true",
+//   {},
+//   Record<"false", Record<typeof resultKey, number>> &
+//     Record<"false", Record<"lorem", number>> &
+//     Record<"true", Record<typeof resultKey, boolean>> &
+//     Record<"true", Record<"trip", boolean>>
+// >;
+
+// a.get("true").get("trip")
+
+// a.run()
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
@@ -218,6 +238,11 @@ interface ParallelStepFactory<
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelStepFactory<G, L & Record<N, T>>;
+
+  get<N extends keyof L>(
+    name: N,
+    scope?: Record<any, any>
+  ): L[N] & { meta: { fs: () => any; name: string } };
 }
 
 interface StepOptions {
