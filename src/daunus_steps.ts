@@ -62,20 +62,20 @@ export interface StepFactory<
   add(...params: any): any;
 }
 
-const lastKey: unique symbol = Symbol("lastKey");
+const resultKey: unique symbol = Symbol("resultKey");
 
 interface DefaultStepFactory<
   G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<typeof lastKey, undefined>
+  L extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<G, L>,
-    Action<"steps", Promise<L[typeof lastKey]>> {
+    Action<"steps", Promise<L[typeof resultKey]>> {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 
   add<T extends Action<any, any>, N extends string>(
@@ -83,7 +83,7 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 
   // add<T extends DaunusAction<any, any, any>, N extends string>(
@@ -118,7 +118,7 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 
   add<T, N extends string>(
@@ -126,9 +126,24 @@ interface DefaultStepFactory<
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof lastKey> & Record<N, T> & Record<typeof lastKey, T>
+    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 }
+
+export type ExtractValuesByKey<T, K extends keyof any> =
+  T extends Record<string, any>
+    ? T extends Record<K, infer R>
+      ? R
+      : { [P in keyof T]: ExtractValuesByKey<T[P], K> }[keyof T]
+    : never;
+
+// type ExampleType = Record<
+//   "name",
+//   Record<"something", boolean> & Record<typeof resultKey, string>
+// > &
+//   Record<"lorem", Record<typeof resultKey, number>>;
+
+// type Result = ExtractValuesByKey<ExampleType, typeof resultKey>;
 
 interface ParallelStepFactory<
   G extends Record<string, any> = {},
