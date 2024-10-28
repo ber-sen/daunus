@@ -7,6 +7,8 @@ import {
 } from "./new_types";
 import { DisableSameName, FormatScope, Overwrite } from "./type_helpers";
 
+// Needs refacoring
+
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
     ? T extends Record<K, infer R>
@@ -133,6 +135,7 @@ type Fallacy = false | "" | undefined | null;
 // WIP
 type Truthy = true | object | number;
 
+// WIP
 interface ConditionStepFactory<
   C,
   G extends Record<string, any> = {},
