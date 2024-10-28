@@ -1,4 +1,5 @@
-import { $steps, StepFactory } from "./daunus_steps";
+import { $steps } from "./daunus_steps";
+import { StepFactory } from "./new_types";
 
 import { Equal, Expect } from "./types";
 
