@@ -173,7 +173,7 @@ interface ConditionStepFactory<
   >;
 }
 
-function $if<C, G extends Record<string, any> = {}>(
+export function $if<C, G extends Record<string, any> = {}>(
   { condition }: { condition: C },
   initialScope?: G
 ) {
@@ -201,17 +201,6 @@ function $if<C, G extends Record<string, any> = {}>(
   //   }
   // };
 }
-
-const a = {} as ConditionStepFactory<boolean>;
-
-const b = a
-  .isTrue()
-  .add("lorem", () => [1, 2, 3])
-  .add("asdadasd", ($) => $.condition)
-  .isFalse()
-  .add("trip", ($) => $.condition);
-
-const d = b.get("false").get("condition");
 
 // function $loop<
 //   A extends Array<any> | readonly any[],
