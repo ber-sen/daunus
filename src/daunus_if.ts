@@ -127,36 +127,91 @@ interface DefaultCaseStepFactory<
   ): StepFactory<G, L[N]> & { meta: { fs: () => any; name: string } };
 }
 
+// WIP
+type Fallacy = false | "" | undefined | null;
+
+// WIP
+type Truthy = true | object | number;
+
 interface ConditionStepFactory<
+  C,
   G extends Record<string, any> = {},
   L extends Record<any, any> = Record<
     "true",
-    Record<typeof resultKey, undefined>
+    Record<"condition", Exclude<C, Fallacy>> &
+      Record<typeof resultKey, Exclude<C, Fallacy>>
   > &
-    Record<"false", Record<typeof resultKey, undefined>>
+    Record<
+      "false",
+      Record<"condition", Exclude<C, Truthy>> &
+        Record<typeof resultKey, Exclude<C, Truthy>>
+    >
 > extends Action<"condition", undefined> {
   isTrue(): DefaultCaseStepFactory<
     "true",
-    G,
+    G & Record<"condition", Exclude<C, Fallacy>>,
     L,
-    { isFalse: () => DefaultCaseStepFactory<"false", G, L> }
+    {
+      isFalse: () => DefaultCaseStepFactory<
+        "false",
+        G & Record<"condition", Exclude<C, Truthy>>,
+        L
+      >;
+    }
   >;
   isFalse(): DefaultCaseStepFactory<
     "false",
-    G,
+    G & Record<"condition", Exclude<C, Fallacy>>,
     L,
-    { isTrue: () => DefaultCaseStepFactory<"true", G, L> }
+    {
+      isTrue: () => DefaultCaseStepFactory<
+        "true",
+        G & Record<"condition", Exclude<C, Truthy>>,
+        L
+      >;
+    }
   >;
 }
 
-const a = {} as ConditionStepFactory;
+function $if<C, G extends Record<string, any> = {}>(
+  { condition }: { condition: C },
+  initialScope?: G
+) {
+  return {} as ConditionStepFactory<C, G>;
+  // return {
+  //   isTrue: () => {
+  //     return $steps<G, {}, "condition">(initialScope).setOptions({
+  //       extend: {
+  //         isFalse: () =>
+  //           $steps<G, {}, "condition">(initialScope).setOptions({
+  //             type: "default"
+  //           })
+  //       }
+  //     });
+  //   },
+  //   isFalse: () => {
+  //     return $steps<G, {}, "condition">(initialScope).setOptions({
+  //       extend: {
+  //         isTrue: () =>
+  //           $steps<G, {}, "condition">(initialScope).setOptions({
+  //             type: "default"
+  //           })
+  //       }
+  //     });
+  //   }
+  // };
+}
 
-a.isTrue()
+const a = {} as ConditionStepFactory<boolean>;
+
+const b = a
+  .isTrue()
   .add("lorem", () => [1, 2, 3])
-  .add("asdadasd", ($) => [1])
+  .add("asdadasd", ($) => $.condition)
   .isFalse()
-  .add("trip", () => true)
-  .run();
+  .add("trip", ($) => $.condition);
+
+const d = b.get("false").get("condition");
 
 // function $loop<
 //   A extends Array<any> | readonly any[],
@@ -174,34 +229,6 @@ a.isTrue()
 //           index: {} as number
 //         };
 //       })
-//   };
-// }
-
-// function $if<C, G extends Record<string, any> = {}>(
-//   { condition }: { condition: C },
-//   initialScope?: G
-// ) {
-//   return {
-//     isTrue: () => {
-//       return $steps<G, {}, "condition">(initialScope).setOptions({
-//         extend: {
-//           isFalse: () =>
-//             $steps<G, {}, "condition">(initialScope).setOptions({
-//               type: "default"
-//             })
-//         }
-//       });
-//     },
-//     isFalse: () => {
-//       return $steps<G, {}, "condition">(initialScope).setOptions({
-//         extend: {
-//           isTrue: () =>
-//             $steps<G, {}, "condition">(initialScope).setOptions({
-//               type: "default"
-//             })
-//         }
-//       });
-//     }
 //   };
 // }
 
