@@ -124,7 +124,7 @@ interface DefaultCaseStepFactory<
   get<N extends keyof L>(
     name: N,
     scope?: Record<any, any>
-  ): StepFactory<G, L[N]> & { meta: { fs: () => any; name: string } };
+  ): StepFactory<G, L[N]>;
 }
 
 // WIP

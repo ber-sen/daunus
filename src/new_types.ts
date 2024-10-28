@@ -34,10 +34,7 @@ export interface AbstractStepFactory<
 > {
   scope: Scope<FormatScope<G>, FormatScope<L>>;
 
-  get(
-    name: string,
-    scope?: Record<any, any>
-  ): any & { meta: { fs: () => any; name: string } };
+  get(name: string, scope?: Record<any, any>): any;
 
   add(...params: any): any;
 }
@@ -46,10 +43,7 @@ export interface StepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > extends AbstractStepFactory<G, L> {
-  get<N extends keyof L>(
-    name: N,
-    scope?: Record<any, any>
-  ): L[N] & { meta: { fs: () => any; name: string } };
+  get<N extends keyof L>(name: N, scope?: Record<any, any>): L[N];
 }
 
 export const resultKey: unique symbol = Symbol("resultKey");
