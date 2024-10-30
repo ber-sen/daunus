@@ -9,7 +9,7 @@ import {
 } from "./new_types";
 import { DisableSameName, FormatScope, Overwrite } from "./type_helpers";
 
-interface DefaultStepFactory<
+export interface DefaultStepFactory<
   G extends Record<string, any> = {},
   L extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<G, L>,
@@ -75,7 +75,7 @@ interface DefaultStepFactory<
   >;
 }
 
-interface ParallelStepFactory<
+export interface ParallelStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > extends StepFactory<G, L>,
