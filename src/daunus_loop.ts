@@ -9,7 +9,7 @@ export function $loop<
   { itemVariable = "item" as I }: { list: A; itemVariable?: I },
   initialScope?: G
 ) {
-  function forEachItem<T extends StepOptions>(options: T) {
+  function forEachItem<T extends StepOptions>(options?: T) {
     return $steps(initialScope).add(itemVariable, () => {
       return {
         value: {} as any as A[number],

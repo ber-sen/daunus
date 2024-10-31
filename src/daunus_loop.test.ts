@@ -1,90 +1,19 @@
-
+import { $loop } from "./daunus_loop";
 import { Expect, Equal } from "./type_helpers";
 
 describe("$loop", () => {
   it("should provide expected types for return", () => {
-    const condition = $loop({ condition: Math.random() > 0.5 })
-      .isTrue()
+    const loop = $loop({ list: [1, 2, 3] })
+      .forEachItem()
 
-      .add("first step", ($) => $.condition)
+      .add("first step", ($) => $.item)
 
-      .add("second step", ($) => $.firstStep)
+      .add("second step", ($) => $.firstStep.value);
 
-      .isFalse()
-
-      .add("false step", () => ({ foo: "bar" }));
-
-    const data = condition.run();
+    const data = loop.run();
 
     type A = typeof data;
 
-    type data = Expect<
-      Equal<
-        A,
-        Promise<
-          | true
-          | {
-              foo: string;
-            }
-        >
-      >
-    >;
-  });
-
-  it("should return the scope of true case", () => {
-    const condition = $if({ condition: Math.random() > 0.5 })
-      .isTrue()
-
-      .add("first step", () => Promise.resolve([1, 2, 3]))
-
-      .add("second step", ($) => $.condition)
-
-      .isFalse()
-
-      .add("false step", () => ({ foo: "bar" }));
-
-    const localScope = condition.get("true").scope.local;
-
-    type A = typeof localScope;
-
-    type localScope = Expect<
-      Equal<
-        A,
-        {
-          condition: true;
-          firstStep: number[];
-          secondStep: true;
-        }
-      >
-    >;
-  });
-
-  it("should return the scope of false case", () => {
-    const condition = $if({ condition: Math.random() > 0.5 })
-      .isTrue()
-
-      .add("first step", () => Promise.resolve([1, 2, 3]))
-
-      .add("second step", ($) => $.condition)
-
-      .isFalse()
-
-      .add("false step", () => ({ foo: "bar" }));
-
-    const localScope = condition.get("false").scope.local;
-
-    type A = typeof localScope;
-
-    type localScope = Expect<
-      Equal<
-        A,
-        {
-          condition: false;
-          falseStep: {
-            foo: string;
-          };
-        }
-      >
-    >;
+    type data = Expect<Equal<A, Promise<number>>>;
   });
 });
