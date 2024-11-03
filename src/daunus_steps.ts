@@ -158,8 +158,8 @@ export function $steps<
 
       const res: any[] = [];
 
-      for (const [name, action] of Object.entries(scope.local)) {
-        let value = await action(scope.global);
+      for (const [name, fn] of Object.entries(scope.local)) {
+        let value = await fn(scope.global);
 
         if (isAction(value)) {
           value = await value.run();
