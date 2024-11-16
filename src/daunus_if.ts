@@ -7,8 +7,6 @@ import {
 } from "./new_types";
 import { DisableSameName, FormatScope, Overwrite } from "./type_helpers";
 
-// Needs refacoring
-
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
     ? T extends Record<K, infer R>
@@ -27,101 +25,109 @@ export type DeepOmitByPath<
     : T
   : T;
 
-type OverwriteLocal<T, L extends Record<any, any>> = {
-  [K in keyof T]: T[K] extends (
-    options: any
-  ) => DefaultCaseStepFactory<any, any, any, any>
-    ? ReturnType<T[K]> extends DefaultCaseStepFactory<
-        infer C,
-        infer G,
-        any,
-        infer E
-      >
-      ? () => DefaultCaseStepFactory<C, G, L, E>
-      : T[K]
-    : T[K];
-};
-
-interface DefaultCaseStepFactory<
-  C extends string,
+interface ConditionDefaultCaseStepFactory<
+  C,
   G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<C, Record<typeof resultKey, undefined>>,
-  E extends {} = {}
+  L extends Record<any, any> = Record<
+    "true",
+    Record<"condition", Exclude<C, Fallacy>> &
+      Record<typeof resultKey, Exclude<C, Fallacy>>
+  > &
+    Record<
+      "false",
+      Record<"condition", Exclude<C, Truthy>> &
+        Record<typeof resultKey, Exclude<C, Truthy>>
+    >,
+  K extends string = "",
+  E extends string = ""
 > extends AbstractStepFactory<G, L>,
     Action<"caseSteps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
+  isTrue(): Omit<
+    ConditionDefaultCaseStepFactory<
+      C,
+      Omit<G, "condition"> & Record<"condition", Exclude<C, Fallacy>>,
+      L,
+      "true",
+      E | "isTrue"
+    >,
+    E | "isTrue"
+  >;
+
+  isFalse(): Omit<
+    ConditionDefaultCaseStepFactory<
+      C,
+      Omit<G, "condition"> & Record<"condition", Exclude<C, Truthy>>,
+      L,
+      "false",
+      E | "isFalse"
+    >,
+    E | "isFalse"
+  >;
+
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultCaseStepFactory<
-    C,
-    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    DeepOmitByPath<L, [C, typeof resultKey]> &
-      Record<C, Record<N, T>> &
-      Record<C, Record<typeof resultKey, T>>,
+  ): Omit<
+    ConditionDefaultCaseStepFactory<
+      C,
+      Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+      DeepOmitByPath<L, [K, typeof resultKey]> &
+        Record<K, Record<N, T>> &
+        Record<K, Record<typeof resultKey, T>>,
+      K,
+      E
+    >,
     E
-  > &
-    OverwriteLocal<
-      E,
-      DeepOmitByPath<L, [C, typeof resultKey]> &
-        Record<C, Record<N, T>> &
-        Record<C, Record<typeof resultKey, T>>
-    >;
-
+  >;
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultCaseStepFactory<
-    C,
-    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    DeepOmitByPath<L, [C, typeof resultKey]> &
-      Record<C, Record<N, T>> &
-      Record<C, Record<typeof resultKey, T>>,
+  ): Omit<
+    ConditionDefaultCaseStepFactory<
+      C,
+      Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+      DeepOmitByPath<L, [K, typeof resultKey]> &
+        Record<K, Record<N, T>> &
+        Record<K, Record<typeof resultKey, T>>,
+      K,
+      E
+    >,
     E
-  > &
-    OverwriteLocal<
-      E,
-      DeepOmitByPath<L, [C, typeof resultKey]> &
-        Record<C, Record<N, T>> &
-        Record<C, Record<typeof resultKey, T>>
-    >;
+  >;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultCaseStepFactory<
-    C,
-    Overwrite<G, N> & Record<N, Awaited<T>>,
-    DeepOmitByPath<L, [C, typeof resultKey]> &
-      Record<C, Record<N, T>> &
-      Record<C, Record<typeof resultKey, T>>,
+  ): Omit<
+    ConditionDefaultCaseStepFactory<
+      C,
+      Overwrite<G, N> & Record<N, Awaited<T>>,
+      DeepOmitByPath<L, [K, typeof resultKey]> &
+        Record<K, Record<N, T>> &
+        Record<K, Record<typeof resultKey, T>>,
+      K,
+      E
+    >,
     E
-  > &
-    OverwriteLocal<
-      E,
-      DeepOmitByPath<L, [C, typeof resultKey]> &
-        Record<C, Record<N, T>> &
-        Record<C, Record<typeof resultKey, T>>
-    >;
+  >;
 
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultCaseStepFactory<
-    C,
-    Overwrite<G, N> & Record<N, Awaited<T>>,
-    DeepOmitByPath<L, [C, typeof resultKey]> &
-      Record<C, Record<N, T>> &
-      Record<C, Record<typeof resultKey, T>>,
+  ): Omit<
+    ConditionDefaultCaseStepFactory<
+      C,
+      Overwrite<G, N> & Record<N, Awaited<T>>,
+      DeepOmitByPath<L, [K, typeof resultKey]> &
+        Record<K, Record<N, T>> &
+        Record<K, Record<typeof resultKey, T>>,
+      K,
+      E
+    >,
     E
-  > &
-    OverwriteLocal<
-      E,
-      DeepOmitByPath<L, [C, typeof resultKey]> &
-        Record<C, Record<N, T>> &
-        Record<C, Record<typeof resultKey, T>>
-    >;
+  >;
 
   get<N extends keyof L>(
     name: N,
@@ -135,52 +141,16 @@ type Fallacy = false | "" | undefined | null;
 // WIP
 type Truthy = true | object | number;
 
-// WIP
-interface ConditionStepFactory<
-  C,
-  G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<
-    "true",
-    Record<"condition", Exclude<C, Fallacy>> &
-      Record<typeof resultKey, Exclude<C, Fallacy>>
-  > &
-    Record<
-      "false",
-      Record<"condition", Exclude<C, Truthy>> &
-        Record<typeof resultKey, Exclude<C, Truthy>>
-    >
-> extends Action<"condition", undefined> {
-  isTrue(): DefaultCaseStepFactory<
-    "true",
-    G & Record<"condition", Exclude<C, Fallacy>>,
-    L,
-    {
-      isFalse: () => DefaultCaseStepFactory<
-        "false",
-        G & Record<"condition", Exclude<C, Truthy>>,
-        L
-      >;
-    }
-  >;
-  isFalse(): DefaultCaseStepFactory<
-    "false",
-    G & Record<"condition", Exclude<C, Fallacy>>,
-    L,
-    {
-      isTrue: () => DefaultCaseStepFactory<
-        "true",
-        G & Record<"condition", Exclude<C, Truthy>>,
-        L
-      >;
-    }
-  >;
-}
+type MainConditionStepFactory<C, G extends Record<string, any> = {}> = Omit<
+  ConditionDefaultCaseStepFactory<C, G>,
+  "add"
+>;
 
 export function $if<C, G extends Record<string, any> = {}>(
   { condition }: { condition: C },
   initialScope?: G
 ) {
-  return {} as ConditionStepFactory<C, G>;
+  return {} as MainConditionStepFactory<C, G>;
   // return {
   //   isTrue: () => {
   //     return $steps<G, {}, "condition">(initialScope).setOptions({
