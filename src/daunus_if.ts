@@ -41,7 +41,7 @@ interface ConditionDefaultCaseStepFactory<
   K extends string = "",
   E extends string = ""
 > extends AbstractStepFactory<G, L>,
-    Action<"caseSteps", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
+    Action<"condition", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
   isTrue(): Omit<
     ConditionDefaultCaseStepFactory<
       C,
