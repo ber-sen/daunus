@@ -147,8 +147,7 @@ type MainConditionStepFactory<C, G extends Record<string, any> = {}> = Omit<
 >;
 
 export function $if<C, G extends Record<string, any> = {}>(
-  { condition }: { condition: C },
-  initialScope?: G
+  { condition, $ }: { condition: C, $?: G },
 ) {
   return {} as MainConditionStepFactory<C, G>;
   // return {
@@ -208,26 +207,26 @@ export function $if<C, G extends Record<string, any> = {}>(
 //   .add("could have error", ($) => $.list)
 
 //   .add("condition", ($) =>
-//     $if({ condition: $.input.name === "foo" }, $)
+//     $if({ condition: $.input.name === "foo", $ })
 //       .isTrue()
 
-//       .add("list", () => ["lorem", "ipsum", "dolor"] as const)
+//       .add("list", () => ["lorem", "ipsum", "dolor"])
 
 //       .add("asdasd", ($) => $.list)
 
 //       .isFalse()
 
-//       .add("asda", ($) => true as const)
+//       .add("asda", ($) => true)
 //   )
 
-//   // .add("asdasd2", ($) => $.condition);
+//   .add("asdasd2", ($) => $.condition)
 
 //   .add("loop", ($) =>
-//     $loop({ list: $.list }, $)
+//     $loop({ list: $.list, $ })
 //       .forEachItem()
 
 //       .add("send slack message", ($) =>
-//         actions.trigger("takswish.slack.send_message@credentials", {
+//         actions.trigger("takswish.slack.send_message", {
 //           channel: "#general",
 //           text: `#${$.item.value}`
 //         })
