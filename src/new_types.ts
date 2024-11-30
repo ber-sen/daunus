@@ -56,5 +56,5 @@ export interface StepFactory<
 export const resultKey: unique symbol = Symbol("resultKey");
 
 export interface StepOptions {
-  type?: "default" | "parallel" | "serial";
+  stepsType?: "default" | "parallel" | "serial";
 }

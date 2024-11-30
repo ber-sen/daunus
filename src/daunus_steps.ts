@@ -66,10 +66,10 @@ export function $steps<
   L extends Record<string, any> = {}
 >({
   $: initialScope,
-  type
+  stepsType
 }: {
   $?: Scope<G, L> | G
-} & T = {} as T): T["type"] extends "parallel"
+} & T = {} as T): T["stepsType"] extends "parallel"
   ? ParallelStepFactory<G, L>
   : DefaultStepFactory<G, L> {
   const scope =
@@ -91,7 +91,7 @@ export function $steps<
     };
 
     return $steps({
-      type,
+      stepsType,
       $: new Scope({
         global: scope.global,
         local: {
@@ -114,7 +114,7 @@ export function $steps<
       return undefined;
     }
 
-    if (type === "parallel") {
+    if (stepsType === "parallel") {
       const promises = Object.values(scope.local).map(async (action) => {
         const res = await action(scope.global);
 
@@ -148,7 +148,7 @@ export function $steps<
     return res.at(-1);
   }
 
-  run.type = type === "parallel" ? "steps.parallel" : "steps";
+  run.type = stepsType === "parallel" ? "steps.parallel" : "steps";
 
   return { scope, run, add, get } as any
 }

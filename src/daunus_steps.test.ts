@@ -118,7 +118,7 @@ describe("$steps", () => {
   });
 
   it("should return the return value of last key by default in nested", async () => {
-    const steps = $steps({})
+    const steps = $steps()
       .add("nested", ($) =>
         $steps({ $ })
           .add("nested", () => ({
@@ -138,7 +138,7 @@ describe("$steps", () => {
       .add("input", () => [1, 2, 3] as const)
 
       .add("parallel", ($) =>
-        $steps({ $, type: "parallel" })
+        $steps({ $, stepsType: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -178,7 +178,7 @@ describe("$steps", () => {
       .add("input", () => [1, 2, 3])
 
       .add("parallel", ($) =>
-        $steps({ $, type: "parallel" })
+        $steps({ $, stepsType: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -199,7 +199,7 @@ describe("$steps", () => {
       .add("input", () => [1, 2, 3])
 
       .add("parallel", ($) =>
-        $steps({ $, type: "parallel" })
+        $steps({ $, stepsType: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -261,7 +261,7 @@ describe("$steps", () => {
       .add("input", () => Promise.resolve([1, 2, 3]))
 
       .add("parallel", ($) =>
-        $steps({ $, type: "parallel" })
+        $steps({ $, stepsType: "parallel" })
           .add("first step", () =>
             Promise.resolve({
               foo: "bar"

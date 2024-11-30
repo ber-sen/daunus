@@ -19,7 +19,7 @@ describe("$loop", () => {
 
   it("should work with parallel", () => {
     const loop = $loop({ list: [1, 2, 3] })
-      .forEachItem({ type: "parallel" })
+      .forEachItem({ stepsType: "parallel" })
 
       .add("first step", ($) => $.item)
 

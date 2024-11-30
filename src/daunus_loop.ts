@@ -12,7 +12,7 @@ export function $loop<
   });
 
   function forEachItem<T extends StepOptions>(options?: T) {
-    return $steps({ $: scope, type: options?.type as T["type"] });
+    return $steps({ $: scope, stepsType: options?.stepsType as T["stepsType"] });
   }
 
   return { forEachItem };
