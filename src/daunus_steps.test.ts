@@ -240,7 +240,7 @@ describe("$steps", () => {
     expect(await steps.run()).toEqual("bar");
   });
 
-  it("should resolve nested values inside promuse ", async () => {
+  it("should resolve nested values inside promise", async () => {
     const steps = $steps()
       .add("nested", ($) =>
         $steps({ $ })
