@@ -10,7 +10,7 @@ export function $loop<
   initialScope?: G
 ) {
   function forEachItem<T extends StepOptions>(options?: T) {
-    return $steps(initialScope).add(itemVariable, () => {
+    return $steps({ $: initialScope }).add(itemVariable, () => {
       return {
         value: {} as any as A[number],
         index: {} as number

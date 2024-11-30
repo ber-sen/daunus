@@ -28,7 +28,7 @@ describe("$steps", () => {
   });
 
   it("should work with one step", async () => {
-    const steps = $steps().add("first step", () => ({
+    const steps = $steps({}).add("first step", () => ({
       foo: "bar"
     }));
 
@@ -47,8 +47,8 @@ describe("$steps", () => {
   });
 
   it("should provide an easy way to extend", () => {
-    const nested = $steps().add("sub", () =>
-      $steps()
+    const nested = $steps({}).add("sub", ($) =>
+      $steps({ $ })
         .add("first step", () => ({ foo: "bar" }))
 
         .add("second step", ($) => $.firstStep.foo.toString())
@@ -118,9 +118,9 @@ describe("$steps", () => {
   });
 
   it("should return the return value of last key by default in nested", async () => {
-    const steps = $steps()
+    const steps = $steps({})
       .add("nested", ($) =>
-        $steps($)
+        $steps({ $ })
           .add("nested", () => ({
             foo: "bar"
           }))
@@ -134,13 +134,11 @@ describe("$steps", () => {
   });
 
   it("should display proper types for parallel ", () => {
-    const steps = $steps()
+    const steps = $steps({})
       .add("input", () => [1, 2, 3] as const)
 
       .add("parallel", ($) =>
-        $steps($)
-          .setOptions({ type: "parallel" })
-
+        $steps({ $, type: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -180,9 +178,7 @@ describe("$steps", () => {
       .add("input", () => [1, 2, 3])
 
       .add("parallel", ($) =>
-        $steps($)
-          .setOptions({ type: "parallel" })
-
+        $steps({ $, type: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -203,15 +199,13 @@ describe("$steps", () => {
       .add("input", () => [1, 2, 3])
 
       .add("parallel", ($) =>
-        $steps($)
-          .setOptions({ type: "parallel" })
-
+        $steps({ $, type: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
 
           .add("second step", ($) =>
-            $steps($)
+            $steps({ $ })
               .add("nested", () => ({
                 foo: $.input
               }))
@@ -231,7 +225,7 @@ describe("$steps", () => {
   it("should resolve promises", async () => {
     const steps = $steps()
       .add("nested", ($) =>
-        $steps($)
+        $steps({ $ })
           .add("nested", () =>
             Promise.resolve({
               foo: "bar"
@@ -249,7 +243,7 @@ describe("$steps", () => {
   it("should resolve nested values inside promuse ", async () => {
     const steps = $steps()
       .add("nested", ($) =>
-        $steps($)
+        $steps({ $ })
           .add("sub", ($) =>
             Promise.resolve($steps($).add("sub", () => [1, 2, 3]))
           )
@@ -267,9 +261,7 @@ describe("$steps", () => {
       .add("input", () => Promise.resolve([1, 2, 3]))
 
       .add("parallel", ($) =>
-        $steps($)
-          .setOptions({ type: "parallel" })
-
+        $steps({ $, type: "parallel" })
           .add("first step", () =>
             Promise.resolve({
               foo: "bar"
@@ -278,7 +270,7 @@ describe("$steps", () => {
 
           .add("second step", ($) =>
             Promise.resolve(
-              $steps($)
+              $steps({ $ })
                 .add("nested", () =>
                   Promise.resolve({
                     foo: $.input
