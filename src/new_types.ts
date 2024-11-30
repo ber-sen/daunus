@@ -26,6 +26,13 @@ export class Scope<
     this.global = global ?? ({} as G);
     this.local = local ?? ({} as L);
   }
+
+  addGlobal<N extends string, V>(name: N, value: V) {
+    return new Scope<G & Record<N, V>, L>({
+      global: { ...this.global, [name]: value },
+      local: this.local
+    });
+  }
 }
 
 export interface AbstractStepFactory<

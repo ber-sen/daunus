@@ -16,4 +16,30 @@ describe("$loop", () => {
 
     type data = Expect<Equal<A, Promise<number>>>;
   });
+
+  it("should work with parallel", () => {
+    const loop = $loop({ list: [1, 2, 3] })
+      .forEachItem({ type: "parallel" })
+
+      .add("first step", ($) => $.item)
+
+      .add("second step", () => 42);
+
+    const data = loop.run();
+
+    type A = typeof data;
+
+    type data = Expect<
+      Equal<
+        A,
+        {
+          firstStep: {
+            value: number;
+            index: number;
+          };
+          secondStep: number;
+        }
+      >
+    >;
+  });
 });
