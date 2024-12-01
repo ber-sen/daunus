@@ -150,48 +150,7 @@ export function $if<C, G extends Record<string, any> = {}>(
   { condition, $ }: { condition: C, $?: G },
 ) {
   return {} as MainConditionStepFactory<C, G>;
-  // return {
-  //   isTrue: () => {
-  //     return $steps<G, {}, "condition">(initialScope).setOptions({
-  //       extend: {
-  //         isFalse: () =>
-  //           $steps<G, {}, "condition">(initialScope).setOptions({
-  //             type: "default"
-  //           })
-  //       }
-  //     });
-  //   },
-  //   isFalse: () => {
-  //     return $steps<G, {}, "condition">(initialScope).setOptions({
-  //       extend: {
-  //         isTrue: () =>
-  //           $steps<G, {}, "condition">(initialScope).setOptions({
-  //             type: "default"
-  //           })
-  //       }
-  //     });
-  //   }
-  // };
 }
-
-// function $loop<
-//   A extends Array<any> | readonly any[],
-//   I extends string = "item",
-//   G extends Record<string, any> = {}
-// >(
-//   { itemVariable = "item" as I }: { list: A; itemVariable?: I },
-//   initialScope?: G
-// ) {
-//   return {
-//     forEachItem: () =>
-//       $steps(initialScope).add(itemVariable, () => {
-//         return {
-//           value: {} as any as A[number],
-//           index: {} as number
-//         };
-//       })
-//   };
-// }
 
 // const actions = {
 //   trigger: (type: string, params: any) => {
