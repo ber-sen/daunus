@@ -115,8 +115,8 @@ export function $steps<
     }
 
     if (stepsType === "parallel") {
-      const promises = Object.values(scope.local).map(async (action) => {
-        const res = await action(scope.global);
+      const promises = Object.values(scope.local).map(async (fn) => {
+        const res = await fn(scope.global);
 
         if (isAction(res)) {
           return await res.run();
