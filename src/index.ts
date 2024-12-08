@@ -6,5 +6,3 @@ export * from "./daunus_action";
 export * from "./daunus_router";
 export * from "./get";
 export * from "./actions";
-export * from "./params";
-export * from "./query";
