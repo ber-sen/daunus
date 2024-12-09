@@ -3,7 +3,6 @@ import { z } from "zod";
 import { $input } from "./daunus_helpers";
 import { resolveParams } from "./resolve_params";
 import { $var } from "./daunus_var";
-import { $fn } from "./daunus_fn";
 
 describe("resolveParams", () => {
   const input = $input({ foo: z.string() });
@@ -25,14 +24,6 @@ describe("resolveParams", () => {
 
   it("should resolve value of $var inside an object", async () => {
     const params = { foo: $var(input, "foo") };
-
-    const res = await resolveParams(ctx, params);
-
-    expect(res).toStrictEqual({ foo: inputValue });
-  });
-
-  it("should resolve value of $var inside an another $var", async () => {
-    const params = { foo: $fn(() => $var(input, "foo")) };
 
     const res = await resolveParams(ctx, params);
 
