@@ -2,8 +2,8 @@ import { runAction } from "../../run_action";
 import { $action } from "../../daunus_action";
 import { DaunusWorkflowAction } from "../../types";
 
-const process = $action(
-  { type: "process", skipParse: true },
+const steps = $action(
+  { type: "steps", skipParse: true },
   ({ ctx }) =>
     async (list: DaunusWorkflowAction<any>[]) => {
       let res: any = null;
@@ -20,4 +20,4 @@ const process = $action(
     }
 );
 
-export default process;
+export default steps;

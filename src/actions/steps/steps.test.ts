@@ -1,11 +1,11 @@
 import { $ctx } from "../../daunus_helpers";
 import { DaunusException } from "../../types";
 
-import process from "./index";
+import steps from ".";
 
-describe("process", () => {
+describe("steps", () => {
   it("should work for basic example", async () => {
-    const action = process([
+    const action = steps([
       {
         name: "test",
         type: ["struct"],
@@ -21,7 +21,7 @@ describe("process", () => {
   });
 
   it("should work with placeholders", async () => {
-    const action = process([
+    const action = steps([
       {
         name: "test",
         type: ["struct"],
@@ -41,7 +41,7 @@ describe("process", () => {
   });
 
   it("should stop on error", async () => {
-    const action = process([
+    const action = steps([
       {
         name: "test",
         type: ["struct"],
@@ -68,7 +68,7 @@ describe("process", () => {
   });
 
   it("should work handle errors placeholders", async () => {
-    const action = process([
+    const action = steps([
       {
         name: "test",
         type: ["struct"],
@@ -87,7 +87,7 @@ describe("process", () => {
     expect(res.data).toStrictEqual("bar");
   });
 
-  it("should work with nested processes", async () => {
+  it("should work with nested steps", async () => {
     const ctx = $ctx();
 
     ctx.set(".daunus-placeholder-resolver", ($: any, key: string) =>
@@ -95,10 +95,10 @@ describe("process", () => {
       new Function("$", `return ${key}`)($)
     );
 
-    const action = process([
+    const action = steps([
       {
         name: "test",
-        type: ["process"],
+        type: ["steps"],
         params: [
           {
             type: ["struct"],

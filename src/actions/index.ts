@@ -1,9 +1,8 @@
 export { default as condition } from "./condition";
 export { default as struct } from "./struct";
-export { default as process } from "./process";
+export { default as workflowSteps } from "./steps";
 export { default as parallel } from "./parallel";
 export { default as serial } from "./serial";
-export { default as response } from "./response";
 export { default as exit } from "./exit";
 export { default as wait } from "./wait";
 export { default as workflow } from "./workflow";

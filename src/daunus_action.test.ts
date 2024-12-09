@@ -12,13 +12,13 @@ type Equal<X, Y> =
     ? true
     : false;
 
-describe("$query", () => {
+describe("$action", () => {
   it("Should infer input", () => {
     const input = $input({
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: $var(input, "id") });
+    const test = struct({ success: true, data: $query($ => $.input.id) });
 
     const res = test.createRoute(input);
 
@@ -165,7 +165,7 @@ describe("$query", () => {
       query: z.object({ sj: z.string() })
     });
 
-    const test = struct({ success: true, data: $var(input, "body.id") });
+    const test = struct({ success: true, data: $query($ => $.body.id) });
 
     const res = test.createRoute(input);
 

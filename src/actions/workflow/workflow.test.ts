@@ -8,7 +8,7 @@ describe("workflow", () => {
     const action = workflow({
       name: "Foo",
       action: {
-        type: ["process"],
+        type: ["steps"],
         params: [
           {
             name: "struct",
@@ -32,7 +32,7 @@ describe("workflow", () => {
     const action = workflow({
       name: "Foo",
       action: {
-        type: ["process"],
+        type: ["steps"],
         params: [
           {
             name: "file",
@@ -74,7 +74,7 @@ describe("workflow", () => {
     const action = workflow({
       name: "Foo",
       action: {
-        type: ["process"],
+        type: ["steps"],
         params: [
           {
             name: "item",
@@ -88,7 +88,7 @@ describe("workflow", () => {
               if: $query(($) => $.item.data.name === "Foo"),
               do: {
                 name: "item2",
-                type: ["process"],
+                type: ["steps"],
                 params: [
                   {
                     name: "item3",
@@ -112,7 +112,7 @@ describe("workflow", () => {
     const action = workflow({
       name: "Foo",
       action: {
-        type: ["process"],
+        type: ["steps"],
         params: [
           {
             name: "item",
