@@ -2,7 +2,6 @@ import { exit, struct } from "./actions";
 import { $router } from "./daunus_router";
 import {
   $input,
-  $var,
   DaunusException,
   DaunusInferReturn,
   Equal,

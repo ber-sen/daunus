@@ -1,9 +1,9 @@
 import { $input } from "./daunus_helpers";
 import { struct } from "./actions";
-import { $var } from "./daunus_var";
 import { DaunusException, DaunusInferInput, DaunusInferReturn } from "./types";
 import { z } from "./zod";
 import { $action } from "./daunus_action";
+import { $query } from ".";
 
 type Expect<T extends true> = T;
 
@@ -32,7 +32,7 @@ describe("$query", () => {
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: $var(input, "id") });
+    const test = struct({ success: true, data: $query($ => $.id as string) });
 
     const res = test.createRoute(input);
 
@@ -48,7 +48,7 @@ describe("$query", () => {
       path: z.object({ id: z.string() })
     }).openapi("User");
 
-    const test = struct({ success: true, data: $var(input, "path.id") });
+    const test = struct({ success: true, data: $query($ => $.path.id) });
 
     const res = test.createRoute(input);
 
