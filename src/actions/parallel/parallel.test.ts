@@ -1,3 +1,4 @@
+import { $query } from "../..";
 import { $ctx } from "../../daunus_helpers";
 
 import parallel from "./index";
@@ -61,7 +62,7 @@ describe("parallel", () => {
       },
       {
         type: ["struct"],
-        params: "<% $.test.data %>"
+        params: $query($ => $.test.data)
       }
     ]);
 

@@ -1,3 +1,4 @@
+import { $query } from "../..";
 import { $ctx } from "../../daunus_helpers";
 
 import serial from "./index";
@@ -61,7 +62,7 @@ describe("serial", () => {
       },
       {
         type: ["struct"],
-        params: "<% $.test.data %>"
+        params: $query($ => $.test.data)
       }
     ]);
 

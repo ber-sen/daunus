@@ -1,6 +1,7 @@
 import { $ctx } from "../../daunus_helpers";
 import { DaunusException } from "../../types";
 
+import { $query } from "../..";
 import steps from ".";
 
 describe("steps", () => {
@@ -20,7 +21,7 @@ describe("steps", () => {
     expect(res.data).toStrictEqual({ foo: "bar" });
   });
 
-  it("should work with placeholders", async () => {
+  it("should work with query", async () => {
     const action = steps([
       {
         name: "test",
@@ -31,7 +32,7 @@ describe("steps", () => {
       },
       {
         type: ["struct"],
-        params: "<% $.test.data.foo %>"
+        params: $query($ => $.test.data.foo)
       }
     ]);
 
@@ -58,7 +59,7 @@ describe("steps", () => {
       },
       {
         type: ["struct"],
-        params: "<% $.test.data.foo %>"
+        params: $query($ => $.test.data.foo)
       }
     ]);
 
@@ -67,33 +68,8 @@ describe("steps", () => {
     expect(res.exception).toStrictEqual(new DaunusException(404));
   });
 
-  it("should work handle errors placeholders", async () => {
-    const action = steps([
-      {
-        name: "test",
-        type: ["struct"],
-        params: {
-          foo: "bar"
-        }
-      },
-      {
-        type: ["struct"],
-        params: "<% $.test.data.foo %>"
-      }
-    ]);
-
-    const res = await action.run($ctx());
-
-    expect(res.data).toStrictEqual("bar");
-  });
-
   it("should work with nested steps", async () => {
     const ctx = $ctx();
-
-    ctx.set(".daunus-placeholder-resolver", ($: any, key: string) =>
-      // eslint-disable-next-line no-new-func
-      new Function("$", `return ${key}`)($)
-    );
 
     const action = steps([
       {
@@ -115,7 +91,7 @@ describe("steps", () => {
       {
         type: ["struct"],
         params: {
-          foo: '<% $.test.data.foo + "asd" %>'
+          foo: $query($ => $.test.data.foo + "asd")
         }
       }
     ]);
