@@ -1,10 +1,10 @@
-export { default as condition } from "./condition";
-export { default as struct } from "./struct";
+export { default as workflowCondition } from "./condition";
 export { default as workflowSteps } from "./steps";
-export { default as parallel } from "./parallel";
-export { default as serial } from "./serial";
+export { default as workflowParallel } from "./parallel";
+export { default as workflowSerial } from "./serial";
+export { default as workflowLoop } from "./loop";
+export { default as struct } from "./struct";
 export { default as exit } from "./exit";
 export { default as wait } from "./wait";
 export { default as workflow } from "./workflow";
 export { default as csv } from "./csv";
-export { default as loop } from "./loop";

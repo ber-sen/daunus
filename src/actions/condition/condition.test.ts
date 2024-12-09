@@ -1,15 +1,19 @@
 import { $ctx } from "../../daunus_helpers";
-import { $var } from "../../daunus_var";
-import struct from "../struct";
-import exit from "../exit";
 
 import condition from "./index";
 
 describe("condition", () => {
   it("should work with error", async () => {
     const action = condition({
-      if: $var(exit({ status: 403 })),
-      else: $var(struct({ error: true }))
+      if: {
+        type: ["exit"],
+        params: {
+          status: 403
+        }
+      },
+      else: {
+        error: true
+      }
     });
 
     const res = await action.run($ctx());
@@ -19,8 +23,8 @@ describe("condition", () => {
 
   it("should work with truthy", async () => {
     const action = condition({
-      if: $var(struct("Truthy")),
-      do: $var(struct({ success: true }))
+      if: "Truthy",
+      do: { success: true }
     });
 
     const res = await action.run($ctx());
@@ -30,8 +34,8 @@ describe("condition", () => {
 
   it("should work with falcy", async () => {
     const action = condition({
-      if: $var(struct("")),
-      else: $var(struct({ error: true }))
+      if: "",
+      else: { error: true }
     });
 
     const res = await action.run($ctx());
@@ -42,7 +46,7 @@ describe("condition", () => {
   it("should work", async () => {
     const action = condition({
       if: true,
-      do: $var(struct({ success: true }))
+      do: { success: true }
     });
 
     const res = await action.run($ctx());

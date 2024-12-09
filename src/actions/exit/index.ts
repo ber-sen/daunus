@@ -15,6 +15,6 @@ export default function exit(params: any) {
     {
       type: "exit"
     },
-    () => () => new DaunusException(params.status, params.data)
+    () => () => new DaunusException(params?.status, params?.data)
   )(params);
 }
