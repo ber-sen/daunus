@@ -21,7 +21,11 @@ export type FormatScope<T> = {
 
 export type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
 
-export type DisableSameName<N, L> = N extends keyof L ? never : N;
+export type DisableSameName<N, L> = N extends "input"
+  ? never
+  : N extends keyof L
+    ? never
+    : N;
 
 export type Expect<T extends true> = T;
 

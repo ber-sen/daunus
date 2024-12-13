@@ -1,7 +1,9 @@
 import { FormatScope } from "./type_helpers";
 
-export interface Action<T extends string, R> {
-  run: ((ctx?: Map<string, any>) => R) & { type: T };
+export interface Action<R, I = unknown> {
+  run: I extends object
+    ? (input: I, ctx?: Map<string, any>) => R
+    : (ctx?: Map<string, any>) => R
 }
 
 type WorkflowBackoff = "constant" | "linear" | "exponential";

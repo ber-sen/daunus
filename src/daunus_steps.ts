@@ -13,7 +13,8 @@ export interface DefaultStepFactory<
   G extends Record<string, any> = {},
   L extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<G, L>,
-    Action<"steps", Promise<L[typeof resultKey]>> {
+    Action<Promise<L[typeof resultKey]>, G["input"]> {
+      
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
@@ -53,7 +54,7 @@ export interface ParallelStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > extends StepFactory<G, L>,
-    Action<"steps.parallel", FormatScope<L>> {
+    Action<FormatScope<L>, G["input"]> {
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
@@ -64,12 +65,14 @@ export function $steps<
   T extends StepOptions,
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
->({
-  $: initialScope,
-  stepsType
-}: {
-  $?: Scope<G, L> | G
-} & T = {} as T): T["stepsType"] extends "parallel"
+>(
+  {
+    $: initialScope,
+    stepsType
+  }: {
+    $?: Scope<G, L> | G;
+  } & T = {} as T
+): T["stepsType"] extends "parallel"
   ? ParallelStepFactory<G, L>
   : DefaultStepFactory<G, L> {
   const scope =
@@ -109,7 +112,7 @@ export function $steps<
     return scope.local[toCamelCase(name)](global);
   }
 
-  async function run() {
+  async function run(i: any, c: any) {
     if (!Object.keys(scope.local)?.at(-1)) {
       return undefined;
     }
@@ -119,7 +122,7 @@ export function $steps<
         const res = await fn(scope.global);
 
         if (isAction(res)) {
-          return await res.run();
+          return res.run(i, c);
         }
 
         return res;
@@ -138,7 +141,7 @@ export function $steps<
       let value = await fn(scope.global);
 
       if (isAction(value)) {
-        value = await value.run();
+        value = await value.run(i, c);
       }
 
       scope.global = { ...scope.global, [name]: value };
@@ -150,5 +153,5 @@ export function $steps<
 
   run.type = stepsType === "parallel" ? "steps.parallel" : "steps";
 
-  return { scope, run, add, get } as any
+  return { scope, run, add, get } as any;
 }

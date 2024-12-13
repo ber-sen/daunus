@@ -1,13 +1,20 @@
 import { $steps } from "./daunus_steps";
 import { isAction, toCamelCase } from "./new_helpers";
-import { Action, Scope, StepConfig, StepFactory, StepOptions, resultKey } from "./new_types";
+import {
+  Action,
+  Scope,
+  StepConfig,
+  StepFactory,
+  StepOptions,
+  resultKey
+} from "./new_types";
 import { DisableSameName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultLoopStepFactory<
   G extends Record<string, any> = {},
   L extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<G, L>,
-    Action<"steps", Promise<Array<L[typeof resultKey]>>> {
+    Action<Promise<Array<L[typeof resultKey]>>, G["input"]> {
   add<T extends Action<any, any>, N extends string>(
     name: DisableSameName<N, L>,
     options: StepConfig,
@@ -43,16 +50,18 @@ export interface DefaultLoopStepFactory<
   >;
 }
 
- function $loopSteps<
+function $loopSteps<
   T extends StepOptions,
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
->({
-  $: initialScope,
-  stepsType
-}: {
-  $?: Scope<G, L> | G
-} & T = {} as T): T["stepsType"] extends "parallel"
+>(
+  {
+    $: initialScope,
+    stepsType
+  }: {
+    $?: Scope<G, L> | G;
+  } & T = {} as T
+): T["stepsType"] extends "parallel"
   ? ParallelLoopStepFactory<G, L>
   : DefaultLoopStepFactory<G, L> {
   const scope =
@@ -92,7 +101,7 @@ export interface DefaultLoopStepFactory<
     return scope.local[toCamelCase(name)](global);
   }
 
-  async function run() {
+  async function run(i: any, c: any) {
     if (!Object.keys(scope.local)?.at(-1)) {
       return undefined;
     }
@@ -102,7 +111,7 @@ export interface DefaultLoopStepFactory<
         const res = await fn(scope.global);
 
         if (isAction(res)) {
-          return await res.run();
+          return await res.run(i, c);
         }
 
         return res;
@@ -121,7 +130,7 @@ export interface DefaultLoopStepFactory<
       let value = await fn(scope.global);
 
       if (isAction(value)) {
-        value = await value.run();
+        value = await value.run(i, c);
       }
 
       scope.global = { ...scope.global, [name]: value };
@@ -133,15 +142,14 @@ export interface DefaultLoopStepFactory<
 
   run.type = stepsType === "parallel" ? "steps.parallel" : "steps";
 
-  return { scope, run, add, get } as any
+  return { scope, run, add, get } as any;
 }
-
 
 export interface ParallelLoopStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > extends StepFactory<G, L>,
-    Action<"loop.parallel", Array<FormatScope<L>>> {
+    Action<Array<FormatScope<L>>, G["input"]> {
   add<T, N extends string>(
     name: DisableSameName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
@@ -159,7 +167,10 @@ export function $loop<
   });
 
   function forEachItem<T extends StepOptions>(options?: T) {
-    return $loopSteps({ $: scope, stepsType: options?.stepsType as T["stepsType"] });
+    return $loopSteps({
+      $: scope,
+      stepsType: options?.stepsType as T["stepsType"]
+    });
   }
 
   return { forEachItem };

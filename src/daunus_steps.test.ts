@@ -135,7 +135,7 @@ describe("$steps", () => {
 
   it("should display proper types for parallel ", () => {
     const steps = $steps({})
-      .add("input", () => [1, 2, 3] as const)
+      .add("data", () => [1, 2, 3] as const)
 
       .add("parallel", ($) =>
         $steps({ $, stepsType: "parallel" })
@@ -157,7 +157,7 @@ describe("$steps", () => {
             foo: string;
           };
           secondStep: {
-            input: readonly [1, 2, 3];
+            data: readonly [1, 2, 3];
           };
         }
       >
@@ -166,7 +166,7 @@ describe("$steps", () => {
 
   it("should work for empty steps", async () => {
     const steps = $steps()
-      .add("input", () => {})
+      .add("data", () => {})
 
       .add("return", ($) => true);
 
@@ -175,7 +175,7 @@ describe("$steps", () => {
 
   it("should return the all values if type is parallel", async () => {
     const steps = $steps()
-      .add("input", () => [1, 2, 3])
+      .add("data", () => [1, 2, 3])
 
       .add("parallel", ($) =>
         $steps({ $, stepsType: "parallel" })
@@ -183,7 +183,7 @@ describe("$steps", () => {
             foo: "bar"
           }))
 
-          .add("second step", ($) => $.input)
+          .add("second step", ($) => $.data)
       )
 
       .add("return", ($) => $.parallel);
@@ -196,7 +196,7 @@ describe("$steps", () => {
 
   it("should work with nested steps inside parallel", async () => {
     const steps = $steps()
-      .add("input", () => [1, 2, 3])
+      .add("data", () => [1, 2, 3])
 
       .add("parallel", ($) =>
         $steps({ $, stepsType: "parallel" })
@@ -207,7 +207,7 @@ describe("$steps", () => {
           .add("second step", ($) =>
             $steps({ $ })
               .add("nested", () => ({
-                foo: $.input
+                foo: $.data
               }))
 
               .add("second step", ($) => $.nested.foo)
@@ -258,7 +258,7 @@ describe("$steps", () => {
 
   it("should resolve promises in parallel", async () => {
     const steps = $steps()
-      .add("input", () => Promise.resolve([1, 2, 3]))
+      .add("data", () => Promise.resolve([1, 2, 3]))
 
       .add("parallel", ($) =>
         $steps({ $, stepsType: "parallel" })
@@ -273,7 +273,7 @@ describe("$steps", () => {
               $steps({ $ })
                 .add("nested", () =>
                   Promise.resolve({
-                    foo: $.input
+                    foo: $.data
                   })
                 )
 

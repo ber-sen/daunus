@@ -13,8 +13,8 @@ export function $route<T>(options?: { input?: z.ZodType<T> }) {
     });
   }
 
-  function handle<T>(fn: ($: typeof scope.global) => T) {
-    return {} as { run: (ctx?: DaunusCtx) => Promise<T> };
+  function handle<Z>(fn: ($: typeof scope.global) => Z) {
+    return {} as { run: (input: T, ctx?: DaunusCtx) => Promise<Z> };
   }
 
   return { steps, handle };

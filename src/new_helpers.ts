@@ -6,6 +6,6 @@ export function toCamelCase(input: string): string {
     .replace(/^[A-Z]/, (match) => match.toLowerCase());
 }
 
-export function isAction<T extends string>(obj: any): obj is Action<T, any> {
+export function isAction(obj: any): obj is Action<any, any> {
   return obj && typeof obj.run === "function" && obj.run.type;
 }

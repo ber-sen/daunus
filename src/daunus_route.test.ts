@@ -7,11 +7,9 @@ describe("$route", () => {
   it("show work for single step", () => {
     const input = $input({ name: z.string() });
 
-    const route = $route({ input }).handle(
-      ($) => $.input.name === "asdad"
-    );
+    const route = $route({ input }).handle(($) => $.input.name === "lorem");
 
-    const data = route.run();
+    const data = route.run({ name: "lorem" });
 
     type A = typeof data;
 
@@ -28,7 +26,7 @@ describe("$route", () => {
 
       .add("second step", ($) => $.firstStep.name);
 
-    const data = route.run();
+    const data = route.run({ name: "asd" });
 
     type A = typeof data;
 

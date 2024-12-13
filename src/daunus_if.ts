@@ -41,7 +41,10 @@ interface ConditionDefaultCaseStepFactory<
   K extends string = "",
   E extends string = ""
 > extends AbstractStepFactory<G, L>,
-    Action<"condition", Promise<ExtractValuesByKey<L, typeof resultKey>>> {
+    Action<
+      Promise<ExtractValuesByKey<L, typeof resultKey>>,
+      G["input"] extends unknown ? undefined : G["input"]
+    > {
   isTrue(): Omit<
     ConditionDefaultCaseStepFactory<
       C,
@@ -146,9 +149,13 @@ type MainConditionStepFactory<C, G extends Record<string, any> = {}> = Omit<
   "add"
 >;
 
-export function $if<C, G extends Record<string, any> = {}>(
-  { condition, $ }: { condition: C, $?: G },
-) {
+export function $if<C, G extends Record<string, any> = {}>({
+  condition,
+  $
+}: {
+  condition: C;
+  $?: G;
+}) {
   return {} as MainConditionStepFactory<C, G>;
 }
 
