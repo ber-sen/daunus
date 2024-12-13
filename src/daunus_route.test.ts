@@ -5,6 +5,18 @@ import { $input } from ".";
 
 describe("$route", () => {
   it("should provide expected types for return", () => {
+    const route = $route({ input: z.object({ name: z.string() }) }).handle(
+      ($) => $.input.name === "asdad"
+    );
+
+    const data = route.run();
+
+    type A = typeof data;
+
+    type data = Expect<Equal<A, Promise<boolean>>>;
+  });
+
+  it("should provide expected types for return", () => {
     const input = $input({ name: z.string() });
 
     const route = $route({ input })
