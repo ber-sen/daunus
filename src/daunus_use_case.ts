@@ -3,7 +3,7 @@ import { $steps } from "./daunus_steps";
 import { Scope, StepOptions } from "./new_types";
 import { DaunusCtx } from ".";
 
-export function $route<T>(options?: { input?: z.ZodType<T> }) {
+export function $useCase<T>(options?: { input?: z.ZodType<T> }) {
   const scope = new Scope({}).addGlobal("input", {} as T);
 
   function steps<T extends StepOptions>(options?: T) {

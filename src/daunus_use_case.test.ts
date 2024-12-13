@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { $route } from "./daunus_route";
+import { $useCase } from "./daunus_use_case";
 import { Expect, Equal } from "./type_helpers";
 import { $input } from ".";
 
@@ -7,9 +7,9 @@ describe("$route", () => {
   it("show work for single step", () => {
     const input = $input({ name: z.string() });
 
-    const route = $route({ input }).handle(($) => $.input.name === "lorem");
+    const useCase = $useCase({ input }).handle(($) => $.input.name === "lorem");
 
-    const data = route.run({ name: "lorem" });
+    const data = useCase.run({ name: "lorem" });
 
     type A = typeof data;
 
@@ -19,7 +19,7 @@ describe("$route", () => {
   it("should provide expected types for return", () => {
     const input = $input({ name: z.string() });
 
-    const route = $route({ input })
+    const route = $useCase({ input })
       .steps()
 
       .add("first step", ($) => $.input)
