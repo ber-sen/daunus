@@ -4,7 +4,7 @@ import { z } from "./zod";
 import { DEFAULT_ACTIONS } from "./default_actions";
 
 export const $ctx = (value?: object): Map<any, any> =>
-  new Map(Object.entries({ ...value, ".defaultActions": DEFAULT_ACTIONS }));
+  new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }));
 
 export const $input = z.object;
 
