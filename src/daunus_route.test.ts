@@ -4,8 +4,10 @@ import { Expect, Equal } from "./type_helpers";
 import { $input } from ".";
 
 describe("$route", () => {
-  it("should provide expected types for return", () => {
-    const route = $route({ input: z.object({ name: z.string() }) }).handle(
+  it("show work for single step", () => {
+    const input = $input({ name: z.string() });
+
+    const route = $route({ input }).handle(
       ($) => $.input.name === "asdad"
     );
 
