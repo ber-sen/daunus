@@ -9,7 +9,6 @@ import {
   DaunusActionInfo,
   DaunusActionRunOptions,
   DaunusCtx,
-  DaunusParams,
   DaunusActionWithOptions
 } from "./types";
 import { isException, parseResult } from "./helpers";
@@ -37,7 +36,7 @@ export const $action =
     }) => (params: P) => Promise<O> | O
   ) =>
   (
-    params: DaunusParams<P>,
+    params: P,
     actionCtx?: {
       name?: string;
     }
@@ -179,7 +178,7 @@ export const $action =
 
 export const parseParams = async <T>(
   ctx: Map<string, any>,
-  params: DaunusParams<T>,
+  params: T,
   options?: {
     schema?: z.Schema<T>;
     skipPlaceholders?: boolean;

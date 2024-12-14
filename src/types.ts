@@ -1,42 +1,16 @@
 import { z } from "./zod";
 
-export type DaunusVar<T> =
-  DaunusExcludeException<T> extends never
-    ? T
-    : DaunusExcludeException<T> & ((ctx: DaunusCtx) => Promise<T>);
-
-export type DaunusParams<T> = T; // TODO: fix type
+export type DaunusQuery<T> = T & ((ctx: DaunusCtx) => Promise<T>);
 
 export type DaunusInput<T> = z.ZodType<T>;
 
 export type DaunusCtx = Map<any, any>;
 
-export type ResolveDaunusVar<T> =
-  T extends DaunusVar<infer U>
-    ? U extends DaunusVar<infer Z>
-      ? Z
-      : U extends Array<infer A>
-        ? Array<ResolveDaunusVar<A>>
-        : U extends object
-          ? {
-              [K in keyof U]: ResolveDaunusVar<U[K]>;
-            }
-          : U
-    : T extends Array<infer A>
-      ? Array<ResolveDaunusVar<A>>
-      : T extends Date
-        ? T
-        : T extends object
-          ? {
-              [K in keyof T]: ResolveDaunusVar<T[K]>;
-            }
-          : T;
-
 export type ResolveDaunusVarData<T> =
   T extends ReadableStream<infer Z>
     ? ReadableStream<Z>
-    : T extends DaunusVar<infer U>
-      ? U extends DaunusVar<infer Z>
+    : T extends DaunusQuery<infer U>
+      ? U extends DaunusQuery<infer Z>
         ? DaunusExcludeException<Z>
         : U extends Array<infer A>
           ? Array<ResolveDaunusVarData<A>>
@@ -60,8 +34,8 @@ export type ResolveDaunusVarData<T> =
               : T;
 
 export type ResolveDaunusVarExceptions<T> =
-  T extends DaunusVar<infer U>
-    ? U extends DaunusVar<infer Z>
+  T extends DaunusQuery<infer U>
+    ? U extends DaunusQuery<infer Z>
       ? DaunusGetExceptions<Z>
       : U extends Array<infer A>
         ? Array<ResolveDaunusVarExceptions<A>>

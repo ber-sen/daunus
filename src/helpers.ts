@@ -5,9 +5,9 @@ import {
   ExtractDaunusExceptions,
   DaunusException,
   DaunusCtx,
-  DaunusVar,
   NonUndefined,
-  DaunusRoute
+  DaunusRoute,
+  DaunusQuery
 } from "./types";
 
 export const isObject = (value: any): value is object =>
@@ -20,8 +20,8 @@ export const isObject = (value: any): value is object =>
     ? false
     : typeof value === "object";
 
-export const isDaunusVar = (value: any) =>
-  typeof value === "function" && value.__type === "daunus_var";
+export const isDaunusQuery = (value: any) =>
+  typeof value === "function" && value.__type === "daunus_query";
 
 export const isDaunusPlaceholder = (value: any) =>
   typeof value === "string" && /<%\s*([\S\s]*?)\s*%>/g.test(value);
@@ -56,12 +56,12 @@ export const isAction = <T>(obj: T): obj is T & { type: [string] } => {
   );
 };
 
-export const resolveDaunusVar = (ctx: DaunusCtx, $var: DaunusVar<any>) =>
-  $var(ctx);
+export const resolveDaunusVar = (ctx: DaunusCtx, $query: DaunusQuery<any>) =>
+  $query(ctx);
 
 export const resolveDaunusPlaceholder = (
   ctx: DaunusCtx,
-  str: DaunusVar<any>
+  str: DaunusQuery<any>
 ) => {
   const $ = new Proxy(ctx, {
     get(target, name) {

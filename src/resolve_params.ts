@@ -4,15 +4,14 @@ import {
   isException,
   isObject,
   isDaunusPlaceholder,
-  isDaunusVar,
+  isDaunusQuery,
   resolveDaunusPlaceholder,
   resolveDaunusVar
 } from "./helpers";
-import { DaunusParams } from "./types";
 
 export const resolveParams = async <T>(
   ctx: Map<string, unknown>,
-  params: DaunusParams<T>,
+  params: T,
   options?: { skipPlaceholders?: boolean }
 ): Promise<T> => {
   if (params instanceof ReadableStream) {
@@ -27,7 +26,7 @@ export const resolveParams = async <T>(
     return await resolveDaunusPlaceholder(ctx, params);
   }
 
-  if (isDaunusVar(params)) {
+  if (isDaunusQuery(params)) {
     return resolveParams(ctx, await resolveDaunusVar(ctx, params), options);
   }
 

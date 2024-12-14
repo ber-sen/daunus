@@ -1,7 +1,7 @@
-import { DaunusCtx, DaunusVar } from "./types";
+import { DaunusCtx, DaunusQuery } from "./types";
 import { get } from "./get";
 
-export function $query<R>(selector: ($: any) => R | Promise<R>): DaunusVar<R> {
+export function $query<R>(selector: ($: any) => R | Promise<R>): DaunusQuery<R> {
   const $query = async (ctx: DaunusCtx) => {
     const $ = new Proxy(ctx, {
       get(target, name) {
@@ -15,7 +15,7 @@ export function $query<R>(selector: ($: any) => R | Promise<R>): DaunusVar<R> {
   $query.toString = () => `{{ ${selector.toString()} }}`;
   $query.toJSON = () => `{{ ${selector.toString()} }}`;
 
-  $query.__type = "daunus_var";
+  $query.__type = "daunus_query";
 
   return $query as any;
 }
