@@ -77,9 +77,7 @@ export const $action =
               ? args.envSchema.parse(ctx.get(".env"))
               : (z.object({}) as E);
 
-            const value = await fn({ ctx, parseParams, env })(
-              parsedParams!
-            );
+            const value = await fn({ ctx, parseParams, env })(parsedParams!);
 
             if (!args.parseResponse) {
               return value;
@@ -96,7 +94,14 @@ export const $action =
             (await runFn()) as O
           );
 
-          ctx.set(name, value);
+          ctx.set(name, value.data);
+
+          if (value.exception) {
+            ctx.set(
+              "exceptions",
+              (ctx.get("exceptions") ?? new Map()).set("name", value.data)
+            );
+          }
 
           actionInfo.data = value.data;
           actionInfo.exception = value.exception;

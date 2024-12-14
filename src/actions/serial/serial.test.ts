@@ -62,7 +62,7 @@ describe("serial", () => {
       },
       {
         type: ["struct"],
-        params: $query($ => $.test.data)
+        params: $query($ => $.test)
       }
     ]);
 
