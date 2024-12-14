@@ -62,7 +62,7 @@ describe("parallel", () => {
       },
       {
         type: ["struct"],
-        params: $query($ => $.test.data)
+        params: $query($ => $?.test?.data)
       }
     ]);
 
