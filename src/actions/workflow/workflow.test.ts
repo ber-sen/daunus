@@ -1,4 +1,4 @@
-import { $ctx } from "../../daunus_helpers";
+import { $ctx, $delay, $stream } from "../../daunus_helpers";
 import { $query } from "../../daunus_query";
 
 import workflow from "./index";
@@ -37,13 +37,11 @@ describe("workflow", () => {
           {
             name: "file",
             type: ["struct"],
-            params: new ReadableStream({
-              start(controller) {
-                controller.enqueue({ name: "Alice", age: 30 });
-                controller.enqueue({ name: "Bob", age: 25 });
-                controller.enqueue({ name: "Charlie", age: 35 });
-                controller.close();
-              }
+            params: $stream(async function* () {
+              yield { name: "Alice", age: 30 };
+              yield { name: "Bob", age: 25 };
+              await $delay(100);
+              yield { name: "Charlie", age: 35 };
             })
           },
           {
