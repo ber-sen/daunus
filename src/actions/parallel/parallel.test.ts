@@ -24,6 +24,28 @@ describe("parallel", () => {
     expect(res.data).toStrictEqual([{ foo: "bar" }, "test"]);
   });
 
+  it("should return exeption", async () => {
+    const action = parallel([
+      {
+        name: "test",
+        type: ["exit"],
+        params: {
+          status: 500
+        }
+      },
+      {
+        name: "lorem",
+        type: ["struct"],
+        params: "test"
+      }
+    ]);
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual(undefined);
+    expect(res.exception).toEqual({ status: 500 });
+  });
+
   it("should work with with nested parallel", async () => {
     const action = parallel([
       {
@@ -62,7 +84,7 @@ describe("parallel", () => {
       },
       {
         type: ["struct"],
-        params: $query($ => $?.test?.data)
+        params: $query(($) => $?.test?.data)
       }
     ]);
 

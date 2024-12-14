@@ -5,12 +5,26 @@ import { DaunusWorkflowAction } from "../../types";
 const parallel = $action(
   { type: "parallel", skipParse: true },
   ({ ctx }) =>
-    (list: DaunusWorkflowAction<any>[]) => {
+    async (list: DaunusWorkflowAction<any>[]) => {
       const promises = list.map((item) =>
-        runAction(ctx, item).then((item) => item.data ?? item.error)
+        runAction(ctx, item).then((item) => {
+          if (item.exception) {
+            throw item.exception;
+          }
+
+          return item.data;
+        })
       );
 
-      return Promise.all(promises);
+      const res = await Promise.allSettled(promises);
+
+      const rejected = res.find((item) => item.status === "rejected");
+
+      if (rejected) {
+        return rejected.status === "rejected" && rejected.reason;
+      }
+
+      return res.map((item) => item.status === "fulfilled" && item.value);
     }
 );
 

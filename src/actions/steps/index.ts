@@ -16,7 +16,7 @@ const steps = $action(
         }
       }
 
-      return res?.data || res.error;
+      return res?.data ?? res.exception;
     }
 );
 
