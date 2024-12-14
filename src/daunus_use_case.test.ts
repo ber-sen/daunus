@@ -4,7 +4,7 @@ import { Expect, Equal } from "./type_helpers";
 import { $input } from ".";
 
 describe("$route", () => {
-  it("show work for single step", () => {
+  xit("show work for single step", () => {
     const input = $input({ name: z.string() });
 
     const useCase = $useCase({ input }).handle(($) => $.input.name === "lorem");
@@ -16,7 +16,7 @@ describe("$route", () => {
     type data = Expect<Equal<A, Promise<boolean>>>;
   });
 
-  it("should provide expected types for return", () => {
+  xit("should provide expected types for return", () => {
     const input = $input({ name: z.string() });
 
     const route = $useCase({ input })

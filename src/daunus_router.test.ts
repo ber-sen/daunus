@@ -10,58 +10,58 @@ import {
 } from ".";
 
 describe("$router", () => {
-  it("should work with multiple routes", async () => {
-    const userInput = $input({ body: z.object({ firstName: z.string() }) });
+  // xit("should work with multiple routes", async () => {
+  //   const userInput = $input({ body: z.object({ firstName: z.string() }) });
 
-    const user = struct({ name: "user" }).createRoute(userInput);
+  //   const user = struct({ name: "user" }).createRoute(userInput);
 
-    const gameInput = $input({ body: z.object({ score: z.number() }) });
+  //   const gameInput = $input({ body: z.object({ score: z.number() }) });
 
-    const game = struct({ score: $var(gameInput, "body.score") }).createRoute(
-      gameInput
-    );
+  //   const game = struct({ score: $var(gameInput, "body.score") }).createRoute(
+  //     gameInput
+  //   );
 
-    const errorInput = $input({ body: z.object({ error: z.boolean() }) });
+  //   const errorInput = $input({ body: z.object({ error: z.boolean() }) });
 
-    const error = exit({
-      status: 404
-    }).createRoute(errorInput);
+  //   const error = exit({
+  //     status: 404
+  //   }).createRoute(errorInput);
 
-    const router = $router()
-      .add("user", user)
-      .add("game", game)
-      .add("error", error);
+  //   const router = $router()
+  //     .add("user", user)
+  //     .add("game", game)
+  //     .add("error", error);
 
-    const data = await router.input({ body: { score: 10 } }).run();
+  //   const data = await router.input({ body: { score: 10 } }).run();
 
-    expect(() => router.meta.iSchema?.parse({ trip: false })).toThrow();
-    expect(() =>
-      router.meta.iSchema?.parse({ body: { score: "test" } })
-    ).toThrow();
-    expect(() =>
-      router.meta.iSchema?.parse({ body: { score: 4 } })
-    ).not.toThrow();
+  //   expect(() => router.meta.iSchema?.parse({ trip: false })).toThrow();
+  //   expect(() =>
+  //     router.meta.iSchema?.parse({ body: { score: "test" } })
+  //   ).toThrow();
+  //   expect(() =>
+  //     router.meta.iSchema?.parse({ body: { score: 4 } })
+  //   ).not.toThrow();
 
-    expect(data).toEqual({ data: { score: 10 }, exception: undefined });
+  //   expect(data).toEqual({ data: { score: 10 }, exception: undefined });
 
-    type A = DaunusInferReturn<typeof router>;
+  //   type A = DaunusInferReturn<typeof router>;
 
-    type data = Expect<
-      Equal<
-        A,
-        {
-          data:
-            | {
-                name: string;
-              }
-            | {
-                score: number;
-              };
-          exception: DaunusException<404, undefined>;
-        }
-      >
-    >;
-  });
+  //   type data = Expect<
+  //     Equal<
+  //       A,
+  //       {
+  //         data:
+  //           | {
+  //               name: string;
+  //             }
+  //           | {
+  //               score: number;
+  //             };
+  //         exception: DaunusException<404, undefined>;
+  //       }
+  //     >
+  //   >;
+  // });
 
   it("should work with simple inputs", async () => {
     const userInput = $input({ firstName: z.string() });

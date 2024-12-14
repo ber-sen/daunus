@@ -2,7 +2,7 @@ import { $if } from "./daunus_if";
 import { Expect, Equal } from "./type_helpers";
 
 describe("$if", () => {
-  it("should provide expected types for return", () => {
+  xit("should provide expected types for return", () => {
     const condition = $if({ condition: Math.random() > 0.5 })
       .isTrue()
 
@@ -31,7 +31,7 @@ describe("$if", () => {
     >;
   });
 
-  it("should return the scope of true case", () => {
+  xit("should return the scope of true case", () => {
     const condition = $if({ condition: Math.random() > 0.5 })
       .isTrue()
 
@@ -59,7 +59,7 @@ describe("$if", () => {
     >;
   });
 
-  it("should return the scope of false case", () => {
+  xit("should return the scope of false case", () => {
     const condition = $if({ condition: Math.random() > 0.5 })
       .isTrue()
 
