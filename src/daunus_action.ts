@@ -28,36 +28,15 @@ export const $action =
       container?: (parmas: P) => T;
       meta?: object;
     },
-
     fn: ({
       ctx,
       parseParams,
       env
     }: {
       ctx: DaunusCtx;
-
       parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
       env: E;
-    }) => (params: P) => Promise<O> | O,
-    container: (
-      // Deprecated
-      r: ({
-        ctx,
-        parseParams,
-        env
-      }: {
-        ctx: DaunusCtx;
-        parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
-        env: E;
-      }) => (params: P) => Promise<O> | O,
-      options: {
-        ctx: DaunusCtx;
-        parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
-        env: E;
-      },
-      params: P
-    ) => Promise<T> | T = (r, options, params) =>
-      r(options)(params) as T | Promise<T>
+    }) => (params: P) => Promise<O> | O
   ) =>
   (
     params: DaunusParams<P>,
@@ -108,9 +87,7 @@ export const $action =
               ? args.envSchema.parse(ctx.get(".env"))
               : (z.object({}) as E);
 
-            const value = await container(
-              fn,
-              { ctx, parseParams, env },
+            const value = await fn({ ctx, parseParams, env })(
               parsedParams!
             );
 

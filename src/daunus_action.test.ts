@@ -18,7 +18,7 @@ describe("$action", () => {
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: $query($ => $.input.id) });
+    const test = struct({ success: true, data: $query(($) => $.input.id) });
 
     const res = test.createRoute(input);
 
@@ -32,7 +32,7 @@ describe("$action", () => {
       id: z.string()
     }).openapi("User");
 
-    const test = struct({ success: true, data: $query($ => $.id as string) });
+    const test = struct({ success: true, data: $query(($) => $.id as string) });
 
     const res = test.createRoute(input);
 
@@ -48,27 +48,13 @@ describe("$action", () => {
       path: z.object({ id: z.string() })
     }).openapi("User");
 
-    const test = struct({ success: true, data: $query($ => $.path.id) });
+    const test = struct({ success: true, data: $query(($) => $.path.id) });
 
     const res = test.createRoute(input);
 
     expect(JSON.stringify(res.meta.openapi)).toEqual(
       '{"method":"post","contentType":"application/json","path":"<% path %>"}'
     );
-  });
-
-  it("Should work with container", () => {
-    const test = $action(
-      { type: "test" },
-      () => (params: string) => params,
-      async (fn, options, params) => {
-        return (await fn(options)(params)).length;
-      }
-    )("test");
-
-    type A = DaunusInferReturn<typeof test>;
-
-    type test = Expect<Equal<A, { data: number; exception: never }>>;
   });
 
   it("Should work with array", () => {
@@ -138,25 +124,6 @@ describe("$action", () => {
     type test = Expect<Equal<A, {}>>;
   });
 
-  it("Should work be able to change params from container", () => {
-    const enhance =
-      <P, R, B = P | null>(run: (p: P) => R) =>
-      (ep: B) =>
-        run(ep as any as P);
-
-    const test = $action(
-      { type: "test" },
-      () => enhance((params: string) => params),
-      async (fn, options, params) => {
-        return (await fn(options)(params)).length;
-      }
-    )("test");
-
-    type A = DaunusInferReturn<typeof test>;
-
-    type test = Expect<Equal<A, { data: number; exception: never }>>;
-  });
-
   it("Should populate openapi by when struct matches", () => {
     const input = $input({
       method: z.literal("post"),
@@ -165,7 +132,7 @@ describe("$action", () => {
       query: z.object({ sj: z.string() })
     });
 
-    const test = struct({ success: true, data: $query($ => $.body.id) });
+    const test = struct({ success: true, data: $query(($) => $.body.id) });
 
     const res = test.createRoute(input);
 
