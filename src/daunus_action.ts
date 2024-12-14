@@ -15,17 +15,15 @@ import {
 import { isException, parseResult } from "./helpers";
 
 export const $action =
-  <P, O, E = {}, T = O>(
+  <P, O, E = {}>(
     args: {
       type: string;
       name?: string;
       paramsSchema?: z.Schema<P>;
       skipParse?: boolean;
       parseResponse?: boolean;
-      skipLog?: boolean;
       skipPlaceholders?: boolean;
       envSchema?: z.Schema<E>;
-      container?: (parmas: P) => T;
       meta?: object;
     },
     fn: ({
@@ -42,13 +40,11 @@ export const $action =
     params: DaunusParams<P>,
     actionCtx?: {
       name?: string;
-      skipLog?: boolean;
     }
   ) => {
     const name: string = actionCtx?.name || args.name || v4();
-    const skipLog = actionCtx?.skipLog || args.skipLog || false;
 
-    const actionInfo: DaunusActionInfo<T, ExceptionParams<T, P>> = {
+    const actionInfo: DaunusActionInfo<O, ExceptionParams<O, P>> = {
       name,
       type: args.type,
       params: null
@@ -58,14 +54,9 @@ export const $action =
       (init?: (ctx: DaunusCtx) => void) =>
       async (
         ctx: DaunusCtx = new Map(),
-        options?: DaunusActionRunOptions<T, ExceptionParams<T, P>>
+        options?: DaunusActionRunOptions<O, ExceptionParams<O, P>>
       ) => {
         try {
-          if (!ctx.has("actions")) {
-            ctx.set("useCase", actionInfo);
-            ctx.set("actions", new Map());
-          }
-
           const runFn = async () => {
             init && init(ctx);
 
@@ -102,8 +93,8 @@ export const $action =
             return parseValue;
           };
 
-          const value = parseResult<T, ExceptionParams<T, P>>(
-            (await runFn()) as T
+          const value = parseResult<O, ExceptionParams<O, P>>(
+            (await runFn()) as O
           );
 
           ctx.set(name, value);
@@ -111,17 +102,9 @@ export const $action =
           actionInfo.data = value.data;
           actionInfo.exception = value.exception;
 
-          if (!skipLog) {
-            ctx.get("actions").set(actionInfo.name, actionInfo);
-          }
-
           return value;
         } catch (error: any) {
           actionInfo.exception = error;
-
-          if (!skipLog) {
-            ctx.get("actions").set(actionInfo.name, actionInfo);
-          }
 
           throw error;
         } finally {
@@ -131,7 +114,7 @@ export const $action =
         }
       };
 
-    const action: DaunusAction<T, ExceptionParams<T, P>, E> = {
+    const action: DaunusAction<O, ExceptionParams<O, P>, E> = {
       ...actionCtx,
       name,
       envSchema: args.envSchema,
@@ -140,8 +123,8 @@ export const $action =
     };
 
     const actionWithOptions: DaunusActionWithOptions<
-      T,
-      ExceptionParams<T, P>,
+      O,
+      ExceptionParams<O, P>,
       E
     > = {
       ...action,
@@ -173,7 +156,7 @@ export const $action =
                   : undefined
             }
           },
-          input: (value: any): DaunusAction<T, ExceptionParams<T, P>, E> => ({
+          input: (value: any): DaunusAction<O, ExceptionParams<O, P>, E> => ({
             ...action,
             run: makeRun((ctx) => {
               ctx.set("input", iSchema?.parse(value));
@@ -181,7 +164,7 @@ export const $action =
           }),
           rawInput: (
             value: unknown
-          ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
+          ): DaunusAction<O, ExceptionParams<O, P>, E> => ({
             ...action,
             run: makeRun((ctx) => {
               ctx.set("input", iSchema?.parse(value));
