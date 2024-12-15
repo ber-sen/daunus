@@ -9,17 +9,19 @@ describe("workflow", () => {
       name: "Foo",
       action: {
         type: ["steps"],
-        params: [
-          {
-            name: "struct",
-            type: ["struct"],
-            params: { name: "Bar" }
-          },
-          {
-            type: ["struct"],
-            params: $query(($) => `Foo ${$.struct.name}`)
-          }
-        ]
+        params: {
+          actions: [
+            {
+              name: "struct",
+              type: ["struct"],
+              params: { name: "Bar" }
+            },
+            {
+              type: ["struct"],
+              params: $query(($) => `Foo ${$.struct.name}`)
+            }
+          ]
+        }
       }
     });
 
@@ -33,31 +35,33 @@ describe("workflow", () => {
       name: "Foo",
       action: {
         type: ["steps"],
-        params: [
-          {
-            name: "file",
-            type: ["struct"],
-            params: $stream(async function* () {
-              yield { name: "Alice", age: 30 };
-              yield { name: "Bob", age: 25 };
-              await $delay(100);
-              yield { name: "Charlie", age: 35 };
-            })
-          },
-          {
-            name: "csv",
-            type: ["csv"],
-            params: {
-              rows: $query(($) => $.file)
+        params: {
+          actions: [
+            {
+              name: "file",
+              type: ["struct"],
+              params: $stream(async function* () {
+                yield { name: "Alice", age: 30 };
+                yield { name: "Bob", age: 25 };
+                await $delay(100);
+                yield { name: "Charlie", age: 35 };
+              })
+            },
+            {
+              name: "csv",
+              type: ["csv"],
+              params: {
+                rows: $query(($) => $.file)
+              }
+            },
+            {
+              type: ["struct"],
+              params: $query(
+                async ($) => `Foo\n${await new Response($.csv).text()}`
+              )
             }
-          },
-          {
-            type: ["struct"],
-            params: $query(
-              async ($) => `Foo\n${await new Response($.csv).text()}`
-            )
-          }
-        ]
+          ]
+        }
       }
     });
 
@@ -73,31 +77,35 @@ describe("workflow", () => {
       name: "Foo",
       action: {
         type: ["steps"],
-        params: [
-          {
-            name: "item",
-            type: ["struct"],
-            params: { name: "Foo" }
-          },
-          {
-            name: "res",
-            type: ["condition"],
-            params: {
-              if: $query(($) => $.item.name === "Foo"),
-              do: {
-                name: "item2",
-                type: ["steps"],
-                params: [
-                  {
-                    name: "item3",
-                    type: ["struct"],
-                    params: { success: true }
+        params: {
+          actions: [
+            {
+              name: "item",
+              type: ["struct"],
+              params: { name: "Foo" }
+            },
+            {
+              name: "res",
+              type: ["condition"],
+              params: {
+                if: $query(($) => $.item.name === "Foo"),
+                do: {
+                  name: "item2",
+                  type: ["steps"],
+                  params: {
+                    actions: [
+                      {
+                        name: "item3",
+                        type: ["struct"],
+                        params: { success: true }
+                      }
+                    ]
                   }
-                ]
+                }
               }
             }
-          }
-        ]
+          ]
+        }
       }
     });
 
@@ -111,25 +119,27 @@ describe("workflow", () => {
       name: "Foo",
       action: {
         type: ["steps"],
-        params: [
-          {
-            name: "item",
-            type: ["struct"],
-            params: { name: "Foo" }
-          },
-          {
-            name: "res",
-            type: ["loop"],
-            params: {
-              list: [1, 2],
-              itemName: "item",
-              action: {
-                type: ["struct"],
-                params: "<% $.item.value %>"
+        params: {
+          actions: [
+            {
+              name: "item",
+              type: ["struct"],
+              params: { name: "Foo" }
+            },
+            {
+              name: "res",
+              type: ["loop"],
+              params: {
+                list: [1, 2],
+                itemName: "item",
+                action: {
+                  type: ["struct"],
+                  params: "<% $.item.value %>"
+                }
               }
             }
-          }
-        ]
+          ]
+        }
       }
     });
 

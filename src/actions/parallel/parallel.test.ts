@@ -5,19 +5,21 @@ import parallel from "./index";
 
 describe("parallel", () => {
   it("should work with two actions", async () => {
-    const action = parallel([
-      {
-        name: "test",
-        type: ["struct"],
-        params: {
-          foo: "bar"
+    const action = parallel({
+      actions: [
+        {
+          name: "test",
+          type: ["struct"],
+          params: {
+            foo: "bar"
+          }
+        },
+        {
+          type: ["struct"],
+          params: "test"
         }
-      },
-      {
-        type: ["struct"],
-        params: "test"
-      }
-    ]);
+      ]
+    });
 
     const res = await action.run($ctx());
 
@@ -25,20 +27,22 @@ describe("parallel", () => {
   });
 
   it("should return exeption", async () => {
-    const action = parallel([
-      {
-        name: "test",
-        type: ["exit"],
-        params: {
-          status: 500
+    const action = parallel({
+      actions: [
+        {
+          name: "test",
+          type: ["exit"],
+          params: {
+            status: 500
+          }
+        },
+        {
+          name: "lorem",
+          type: ["struct"],
+          params: "test"
         }
-      },
-      {
-        name: "lorem",
-        type: ["struct"],
-        params: "test"
-      }
-    ]);
+      ]
+    });
 
     const res = await action.run($ctx());
 
@@ -47,26 +51,30 @@ describe("parallel", () => {
   });
 
   it("should work with with nested parallel", async () => {
-    const action = parallel([
-      {
-        name: "test",
-        type: ["parallel"],
-        params: [
-          {
-            type: ["struct"],
-            params: "action.1.1"
-          },
-          {
-            type: ["struct"],
-            params: "action.1.2"
+    const action = parallel({
+      actions: [
+        {
+          name: "test",
+          type: ["parallel"],
+          params: {
+            actions: [
+              {
+                type: ["struct"],
+                params: "action.1.1"
+              },
+              {
+                type: ["struct"],
+                params: "action.1.2"
+              }
+            ]
           }
-        ]
-      },
-      {
-        type: ["struct"],
-        params: "action.2"
-      }
-    ]);
+        },
+        {
+          type: ["struct"],
+          params: "action.2"
+        }
+      ]
+    });
 
     const res = await action.run($ctx());
 
@@ -74,19 +82,21 @@ describe("parallel", () => {
   });
 
   it("should NOT be able to access return of the first action from the second", async () => {
-    const action = parallel([
-      {
-        name: "test",
-        type: ["struct"],
-        params: {
-          foo: "bar"
+    const action = parallel({
+      actions: [
+        {
+          name: "test",
+          type: ["struct"],
+          params: {
+            foo: "bar"
+          }
+        },
+        {
+          type: ["struct"],
+          params: $query(($) => $?.test?.data)
         }
-      },
-      {
-        type: ["struct"],
-        params: $query(($) => $?.test?.data)
-      }
-    ]);
+      ]
+    });
 
     const res = await action.run($ctx());
 

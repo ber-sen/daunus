@@ -5,19 +5,21 @@ import serial from "./index";
 
 describe("serial", () => {
   it("should work with two actions", async () => {
-    const action = serial([
-      {
-        name: "test",
-        type: ["struct"],
-        params: {
-          foo: "bar"
+    const action = serial({
+      actions: [
+        {
+          name: "test",
+          type: ["struct"],
+          params: {
+            foo: "bar"
+          }
+        },
+        {
+          type: ["struct"],
+          params: "test"
         }
-      },
-      {
-        type: ["struct"],
-        params: "test"
-      }
-    ]);
+      ]
+    });
 
     const res = await action.run($ctx());
 
@@ -25,26 +27,30 @@ describe("serial", () => {
   });
 
   it("should work with with nested serial", async () => {
-    const action = serial([
-      {
-        name: "test",
-        type: ["serial"],
-        params: [
-          {
-            type: ["struct"],
-            params: "action.1.1"
-          },
-          {
-            type: ["struct"],
-            params: "action.1.2"
+    const action = serial({
+      actions: [
+        {
+          name: "test",
+          type: ["serial"],
+          params: {
+            actions: [
+              {
+                type: ["struct"],
+                params: "action.1.1"
+              },
+              {
+                type: ["struct"],
+                params: "action.1.2"
+              }
+            ]
           }
-        ]
-      },
-      {
-        type: ["struct"],
-        params: "action.2"
-      }
-    ]);
+        },
+        {
+          type: ["struct"],
+          params: "action.2"
+        }
+      ]
+    });
 
     const res = await action.run($ctx());
 
@@ -52,19 +58,21 @@ describe("serial", () => {
   });
 
   it("should be able to access return of the first action from the second", async () => {
-    const action = serial([
-      {
-        name: "test",
-        type: ["struct"],
-        params: {
-          foo: "bar"
+    const action = serial({
+      actions: [
+        {
+          name: "test",
+          type: ["struct"],
+          params: {
+            foo: "bar"
+          }
+        },
+        {
+          type: ["struct"],
+          params: $query(($) => $.test)
         }
-      },
-      {
-        type: ["struct"],
-        params: $query($ => $.test)
-      }
-    ]);
+      ]
+    });
 
     const res = await action.run($ctx());
 

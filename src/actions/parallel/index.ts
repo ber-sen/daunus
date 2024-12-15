@@ -5,8 +5,16 @@ import { DaunusWorkflowAction } from "../../types";
 const parallel = $action(
   { type: "parallel", skipParse: true },
   ({ ctx }) =>
-    async (list: DaunusWorkflowAction<any>[]) => {
-      const promises = list.map((item) =>
+    async ({
+      actions
+    }: {
+      /**
+       * Actions
+       * @ref https://taskwish.vercel.app/schema/actions.json
+       */
+      actions: DaunusWorkflowAction<any>[];
+    }) => {
+      const promises = actions.map((item) =>
         runAction(ctx, item).then((item) => {
           if (item.exception) {
             throw item.exception;

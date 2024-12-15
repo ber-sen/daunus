@@ -5,10 +5,18 @@ import { DaunusWorkflowAction } from "../../types";
 const serial = $action(
   { type: "serial", skipParse: true },
   ({ ctx }) =>
-    async (list: DaunusWorkflowAction<any>[]) => {
+    async ({
+      actions
+    }: {
+      /**
+       * Actions
+       * @ref https://taskwish.vercel.app/schema/actions.json
+       */
+      actions: DaunusWorkflowAction<any>[];
+    }) => {
       const res: Array<any> = [];
 
-      for (const action of list) {
+      for (const action of actions) {
         const ares = await runAction(ctx, action);
 
         res.push(ares.data ?? ares.error);
