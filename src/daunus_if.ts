@@ -5,7 +5,7 @@ import {
   StepFactory,
   resultKey
 } from "./new_types";
-import { DisableSameName, FormatScope, Overwrite } from "./type_helpers";
+import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
@@ -68,7 +68,7 @@ interface ConditionDefaultCaseStepFactory<
   >;
 
   add<T extends Action<any, any>, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): Omit<
@@ -84,7 +84,7 @@ interface ConditionDefaultCaseStepFactory<
     E
   >;
   add<T extends Action<any, any>, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): Omit<
     ConditionDefaultCaseStepFactory<
@@ -100,7 +100,7 @@ interface ConditionDefaultCaseStepFactory<
   >;
 
   add<T, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): Omit<
@@ -117,7 +117,7 @@ interface ConditionDefaultCaseStepFactory<
   >;
 
   add<T, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): Omit<
     ConditionDefaultCaseStepFactory<

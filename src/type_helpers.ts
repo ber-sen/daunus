@@ -1,3 +1,5 @@
+import { never } from "zod";
+
 export type ToCamelCase<T extends string> =
   T extends `${infer Left}${infer Delimiter}${infer Right}`
     ? Delimiter extends " " | "_" | "-" | "." | "," | "!"
@@ -21,11 +23,13 @@ export type FormatScope<T> = {
 
 export type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
 
-export type DisableSameName<N, L> = N extends "input"
+export type ValidateName<N, L> = N extends "input"
   ? never
-  : N extends keyof L
+  : N extends "expetions"
     ? never
-    : N;
+    : N extends keyof L
+      ? never
+      : N;
 
 export type Expect<T extends true> = T;
 

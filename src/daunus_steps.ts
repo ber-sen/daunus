@@ -7,7 +7,7 @@ import {
   StepOptions,
   resultKey
 } from "./new_types";
-import { DisableSameName, FormatScope, Overwrite } from "./type_helpers";
+import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultStepFactory<
   G extends Record<string, any> = {},
@@ -16,7 +16,7 @@ export interface DefaultStepFactory<
     Action<Promise<L[typeof resultKey]>, G["input"]> {
       
   add<T extends Action<any, any>, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
@@ -25,7 +25,7 @@ export interface DefaultStepFactory<
   >;
 
   add<T extends Action<any, any>, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
@@ -33,7 +33,7 @@ export interface DefaultStepFactory<
   >;
 
   add<T, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     options: StepConfig,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
@@ -42,7 +42,7 @@ export interface DefaultStepFactory<
   >;
 
   add<T, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
@@ -56,7 +56,7 @@ export interface ParallelStepFactory<
 > extends StepFactory<G, L>,
     Action<FormatScope<L>, G["input"]> {
   add<T, N extends string>(
-    name: DisableSameName<N, L>,
+    name: ValidateName<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelStepFactory<G, L & Record<N, T>>;
 }

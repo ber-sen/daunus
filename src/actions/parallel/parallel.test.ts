@@ -8,13 +8,14 @@ describe("parallel", () => {
     const action = parallel({
       actions: [
         {
-          name: "test",
+          name: "sub1",
           type: ["struct"],
           params: {
             foo: "bar"
           }
         },
         {
+          name: "sub2",
           type: ["struct"],
           params: "test"
         }
@@ -59,10 +60,12 @@ describe("parallel", () => {
           params: {
             actions: [
               {
+                name: "nested1",
                 type: ["struct"],
                 params: "action.1.1"
               },
               {
+                name: "nested2",
                 type: ["struct"],
                 params: "action.1.2"
               }
@@ -85,13 +88,14 @@ describe("parallel", () => {
     const action = parallel({
       actions: [
         {
-          name: "test",
+          name: "sub1",
           type: ["struct"],
           params: {
             foo: "bar"
           }
         },
         {
+          name: "sub2",
           type: ["struct"],
           params: $query(($) => $?.test?.data)
         }
