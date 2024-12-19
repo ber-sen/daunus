@@ -35,7 +35,7 @@ describe("steps", () => {
         },
         {
           type: ["struct"],
-          params: $query(($) => $.test.foo)
+          params: $query(($) => $.test.data.foo)
         }
       ]
     });
@@ -64,7 +64,7 @@ describe("steps", () => {
         },
         {
           type: ["struct"],
-          params: $query(($) => $.test.foo)
+          params: $query(($) => $.test.data.foo)
         }
       ]
     });
@@ -100,7 +100,7 @@ describe("steps", () => {
         {
           type: ["struct"],
           params: {
-            foo: $query(($) => $.test.foo + "asd")
+            foo: $query(($) => $.test.data.foo + "asd")
           }
         }
       ]

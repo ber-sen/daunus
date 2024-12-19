@@ -94,14 +94,7 @@ export const $action =
             (await runFn()) as O
           );
 
-          ctx.set(name, value.data);
-
-          if (value.exception) {
-            ctx.set(
-              "exception",
-              (ctx.get("exception") ?? new Map()).set("name", value.data)
-            );
-          }
+          ctx.set(name, value);
 
           actionInfo.data = value.data;
           actionInfo.exception = value.exception;

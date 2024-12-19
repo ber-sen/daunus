@@ -18,7 +18,7 @@ describe("workflow", () => {
             },
             {
               type: ["struct"],
-              params: $query(($) => `Foo ${$.struct.name}`)
+              params: $query(($) => `Foo ${$.struct.data.name}`)
             }
           ]
         }
@@ -51,13 +51,13 @@ describe("workflow", () => {
               name: "csv",
               type: ["csv"],
               params: {
-                rows: $query(($) => $.file)
+                rows: $query(($) => $.file.data)
               }
             },
             {
               type: ["struct"],
               params: $query(
-                async ($) => `Foo\n${await new Response($.csv).text()}`
+                async ($) => `Foo\n${await new Response($.csv.data).text()}`
               )
             }
           ]
@@ -88,7 +88,7 @@ describe("workflow", () => {
               name: "res",
               type: ["condition"],
               params: {
-                if: $query(($) => $.item.name === "Foo"),
+                if: $query(($) => $.item.data.name === "Foo"),
                 do: {
                   name: "item2",
                   type: ["steps"],
