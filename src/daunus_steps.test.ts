@@ -179,6 +179,7 @@ describe("$steps", () => {
 
       .add("parallel", ($) =>
         $steps({ $, stepsType: "parallel" })
+
           .add("first step", () => ({
             foo: "bar"
           }))

@@ -1,5 +1,3 @@
-import { never } from "zod";
-
 export type ToCamelCase<T extends string> =
   T extends `${infer Left}${infer Delimiter}${infer Right}`
     ? Delimiter extends " " | "_" | "-" | "." | "," | "!"
@@ -7,7 +5,7 @@ export type ToCamelCase<T extends string> =
       : `${Left}${ToCamelCase<`${Delimiter}${Right}`>}`
     : T;
 
-export type FormatExceptions<T> = {
+export type FormatException<T> = {
   [K in keyof T as ToCamelCase<Extract<K, string>>]: T[K];
 } & {};
 
@@ -16,8 +14,8 @@ export type NestedPretty<T> = {
 } & {};
 
 export type FormatScope<T> = {
-  [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exceptions"
-    ? FormatExceptions<T[K]>
+  [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exception"
+    ? FormatException<T[K]>
     : T[K];
 } & {};
 
@@ -25,7 +23,7 @@ export type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
 
 export type ValidateName<N, L> = N extends "input"
   ? never
-  : N extends "expetions"
+  : N extends "exception"
     ? never
     : N extends keyof L
       ? never

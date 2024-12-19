@@ -98,8 +98,8 @@ export const $action =
 
           if (value.exception) {
             ctx.set(
-              "exceptions",
-              (ctx.get("exceptions") ?? new Map()).set("name", value.data)
+              "exception",
+              (ctx.get("exception") ?? new Map()).set("name", value.data)
             );
           }
 
