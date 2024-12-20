@@ -3,6 +3,7 @@ import { ZodRawShape } from "zod";
 import { z } from "./zod";
 
 import { DEFAULT_ACTIONS } from "./default_actions";
+import { DaunusException } from ".";
 
 export const $ctx = (value?: object): Map<any, any> =>
   new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }));
@@ -13,14 +14,17 @@ export const $httpInput = <T extends ZodRawShape>(shape: T) =>
   z.object({ __type: z.literal("http").catch("http"), ...shape });
 
 export const $stream = <T>(
-  generator: () => Generator<T | Promise<T>, void, unknown> | AsyncGenerator<T | Promise<T>, void, unknown>
+  generator: () =>
+    | Generator<T | Promise<T>, void, unknown>
+    | AsyncGenerator<T | Promise<T>, void, unknown>
 ): ReadableStream<T> => {
   return new ReadableStream<T>({
     start(controller) {
       const iterator = generator();
 
-      const isAsync = typeof (iterator as AsyncGenerator).next === "function" &&
-                      typeof (iterator as AsyncGenerator).throw === "function";
+      const isAsync =
+        typeof (iterator as AsyncGenerator).next === "function" &&
+        typeof (iterator as AsyncGenerator).throw === "function";
 
       const push = async () => {
         try {
@@ -34,7 +38,7 @@ export const $stream = <T>(
           }
 
           const resolvedValue = await Promise.resolve(result.value as T);
-          controller.enqueue(resolvedValue); 
+          controller.enqueue(resolvedValue);
 
           await push();
         } catch (error) {

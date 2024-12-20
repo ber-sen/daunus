@@ -67,7 +67,7 @@ describe("workflow", () => {
     const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual(undefined);
-    expect(res.exception).toStrictEqual(new DaunusException(403));
+    expect(res.exception).toStrictEqual(new DaunusException({ status: 403 }));
   });
 
   it("should work with streams", async () => {

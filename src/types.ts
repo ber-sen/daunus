@@ -155,13 +155,17 @@ export type DaunusInferReturn<
 export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
   T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never;
 
-export class DaunusException<S extends number, D = undefined, P = undefined> {
+export class DaunusException<
+  S extends number = 500,
+  D = undefined,
+  P = undefined
+> {
   public status: S;
   public data: D;
   public paths: P;
 
-  constructor(status: S, options?: { data?: D; paths?: P }) {
-    this.status = status;
+  constructor(options?: { status?: S; data?: D; paths?: P }) {
+    this.status = options?.status ?? 500 as S;
     this.data = options?.data as D;
     this.paths = options?.paths as P;
   }
@@ -177,13 +181,13 @@ type WaitParams =
 
 export class Wait extends DaunusException<102, WaitParams> {
   constructor(params: WaitParams) {
-    super(102, { data: params });
+    super({ status: 102, data: params });
   }
 }
 
 export class Return extends DaunusException<200, WaitParams> {
   constructor(params: WaitParams) {
-    super(200, { data: params });
+    super({ status: 200, data: params });
   }
 }
 

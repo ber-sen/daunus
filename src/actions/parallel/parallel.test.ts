@@ -50,12 +50,12 @@ describe("parallel", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual(undefined);
+    expect(res.data).toStrictEqual({ lorem: undefined, test: undefined });
     expect(res.exception).toEqual(
-      new DaunusException(500, {
+      new DaunusException({
         paths: {
-          test: new DaunusException(500),
-          lorem: new DaunusException(400, { data: "test" })
+          test: new DaunusException(),
+          lorem: new DaunusException({ status: 400, data: "test" })
         }
       })
     );
@@ -84,11 +84,81 @@ describe("parallel", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual({ test: { success: true } });
+    expect(res.data).toStrictEqual({
+      test: { success: true },
+      lorem: undefined
+    });
     expect(res.exception).toEqual(
-      new DaunusException(500, {
+      new DaunusException({
         paths: {
-          lorem: new DaunusException(400, { data: "test" })
+          lorem: new DaunusException({ status: 400, data: "test" })
+        }
+      })
+    );
+  });
+
+  it("should return data and exceptions when some failed in nested parallels", async () => {
+    const action = parallel({
+      actions: [
+        {
+          name: "main1",
+          type: ["struct"],
+          params: {
+            success: true
+          }
+        },
+        {
+          name: "main2",
+          type: ["parallel"],
+          params: {
+            actions: [
+              {
+                name: "sub1",
+                type: ["struct"],
+                params: {
+                  success: true
+                }
+              },
+              {
+                name: "sub2",
+                type: ["exit"],
+                params: {
+                  status: 500
+                }
+              }
+            ]
+          }
+        },
+        {
+          name: "main3",
+          type: ["exit"],
+          params: {
+            status: 400,
+            data: "test"
+          }
+        }
+      ]
+    });
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual({
+      main1: { success: true },
+      main2: { sub1: { success: true }, sub2: undefined },
+      main3: undefined
+    });
+    expect(res.exception).toEqual(
+      new DaunusException({
+        paths: {
+          main2: new DaunusException({
+            paths: {
+              sub2: new DaunusException()
+            }
+          }),
+          main3: new DaunusException({
+            data: "test",
+            status: 400
+          })
         }
       })
     );

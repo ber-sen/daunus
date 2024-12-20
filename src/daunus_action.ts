@@ -94,7 +94,7 @@ export const $action =
 
           return value;
         } catch (error: any) {
-          const exception = new DaunusException(500, { data: error.message });
+          const exception = new DaunusException({ data: error.message });
 
           ctx.set(
             "exceptions",

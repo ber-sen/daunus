@@ -16,46 +16,32 @@ const parallel = $action(
     }) => {
       const promises = actions.map((item) =>
         runAction(ctx, item).then((item) => {
-          if (item.exception) {
-            throw item.exception;
-          }
-
-          return item.data;
+          return [item.data, item.exception];
         })
       );
 
-      const results = await Promise.allSettled(promises);
+      const results = await Promise.all(promises);
 
-      const values = actions.map((item, index) => {
-        const result = results[index];
+      const successResults: Array<any> = [];
+      const errorResults: Array<any> = [];
 
-        return [
-          item.name,
-          result.status === "fulfilled" ? result.value : result.reason
-        ];
-      });
+      for (const [index, action] of actions.entries()) {
+        const [data, exception] = results[index];
 
-      const successResuts = values.filter(
-        (item) => !(item[1] instanceof DaunusException)
-      );
+        successResults.push([action.name, data]);
 
-      if (successResuts.length === results.length) {
-        return Object.fromEntries(successResuts);
+        if (exception) {
+          errorResults.push([action.name, exception]);
+        }
       }
 
-      const errorResults = values.filter(
-        (item) => item[1] instanceof DaunusException
-      );
-
-      if (errorResults.length === results.length) {
-        return new DaunusException(500, {
-          paths: Object.fromEntries(errorResults)
-        });
+      if (errorResults.length === 0) {
+        return Object.fromEntries(successResults);
       }
 
       return [
-        Object.fromEntries(successResuts),
-        new DaunusException(500, { paths: Object.fromEntries(errorResults) })
+        Object.fromEntries(successResults),
+        new DaunusException({ paths: Object.fromEntries(errorResults) })
       ];
     }
 );

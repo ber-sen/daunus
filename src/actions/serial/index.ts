@@ -18,30 +18,22 @@ const serial = $action(
       const errorResults: Array<any> = [];
 
       for (const action of actions) {
-        const ares = await runAction(ctx, action);
+        const { data, exception } = await runAction(ctx, action);
 
-        if (ares.data) {
-          successResuts.push([action.name, ares.data ?? ares.exception]);
-        }
+        successResuts.push([action.name, data]);
 
-        if (ares.data) {
-          successResuts.push([action.name, ares.data ?? ares.exception]);
+        if (exception) {
+          errorResults.push([action.name, exception]);
         }
       }
 
-      if (successResuts.length === actions.length) {
+      if (errorResults.length === 0) {
         return Object.fromEntries(successResuts);
-      }
-
-      if (errorResults.length === actions.length) {
-        return new DaunusException(500, {
-          paths: Object.fromEntries(errorResults)
-        });
       }
 
       return [
         Object.fromEntries(successResuts),
-        new DaunusException(500, { paths: Object.fromEntries(errorResults) })
+        new DaunusException({ paths: Object.fromEntries(errorResults) })
       ];
     }
 );

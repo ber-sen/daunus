@@ -60,7 +60,7 @@ describe("$action", () => {
   it("Should work with array", () => {
     const test = $action({ type: "test" }, () => (payload: string) => {
       if (Math.random() > 0.5) {
-        return new DaunusException(500, { data: "Server Error" });
+        return new DaunusException({ data: "Server Error" });
       }
 
       return [{ name: payload }];

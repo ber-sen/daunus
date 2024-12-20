@@ -1,7 +1,6 @@
 import { $ctx } from "../../daunus_helpers";
 import { DaunusException } from "../../types";
 
-
 import { $query } from "../..";
 import steps from ".";
 
@@ -74,7 +73,7 @@ describe("steps", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.exception).toStrictEqual(new DaunusException(404));
+    expect(res.exception).toStrictEqual(new DaunusException({ status: 404 }));
   });
 
   it("should work with nested steps", async () => {
