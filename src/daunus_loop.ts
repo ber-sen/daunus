@@ -16,16 +16,7 @@ export interface DefaultLoopStepFactory<
 > extends StepFactory<G, L>,
     Action<Promise<Array<L[typeof resultKey]>>, G["input"]> {
   add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L>,
-    options: StepConfig,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultLoopStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
-
-  add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultLoopStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
@@ -33,16 +24,7 @@ export interface DefaultLoopStepFactory<
   >;
 
   add<T, N extends string>(
-    name: ValidateName<N, L>,
-    options: StepConfig,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultLoopStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
-
-  add<T, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultLoopStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
@@ -151,7 +133,7 @@ export interface ParallelLoopStepFactory<
 > extends StepFactory<G, L>,
     Action<Array<FormatScope<L>>, G["input"]> {
   add<T, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelLoopStepFactory<G, L & Record<N, T>>;
 }

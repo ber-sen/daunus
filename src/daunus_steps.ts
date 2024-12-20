@@ -14,18 +14,8 @@ export interface DefaultStepFactory<
   L extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<G, L>,
     Action<Promise<L[typeof resultKey]>, G["input"]> {
-      
   add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L>,
-    options: StepConfig,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
-
-  add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
@@ -33,16 +23,7 @@ export interface DefaultStepFactory<
   >;
 
   add<T, N extends string>(
-    name: ValidateName<N, L>,
-    options: StepConfig,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): DefaultStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
-  >;
-
-  add<T, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): DefaultStepFactory<
     Overwrite<G, N> & Record<N, Awaited<T>>,
@@ -56,7 +37,7 @@ export interface ParallelStepFactory<
 > extends StepFactory<G, L>,
     Action<FormatScope<L>, G["input"]> {
   add<T, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): ParallelStepFactory<G, L & Record<N, T>>;
 }
@@ -80,10 +61,13 @@ export function $steps<
       ? initialScope
       : new Scope<G, L>({ global: initialScope });
 
-  function add<T, N extends string>(
-    name: N,
+  function add<T>(
+    nameOrConfig: string | StepConfig<any, any>,
     fn: ($: FormatScope<G>) => T | Promise<T>
   ) {
+    const name =
+      typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
+
     const result = (scope: any) => {
       return fn(scope);
     };
@@ -150,8 +134,6 @@ export function $steps<
 
     return res.at(-1);
   }
-
-  run.type = stepsType === "parallel" ? "steps.parallel" : "steps";
 
   return { scope, run, add, get } as any;
 }

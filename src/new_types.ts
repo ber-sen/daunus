@@ -1,4 +1,4 @@
-import { FormatScope } from "./type_helpers";
+import { FormatScope, ValidateName } from "./type_helpers";
 
 export interface Action<R, I = unknown> {
   run: I extends object
@@ -8,7 +8,8 @@ export interface Action<R, I = unknown> {
 
 type WorkflowBackoff = "constant" | "linear" | "exponential";
 
-export interface StepConfig {
+export interface StepConfig<N, L> {
+  name: ValidateName<N, L>
   retries?: {
     limit: number;
     delay: string | number;

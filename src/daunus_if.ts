@@ -68,23 +68,7 @@ interface ConditionDefaultCaseStepFactory<
   >;
 
   add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L>,
-    options: StepConfig,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): Omit<
-    ConditionDefaultCaseStepFactory<
-      C,
-      Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-      DeepOmitByPath<L, [K, typeof resultKey]> &
-        Record<K, Record<N, T>> &
-        Record<K, Record<typeof resultKey, T>>,
-      K,
-      E
-    >,
-    E
-  >;
-  add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): Omit<
     ConditionDefaultCaseStepFactory<
@@ -100,24 +84,7 @@ interface ConditionDefaultCaseStepFactory<
   >;
 
   add<T, N extends string>(
-    name: ValidateName<N, L>,
-    options: StepConfig,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): Omit<
-    ConditionDefaultCaseStepFactory<
-      C,
-      Overwrite<G, N> & Record<N, Awaited<T>>,
-      DeepOmitByPath<L, [K, typeof resultKey]> &
-        Record<K, Record<N, T>> &
-        Record<K, Record<typeof resultKey, T>>,
-      K,
-      E
-    >,
-    E
-  >;
-
-  add<T, N extends string>(
-    name: ValidateName<N, L>,
+    name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
   ): Omit<
     ConditionDefaultCaseStepFactory<

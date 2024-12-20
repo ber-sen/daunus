@@ -7,5 +7,5 @@ export function toCamelCase(input: string): string {
 }
 
 export function isAction(obj: any): obj is Action<any, any> {
-  return obj && typeof obj.run === "function" && obj.run.type;
+  return obj && typeof obj.run === "function";
 }

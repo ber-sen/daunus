@@ -37,7 +37,7 @@ describe("$steps", () => {
 
   it("should return the return value of last key by default", async () => {
     const steps = $steps()
-      .add("first step", () => ({
+      .add({ name: "first step" }, () => ({
         foo: "bar"
       }))
 
@@ -179,7 +179,6 @@ describe("$steps", () => {
 
       .add("parallel", ($) =>
         $steps({ $, stepsType: "parallel" })
-
           .add("first step", () => ({
             foo: "bar"
           }))
