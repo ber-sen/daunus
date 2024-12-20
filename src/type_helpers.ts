@@ -14,7 +14,7 @@ export type NestedPretty<T> = {
 } & {};
 
 export type FormatScope<T> = {
-  [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exception"
+  [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exceptions"
     ? FormatException<T[K]>
     : T[K];
 } & {};
@@ -23,7 +23,7 @@ export type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G;
 
 export type ValidateName<N, L> = N extends "input"
   ? never
-  : N extends "exception"
+  : N extends "exceptions"
     ? never
     : N extends keyof L
       ? never
