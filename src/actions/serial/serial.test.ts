@@ -24,7 +24,7 @@ describe("serial", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual([{ foo: "bar" }, "test"]);
+    expect(res.data).toStrictEqual({ test: { foo: "bar" }, test2: "test" });
   });
 
   it("should work with with nested serial", async () => {
@@ -36,10 +36,12 @@ describe("serial", () => {
           params: {
             actions: [
               {
+                name: "nested1",
                 type: ["struct"],
                 params: "action.1.1"
               },
               {
+                name: "nested2",
                 type: ["struct"],
                 params: "action.1.2"
               }
@@ -49,14 +51,17 @@ describe("serial", () => {
         {
           name: "test2",
           type: ["struct"],
-          params: "action.2"
+          params: $query(($) => $.test.nested1)
         }
       ]
     });
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual([["action.1.1", "action.1.2"], "action.2"]);
+    expect(res.data).toStrictEqual({
+      test: { nested1: "action.1.1", nested2: "action.1.2" },
+      test2: "action.1.1"
+    });
   });
 
   it("should be able to access return of the first action from the second", async () => {
@@ -79,6 +84,9 @@ describe("serial", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual([{ foo: "bar" }, { foo: "bar" }]);
+    expect(res.data).toStrictEqual({
+      test: { foo: "bar" },
+      test2: { foo: "bar" }
+    });
   });
 });
