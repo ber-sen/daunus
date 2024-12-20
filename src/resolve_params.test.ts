@@ -1,12 +1,7 @@
-import { z } from "zod";
-
-import { $input } from "./daunus_helpers";
 import { resolveParams } from "./resolve_params";
 import { $query } from ".";
 
 describe("resolveParams", () => {
-  const input = $input({ foo: z.string() });
-
   const ctx = new Map();
 
   const inputValue = "bar";
@@ -23,7 +18,7 @@ describe("resolveParams", () => {
   });
 
   it("should resolve value of $var inside an object", async () => {
-    const params = { foo: $query($ => $.input.foo) };
+    const params = { foo: $query(($) => $.input.foo) };
 
     const res = await resolveParams(ctx, params);
 
@@ -31,7 +26,7 @@ describe("resolveParams", () => {
   });
 
   it("should work in case $var is the params", async () => {
-    const params = $query($ => $.input.foo);
+    const params = $query(($) => $.input.foo);
 
     const res = await resolveParams(ctx, params);
 
@@ -39,7 +34,7 @@ describe("resolveParams", () => {
   });
 
   it("should work in case $var is in array", async () => {
-    const params = [3, $query($ => $.input.foo)];
+    const params = [3, $query(($) => $.input.foo)];
 
     const res = await resolveParams(ctx, params);
 
@@ -47,7 +42,7 @@ describe("resolveParams", () => {
   });
 
   it("should work in case $var is as a nested value in object ", async () => {
-    const params = { level1: { level2: $query($ => $.input.foo) } };
+    const params = { level1: { level2: $query(($) => $.input.foo) } };
 
     const res = await resolveParams(ctx, params);
 
@@ -55,7 +50,7 @@ describe("resolveParams", () => {
   });
 
   it("should work in case $var is as a nested value in array ", async () => {
-    const params = [[[$query($ => $.input.foo)]]];
+    const params = [[[$query(($) => $.input.foo)]]];
 
     const res = await resolveParams(ctx, params);
 
@@ -63,7 +58,7 @@ describe("resolveParams", () => {
   });
 
   it("should work in case $var is as a nested value in array inside a nested object", async () => {
-    const params = { level1: { level2: [[[$query($ => $.input.foo)]]] } };
+    const params = { level1: { level2: [[[$query(($) => $.input.foo)]]] } };
 
     const res = await resolveParams(ctx, params);
 
