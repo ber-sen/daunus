@@ -108,7 +108,7 @@ export type DaunusAction<T, P, E = {}> = {
 export type DaunusWorkflowAction<T> = {
   type: string[];
   params?: T;
-  name?: string;
+  name: string;
 };
 
 export type DaunusOpenApiMethod =
@@ -177,13 +177,15 @@ export type DaunusInferReturn<
 export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
   T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never;
 
-export class DaunusException<S extends number, D = undefined> {
+export class DaunusException<S extends number, D = undefined, P = undefined> {
   public status: S;
   public data: D;
+  public paths: P;
 
-  constructor(status: S, data = undefined as D) {
+  constructor(status: S, options?: { data?: D; paths?: P }) {
     this.status = status;
-    this.data = data;
+    this.data = options?.data as D;
+    this.paths = options?.paths as P;
   }
 }
 
@@ -197,13 +199,13 @@ type WaitParams =
 
 export class Wait extends DaunusException<102, WaitParams> {
   constructor(params: WaitParams) {
-    super(102, params);
+    super(102, { data: params });
   }
 }
 
 export class Return extends DaunusException<200, WaitParams> {
   constructor(params: WaitParams) {
-    super(200, params);
+    super(200, { data: params });
   }
 }
 

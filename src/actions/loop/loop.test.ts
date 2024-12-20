@@ -11,6 +11,7 @@ describe("loop", () => {
         list: [1, 2],
         itemName: "item",
         action: {
+          name: "iterate",
           type: ["struct"],
           params: $query(($) => $.item.value as number)
         }

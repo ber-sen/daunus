@@ -126,6 +126,17 @@ export const parseResult = <T, P>(
     | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
   >;
 } => {
+  if(Array.isArray(data) && data.length === 2 && isException(data[1])){
+    return {
+      data: data[0] as ResolveDaunusVarData<T>,
+      exception: data[1] as NonUndefined<
+        | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
+        | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
+      >
+    };
+  }
+
+
   if (isException(data)) {
     return {
       data: undefined as ResolveDaunusVarData<T>,

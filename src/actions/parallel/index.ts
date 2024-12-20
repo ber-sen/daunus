@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action";
 import { $action } from "../../daunus_action";
-import { DaunusWorkflowAction } from "../../types";
+import { DaunusException, DaunusWorkflowAction } from "../../types";
 
 const parallel = $action(
   { type: "parallel", skipParse: true },
@@ -24,15 +24,39 @@ const parallel = $action(
         })
       );
 
-      const res = await Promise.allSettled(promises);
+      const results = await Promise.allSettled(promises);
 
-      const rejected = res.find((item) => item.status === "rejected");
+      const values = actions.map((item, index) => {
+        const result = results[index];
 
-      if (rejected) {
-        return rejected.status === "rejected" && rejected.reason;
+        return [
+          item.name,
+          result.status === "fulfilled" ? result.value : result.reason
+        ];
+      });
+
+      const successResuts = values.filter(
+        (item) => !(item[1] instanceof DaunusException)
+      );
+
+      if (successResuts.length === results.length) {
+        return Object.fromEntries(successResuts);
       }
 
-      return res.map((item) => item.status === "fulfilled" && item.value);
+      const errorResults = values.filter(
+        (item) => item[1] instanceof DaunusException
+      );
+
+      if (errorResults.length === results.length) {
+        return new DaunusException(500, {
+          paths: Object.fromEntries(errorResults)
+        });
+      }
+
+      return [
+        Object.fromEntries(successResuts),
+        new DaunusException(500, { paths: Object.fromEntries(errorResults) })
+      ];
     }
 );
 

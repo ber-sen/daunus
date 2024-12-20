@@ -15,6 +15,7 @@ describe("serial", () => {
           }
         },
         {
+          name: "test2",
           type: ["struct"],
           params: "test"
         }
@@ -46,6 +47,7 @@ describe("serial", () => {
           }
         },
         {
+          name: "test2",
           type: ["struct"],
           params: "action.2"
         }
@@ -68,6 +70,7 @@ describe("serial", () => {
           }
         },
         {
+          name: "test2",
           type: ["struct"],
           params: $query(($) => $.test.data)
         }

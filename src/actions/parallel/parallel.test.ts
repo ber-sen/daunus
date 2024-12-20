@@ -1,4 +1,4 @@
-import { $query } from "../..";
+import { $query, DaunusException } from "../..";
 import { $ctx } from "../../daunus_helpers";
 
 import parallel from "./index";
@@ -24,10 +24,10 @@ describe("parallel", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual([{ foo: "bar" }, "test"]);
+    expect(res.data).toStrictEqual({ sub1: { foo: "bar" }, sub2: "test" });
   });
 
-  it("should return exeption", async () => {
+  it("should return exceptions when all failed", async () => {
     const action = parallel({
       actions: [
         {
@@ -39,8 +39,11 @@ describe("parallel", () => {
         },
         {
           name: "lorem",
-          type: ["struct"],
-          params: "test"
+          type: ["exit"],
+          params: {
+            status: 400,
+            data: "test"
+          }
         }
       ]
     });
@@ -48,7 +51,47 @@ describe("parallel", () => {
     const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual(undefined);
-    expect(res.exception).toEqual({ status: 500 });
+    expect(res.exception).toEqual(
+      new DaunusException(500, {
+        paths: {
+          test: new DaunusException(500),
+          lorem: new DaunusException(400, { data: "test" })
+        }
+      })
+    );
+  });
+
+  it("should return data and exceptions when some failed", async () => {
+    const action = parallel({
+      actions: [
+        {
+          name: "test",
+          type: ["struct"],
+          params: {
+            success: true
+          }
+        },
+        {
+          name: "lorem",
+          type: ["exit"],
+          params: {
+            status: 400,
+            data: "test"
+          }
+        }
+      ]
+    });
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual({ test: { success: true } });
+    expect(res.exception).toEqual(
+      new DaunusException(500, {
+        paths: {
+          lorem: new DaunusException(400, { data: "test" })
+        }
+      })
+    );
   });
 
   it("should work with with nested parallel", async () => {
@@ -73,6 +116,7 @@ describe("parallel", () => {
           }
         },
         {
+          name: "sub2",
           type: ["struct"],
           params: "action.2"
         }
@@ -81,7 +125,10 @@ describe("parallel", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual([["action.1.1", "action.1.2"], "action.2"]);
+    expect(res.data).toStrictEqual({
+      test: { nested1: "action.1.1", nested2: "action.1.2" },
+      sub2: "action.2"
+    });
   });
 
   it("should NOT be able to access return of the first action from the second", async () => {
@@ -104,6 +151,6 @@ describe("parallel", () => {
 
     const res = await action.run($ctx());
 
-    expect(res.data).toStrictEqual([{ foo: "bar" }, undefined]);
+    expect(res.data).toStrictEqual({ sub1: { foo: "bar" }, sub2: undefined });
   });
 });
