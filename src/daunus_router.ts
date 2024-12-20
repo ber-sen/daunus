@@ -1,13 +1,47 @@
 import { $action } from "./daunus_action";
 import { isDaunusRoute } from "./helpers";
-import { DaunusRoute, RouterFactory, DaunusAction } from "./types";
+import { DaunusRoute, DaunusAction } from "./types";
 import { z } from "./zod";
+
+export interface RouterFactory<
+  R extends Record<
+    string,
+    {
+      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any>;
+      input: any;
+    }
+  >,
+  AI extends any | undefined,
+  AR extends any | undefined
+> extends DaunusRoute<
+    Exclude<AR, undefined>,
+    {},
+    {},
+    z.ZodType<Exclude<AI, undefined>>
+  > {
+  add<N extends string, D, P, E, I extends z.ZodTypeAny = z.ZodUndefined>(
+    name: N,
+    route: DaunusRoute<D, P, E, I>
+  ): RouterFactory<
+    R & Record<N, { route: DaunusRoute<D, P, E, I> }>,
+    AI | I["_output"],
+    AR | D
+  >;
+
+  add<N extends string, D, P, E>(
+    name: N,
+    route: DaunusAction<D, E>
+  ): RouterFactory<R & Record<N, { route: DaunusAction<D, E> }>, AI, AR | D>;
+
+  get<N extends keyof R>(name: N): R[N]["route"];
+  defs: R;
+}
 
 export const $router = <
   R extends Record<
     string,
     {
-      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>;
+      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any>;
       input: any;
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -25,7 +59,7 @@ export const $router = <
 ): RouterFactory<R, AI, AR> => {
   const add = (
     name: string,
-    route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>
+    route: DaunusRoute<any, any, any, any> | DaunusAction<any, any>
   ) => {
     if (isDaunusRoute(route)) {
       const newInput = options.createInput

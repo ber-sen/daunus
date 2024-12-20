@@ -6,10 +6,12 @@ import { resolveParams } from "./resolve_params";
 import {
   ExceptionParams,
   DaunusAction,
-  DaunusActionInfo,
-  DaunusActionRunOptions,
   DaunusCtx,
-  DaunusActionWithOptions
+  DaunusActionWithOptions,
+  DaunusException,
+  ResolveDaunusVarData,
+  NonUndefined,
+  ExtractDaunusExceptions
 } from "./types";
 import { isException, parseResult } from "./helpers";
 
@@ -43,18 +45,9 @@ export const $action =
   ) => {
     const name: string = actionCtx?.name || args.name || v4();
 
-    const actionInfo: DaunusActionInfo<O, ExceptionParams<O, P>> = {
-      name,
-      type: args.type,
-      params: null
-    };
-
     const makeRun =
       (init?: (ctx: DaunusCtx) => void) =>
-      async (
-        ctx: DaunusCtx = new Map(),
-        options?: DaunusActionRunOptions<O, ExceptionParams<O, P>>
-      ) => {
+      async (ctx: DaunusCtx = new Map()) => {
         try {
           const runFn = async () => {
             init && init(ctx);
@@ -66,8 +59,6 @@ export const $action =
                     schema: args.paramsSchema,
                     skipPlaceholders: args.skipPlaceholders
                   });
-
-            actionInfo.params = parsedParams;
 
             if (isException(parsedParams)) {
               return parsedParams;
@@ -90,9 +81,7 @@ export const $action =
             return parseValue;
           };
 
-          const value = parseResult<O, ExceptionParams<O, P>>(
-            (await runFn()) as O
-          );
+          const value = parseResult<O>((await runFn()) as O);
 
           ctx.set(name, value.data);
 
@@ -103,22 +92,26 @@ export const $action =
             );
           }
 
-          actionInfo.data = value.data;
-          actionInfo.exception = value.exception;
-
           return value;
         } catch (error: any) {
-          actionInfo.exception = error;
+          const exception = new DaunusException(500, { data: error.message });
 
-          throw error;
-        } finally {
-          if (options?.onComplete) {
-            options.onComplete(actionInfo, ctx);
-          }
+          ctx.set(
+            "exceptions",
+            (ctx.get("exceptions") ?? new Map()).set(name, exception)
+          );
+
+          return {
+            data: undefined,
+            exception
+          } as {
+            data: ResolveDaunusVarData<O>;
+            exception: NonUndefined<ExtractDaunusExceptions<O>>;
+          };
         }
       };
 
-    const action: DaunusAction<O, ExceptionParams<O, P>, E> = {
+    const action: DaunusAction<O, E> = {
       ...actionCtx,
       name,
       envSchema: args.envSchema,
@@ -160,15 +153,13 @@ export const $action =
                   : undefined
             }
           },
-          input: (value: any): DaunusAction<O, ExceptionParams<O, P>, E> => ({
+          input: (value: any): DaunusAction<O, E> => ({
             ...action,
             run: makeRun((ctx) => {
               ctx.set("input", iSchema?.parse(value));
             })
           }),
-          rawInput: (
-            value: unknown
-          ): DaunusAction<O, ExceptionParams<O, P>, E> => ({
+          rawInput: (value: unknown): DaunusAction<O, E> => ({
             ...action,
             run: makeRun((ctx) => {
               ctx.set("input", iSchema?.parse(value));
