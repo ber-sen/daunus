@@ -6,20 +6,22 @@ const steps = $action(
   { type: "steps", skipParse: true },
   ({ ctx }) =>
     async ({
-      actions
+      actions,
+      continueOnError
     }: {
       /**
        * Actions
        * @ref https://taskwish.vercel.app/schema/actions.json
        */
       actions: DaunusWorkflowAction<any>[];
+      continueOnError?: boolean;
     }) => {
       let res: any = null;
 
       for (const action of actions) {
         res = await runAction(ctx, action);
 
-        if (res.exception) {
+        if (res.exception && !continueOnError) {
           return res.exception;
         }
       }

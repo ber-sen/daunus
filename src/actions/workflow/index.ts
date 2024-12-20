@@ -27,7 +27,7 @@ const workflow = $action(
 
       const res = await runAction(ctx, params.action);
 
-      return res.data ?? res.error;
+      return res.data ?? res.exception;
     }
 );
 

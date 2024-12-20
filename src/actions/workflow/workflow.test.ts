@@ -1,3 +1,4 @@
+import { DaunusException } from "../..";
 import { $ctx, $delay, $stream } from "../../daunus_helpers";
 import { $query } from "../../daunus_query";
 
@@ -28,6 +29,45 @@ describe("workflow", () => {
     const res = await action.run($ctx());
 
     expect(res.data).toStrictEqual("Foo Bar");
+  });
+
+  it("should be able to pass exeptions", async () => {
+    const action = workflow({
+      name: "Foo",
+      action: {
+        type: ["steps"],
+        params: {
+          continueOnError: true,
+          actions: [
+            {
+              name: "error",
+              type: ["parallel"],
+              params: {
+                actions: [
+                  {
+                    name: "fail",
+                    type: ["exit"],
+                    params: {
+                      status: 403
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              name: "return",
+              type: ["struct"],
+              params: $query(($) => $.exceptions.error.fail)
+            }
+          ]
+        }
+      }
+    });
+
+    const res = await action.run($ctx());
+
+    expect(res.data).toStrictEqual(undefined);
+    expect(res.exception).toStrictEqual(new DaunusException(403));
   });
 
   it("should work with streams", async () => {
