@@ -32,28 +32,60 @@ export interface DefaultLoopStepFactory<
   >;
 }
 
-function $loopSteps<
-  T extends StepOptions,
+export interface ParallelLoopStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
+> extends StepFactory<G, L>,
+    Action<Array<FormatScope<L>>, G["input"]> {
+  add<T, N extends string>(
+    name: ValidateName<N, L> | StepConfig<N, L>,
+    fn: ($: FormatScope<G>) => Promise<T> | T
+  ): ParallelLoopStepFactory<G, L & Record<N, T>>;
+}
+
+function $loopSteps<
+  List extends Array<any> | readonly any[],
+  itemVariable extends string = "item",
+  Options extends StepOptions = {},
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
 >(
-  {
-    $: initialScope,
-    stepsType
-  }: {
-    $?: Scope<G, L> | G;
-  } & T = {} as T
-): T["stepsType"] extends "parallel"
-  ? ParallelLoopStepFactory<G, L>
-  : DefaultLoopStepFactory<G, L> {
+  params: {
+    list: List;
+    itemVariable: itemVariable;
+    $?: Scope<Global, Local> | Global;
+  } & Options
+): Options["stepsType"] extends "parallel"
+  ? ParallelLoopStepFactory<
+      Global &
+        Record<
+          itemVariable,
+          {
+            value: List[number];
+            index: number;
+          }
+        >,
+      Local
+    >
+  : DefaultLoopStepFactory<
+      Global &
+        Record<
+          itemVariable,
+          {
+            value: List[number];
+            index: number;
+          }
+        >,
+      Local
+    > {
   const scope =
-    initialScope instanceof Scope
-      ? initialScope
-      : new Scope<G, L>({ global: initialScope });
+    params?.$ instanceof Scope
+      ? params?.$
+      : new Scope<Global, Local>({ global: params?.$ });
 
   function add<T, N extends string>(
     name: N,
-    fn: ($: FormatScope<G>) => T | Promise<T>
+    fn: ($: FormatScope<Global>) => T | Promise<T>
   ) {
     const result = (scope: any) => {
       return fn(scope);
@@ -65,7 +97,7 @@ function $loopSteps<
     };
 
     return $steps({
-      stepsType,
+      stepsType: params?.stepsType,
       $: new Scope({
         global: scope.global,
         local: {
@@ -76,10 +108,10 @@ function $loopSteps<
     });
   }
 
-  function get<N extends keyof L>(
+  function get<N extends keyof Local>(
     name: Extract<N, string>,
     global?: Record<any, any>
-  ): L[N] {
+  ): Local[N] {
     return scope.local[toCamelCase(name)](global);
   }
 
@@ -88,7 +120,7 @@ function $loopSteps<
       return undefined;
     }
 
-    if (stepsType === "parallel") {
+    if (params?.stepsType === "parallel") {
       const promises = Object.values(scope.local).map(async (fn) => {
         const res = await fn(scope.global);
 
@@ -122,36 +154,28 @@ function $loopSteps<
     return res.at(-1);
   }
 
-  run.type = stepsType === "parallel" ? "steps.parallel" : "steps";
-
   return { scope, run, add, get } as any;
 }
 
-export interface ParallelLoopStepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
-> extends StepFactory<G, L>,
-    Action<Array<FormatScope<L>>, G["input"]> {
-  add<T, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): ParallelLoopStepFactory<G, L & Record<N, T>>;
-}
-
 export function $loop<
-  A extends Array<any> | readonly any[],
-  I extends string = "item",
-  G extends Record<string, any> = {}
->({ itemVariable = "item" as I, $ }: { list: A; itemVariable?: I; $?: G }) {
-  const scope = new Scope({ global: $ }).addGlobal(itemVariable, {
-    value: {} as any as A[number],
-    index: {} as number
-  });
-
-  function forEachItem<T extends StepOptions>(options?: T) {
+  List extends Array<any> | readonly any[],
+  itemVariable extends string = "item",
+  Global extends Record<string, any> = {}
+>({
+  itemVariable = "item" as itemVariable,
+  $,
+  list
+}: {
+  list: List;
+  itemVariable?: itemVariable;
+  $?: Global;
+}) {
+  function forEachItem<Options extends StepOptions>(options?: Options) {
     return $loopSteps({
-      $: scope,
-      stepsType: options?.stepsType as T["stepsType"]
+      list,
+      itemVariable,
+      $,
+      stepsType: options?.stepsType as Options["stepsType"]
     });
   }
 

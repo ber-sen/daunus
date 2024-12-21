@@ -15,6 +15,8 @@ describe("$loop", () => {
     type A = typeof data;
 
     type data = Expect<Equal<A, Promise<number[]>>>;
+
+    expect(data).toEqual([1, 2, 3]);
   });
 
   it("should work with parallel", () => {

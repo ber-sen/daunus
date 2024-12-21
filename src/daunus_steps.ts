@@ -10,56 +10,53 @@ import {
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultStepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<typeof resultKey, undefined>
-> extends StepFactory<G, L>,
-    Action<Promise<L[typeof resultKey]>, G["input"]> {
+  Global extends Record<string, any> = {},
+  Local extends Record<any, any> = Record<typeof resultKey, undefined>
+> extends StepFactory<Global, Local>,
+    Action<Promise<Local[typeof resultKey]>, Global["input"]> {
   add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
+    name: ValidateName<N, Local> | StepConfig<N, Local>,
+    fn: ($: FormatScope<Global>) => Promise<T> | T
   ): DefaultStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 
   add<T, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
+    name: ValidateName<N, Local> | StepConfig<N, Local>,
+    fn: ($: FormatScope<Global>) => Promise<T> | T
   ): DefaultStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, N> & Record<N, Awaited<T>>,
+    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 }
 
 export interface ParallelStepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
-> extends StepFactory<G, L>,
-    Action<FormatScope<L>, G["input"]> {
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> extends StepFactory<Global, Local>,
+    Action<FormatScope<Local>, Global["input"]> {
   add<T, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): ParallelStepFactory<G, L & Record<N, T>>;
+    name: ValidateName<N, Local> | StepConfig<N, Local>,
+    fn: ($: FormatScope<Global>) => Promise<T> | T
+  ): ParallelStepFactory<Global, Local & Record<N, T>>;
 }
 
 export function $steps<
-  T extends StepOptions,
+  T extends StepOptions = {},
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 >(
-  {
-    $: initialScope,
-    stepsType
-  }: {
+  params?: {
     $?: Scope<G, L> | G;
-  } & T = {} as T
+  } & T
 ): T["stepsType"] extends "parallel"
   ? ParallelStepFactory<G, L>
   : DefaultStepFactory<G, L> {
   const scope =
-    initialScope instanceof Scope
-      ? initialScope
-      : new Scope<G, L>({ global: initialScope });
+  params?.$ instanceof Scope
+      ? params?.$
+      : new Scope<G, L>({ global: params?.$ });
 
   function add<T>(
     nameOrConfig: string | StepConfig<any, any>,
@@ -78,7 +75,7 @@ export function $steps<
     };
 
     return $steps({
-      stepsType,
+      stepsType: params?.stepsType,
       $: new Scope({
         global: scope.global,
         local: {
@@ -101,7 +98,7 @@ export function $steps<
       return undefined;
     }
 
-    if (stepsType === "parallel") {
+    if (params?.stepsType === "parallel") {
       const promises = Object.values(scope.local).map(async (fn) => {
         const res = await fn(scope.global);
 
