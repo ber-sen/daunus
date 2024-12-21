@@ -1,5 +1,4 @@
 import { $steps } from "./daunus_steps";
-import { toCamelCase } from "./new_helpers";
 import {
   Action,
   Scope,
@@ -83,23 +82,16 @@ function $loopSteps<
   const scope =
     $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ });
 
-  function add<T, N extends string>(
-    name: N,
-    fn: ($: FormatScope<Global>) => T | Promise<T>
-  ) {
+  function add(
+    nameOrConfig: string | StepConfig<any, any>,
+    fn: ($: any) => any
+  ): any {
     return $loopSteps({
       list,
       itemVariable,
       stepsType,
-      $: scope.addStep(name, fn)
+      $: scope.add(nameOrConfig, fn)
     });
-  }
-
-  function get<N extends keyof Local>(
-    name: Extract<N, string>,
-    global?: Record<any, any>
-  ): Local[N] {
-    return scope.steps[toCamelCase(name)](global);
   }
 
   async function run(i: any, c: any) {
@@ -115,7 +107,7 @@ function $loopSteps<
     return await Promise.all(promises);
   }
 
-  return { scope, run, add, get } as any;
+  return { get: scope.get, scope, add, run: run as any }
 }
 
 export function $loop<

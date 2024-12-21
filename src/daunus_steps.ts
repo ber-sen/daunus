@@ -1,4 +1,4 @@
-import { isAction, toCamelCase } from "./new_helpers";
+import { isAction } from "./new_helpers";
 import {
   Action,
   Scope,
@@ -37,7 +37,7 @@ export interface DefaultStepFactory<
 
 export interface ParallelStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
 > extends StepFactory<Global, Local>,
     Action<FormatScope<Local>, Global["input"]> {
   add<Value, Name extends string>(
@@ -61,27 +61,17 @@ export function $steps<
 
   const scope = $ instanceof Scope ? $ : new Scope<G, L>({ global: $ });
 
-  function add<T>(
+  function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: ($: FormatScope<G>) => T | Promise<T>
-  ) {
-    const name =
-      typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
-
+    fn: ($: any) => any
+  ): any {
     return $steps({
       stepsType,
-      $: scope.addStep(name, fn)
-    });
+      $: scope.add(nameOrConfig, fn)
+    }) 
   }
 
-  function get<N extends keyof L>(
-    name: Extract<N, string>,
-    global?: Record<any, any>
-  ): L[N] {
-    return scope.steps[toCamelCase(name)](global);
-  }
-
-  async function run(i: any, c: any) {
+  async function run(i: any, c: any): Promise<any> {
     if (!Object.keys(scope.steps)?.at(-1)) {
       return undefined;
     }
@@ -122,5 +112,5 @@ export function $steps<
     return res.at(-1);
   }
 
-  return { scope, run, add, get } as any;
+  return { get: scope.get, scope, add, run: run as any };
 }

@@ -58,10 +58,13 @@ export class Scope<
     });
   }
 
-  addStep<Name extends string, Value>(
-    name: Name,
+  add<Name extends string, Value>(
+    nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: ($: FormatScope<Global>) => Value | Promise<Value>
   ) {
+    const name =
+      typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
+
     const step = (scope: any) => {
       return fn(scope);
     };
@@ -76,6 +79,13 @@ export class Scope<
       local: this.local,
       steps: { ...this.steps, [toCamelCase(name)]: step }
     });
+  }
+
+  get<Name extends keyof Local>(
+    name: Extract<Name, string>,
+    global?: Record<any, any>
+  ): Local[Name] {
+    return this.steps[toCamelCase(name)](global);
   }
 }
 
