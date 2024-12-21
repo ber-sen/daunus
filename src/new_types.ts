@@ -1,5 +1,6 @@
 import { toCamelCase } from "./new_helpers";
 import { FormatScope, ValidateName } from "./type_helpers";
+import { DaunusCtx } from ".";
 
 export interface Action<R, I = unknown> {
   run: I extends object
@@ -27,6 +28,14 @@ type Steps<R extends Record<string, any>> = {
     };
   };
 };
+
+class LazyGlobal<Value> {
+  public run: (ctx: DaunusCtx) => Value;
+
+  constructor(fn: (ctx: DaunusCtx) => Value) {
+    this.run = fn;
+  }
+}
 
 export class Scope<
   Global extends Record<string, any> = {},
@@ -58,7 +67,30 @@ export class Scope<
     });
   }
 
-  add<Name extends string, Value>(
+  addLazyGlobal<Name extends string, Value>(
+    name: Name,
+    fn: (ctx: DaunusCtx) => Value
+  ) {
+    return new Scope<Global & Record<Name, Value>, Local>({
+      global: { ...this.global, [name]: new LazyGlobal(fn) },
+      local: this.local,
+      steps: this.steps
+    });
+  }
+
+  getGlobal(ctx: DaunusCtx) {
+    return Object.fromEntries(
+      Object.entries(this.global).map(([key, value]) => {
+        if (value instanceof LazyGlobal) {
+          return [key, value.run(ctx)];
+        }
+
+        return [key, value];
+      })
+    );
+  }
+
+  addStep<Name extends string, Value>(
     nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: ($: FormatScope<Global>) => Value | Promise<Value>
   ) {

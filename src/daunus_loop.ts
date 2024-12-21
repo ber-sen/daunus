@@ -7,6 +7,7 @@ import {
   StepOptions,
   resultKey
 } from "./new_types";
+import { getContext } from "./run_helpers";
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultLoopStepFactory<
@@ -89,18 +90,20 @@ function $loopSteps<
       list,
       itemVariable,
       stepsType,
-      $: scope.add(nameOrConfig, fn)
+      $: scope.addStep(nameOrConfig, fn)
     });
   }
 
-  async function run(i: any, c: any) {
+  async function run(...args: any) {
+    const ctx = getContext(...args);
+
     const promises = list.map((value, index) => {
       const rowScope = scope.addGlobal(itemVariable ?? "item", {
         value,
         index
       });
 
-      return $steps({ $: rowScope, stepsType }).run(i, c);
+      return $steps({ $: rowScope, stepsType }).run(ctx);
     });
 
     return await Promise.all(promises);

@@ -7,6 +7,7 @@ import {
   StepOptions,
   resultKey
 } from "./new_types";
+import { getContext } from "./run_helpers";
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultStepFactory<
@@ -75,21 +76,23 @@ export function $steps<
   ): any {
     return $steps({
       stepsType,
-      $: scope.add(nameOrConfig, fn)
+      $: scope.addStep(nameOrConfig, fn)
     });
   }
 
-  async function run(i: any, c: any): Promise<any> {
+  async function run(...args: any): Promise<any> {
+    const ctx = getContext(...args);
+
     if (!Object.keys(scope.steps)?.at(-1)) {
       return undefined;
     }
 
     if (stepsType === "parallel") {
       const promises = Object.values(scope.steps).map(async (fn) => {
-        const res = await fn(scope.global);
+        const res = await fn(scope.getGlobal(ctx));
 
         if (isAction(res)) {
-          return res.run(i, c);
+          return res.run(ctx);
         }
 
         return res;
@@ -105,10 +108,10 @@ export function $steps<
     const res: any[] = [];
 
     for (const [name, fn] of Object.entries(scope.steps)) {
-      let value = await fn(scope.global);
+      let value = await fn(scope.getGlobal(ctx));
 
       if (isAction(value)) {
-        value = await value.run(i, c);
+        value = await value.run(ctx);
       }
 
       scope.global = { ...scope.global, [name]: value };
