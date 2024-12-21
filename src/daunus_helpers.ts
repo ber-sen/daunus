@@ -3,7 +3,6 @@ import { ZodRawShape } from "zod";
 import { z } from "./zod";
 
 import { DEFAULT_ACTIONS } from "./default_actions";
-import { DaunusException } from ".";
 
 export const $ctx = (value?: object): Map<any, any> =>
   new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }));
