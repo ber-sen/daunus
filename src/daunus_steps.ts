@@ -47,19 +47,27 @@ export interface ParallelStepFactory<
 }
 
 export function $steps<
-  T extends StepOptions = {},
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
+  Options extends StepOptions = {},
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
 >(
   params?: {
-    $?: Scope<G, L> | G;
-  } & T
-): T["stepsType"] extends "parallel"
-  ? ParallelStepFactory<G, L>
-  : DefaultStepFactory<G, L> {
+    $?: Scope<Global, Local> | Global;
+  } & Options
+): Options["stepsType"] extends "parallel"
+  ? ParallelStepFactory<Global, Local>
+  : DefaultStepFactory<Global, Local> {
   const { $, stepsType } = params ?? {};
 
-  const scope = $ instanceof Scope ? $ : new Scope<G, L>({ global: $ });
+  const scope =
+    $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ });
+
+  function get<Name extends keyof Local>(
+    name: Extract<Name, string>,
+    global?: Record<any, any>
+  ): Local[Name] {
+    return scope.get(name, global);
+  }
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
@@ -68,7 +76,7 @@ export function $steps<
     return $steps({
       stepsType,
       $: scope.add(nameOrConfig, fn)
-    }) 
+    });
   }
 
   async function run(i: any, c: any): Promise<any> {
@@ -112,5 +120,5 @@ export function $steps<
     return res.at(-1);
   }
 
-  return { get: scope.get, scope, add, run: run as any };
+  return { get, scope, add, run: run as any };
 }

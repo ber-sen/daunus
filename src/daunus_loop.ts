@@ -10,24 +10,24 @@ import {
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultLoopStepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<any, any> = Record<typeof resultKey, undefined>
-> extends StepFactory<G, L>,
-    Action<Promise<Array<L[typeof resultKey]>>, G["input"]> {
+  Global extends Record<string, any> = {},
+  Local extends Record<any, any> = Record<typeof resultKey, undefined>
+> extends StepFactory<Global, Local>,
+    Action<Promise<Array<Local[typeof resultKey]>>, Global["input"]> {
   add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
+    name: ValidateName<N, Local> | StepConfig<N, Local>,
+    fn: ($: FormatScope<Global>) => Promise<T> | T
   ): DefaultLoopStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 
   add<T, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
+    name: ValidateName<N, Local> | StepConfig<N, Local>,
+    fn: ($: FormatScope<Global>) => Promise<T> | T
   ): DefaultLoopStepFactory<
-    Overwrite<G, N> & Record<N, Awaited<T>>,
-    Omit<L, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, N> & Record<N, Awaited<T>>,
+    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
   >;
 }
 
@@ -79,8 +79,7 @@ function $loopSteps<
     > {
   const { $, list, itemVariable, stepsType } = params ?? {};
 
-  const scope =
-    $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ });
+  const { get, scope } = $steps({ $, stepsType });
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
@@ -107,7 +106,7 @@ function $loopSteps<
     return await Promise.all(promises);
   }
 
-  return { get: scope.get, scope, add, run: run as any }
+  return { get, scope, add, run: run as any };
 }
 
 export function $loop<
