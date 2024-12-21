@@ -14,32 +14,36 @@ export interface DefaultStepFactory<
   Local extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<Global, Local>,
     Action<Promise<Local[typeof resultKey]>, Global["input"]> {
-  add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
+  add<Value extends Action<any, any>, Name extends string>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: ($: FormatScope<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
-    Overwrite<Global, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
+    Omit<Local, typeof resultKey> &
+      Record<Name, Value> &
+      Record<typeof resultKey, Value>
   >;
 
-  add<T, N extends string>(
-    name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
+  add<Value, Name extends string>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: ($: FormatScope<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
-    Overwrite<Global, N> & Record<N, Awaited<T>>,
-    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
+    Omit<Local, typeof resultKey> &
+      Record<Name, Value> &
+      Record<typeof resultKey, Value>
   >;
 }
 
 export interface ParallelStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
 > extends StepFactory<Global, Local>,
     Action<FormatScope<Local>, Global["input"]> {
-  add<T, N extends string>(
-    name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
-  ): ParallelStepFactory<Global, Local & Record<N, T>>;
+  add<Value, Name extends string>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: ($: FormatScope<Global>) => Promise<Value> | Value
+  ): ParallelStepFactory<Global, Local & Record<Name, Value>>;
 }
 
 export function $steps<
@@ -64,24 +68,9 @@ export function $steps<
     const name =
       typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
 
-    const result = (scope: any) => {
-      return fn(scope);
-    };
-
-    result.meta = {
-      name,
-      fn
-    };
-
     return $steps({
       stepsType,
-      $: new Scope({
-        global: scope.global,
-        local: {
-          ...scope.local,
-          [toCamelCase(name)]: result
-        }
-      })
+      $: scope.addStep(name, fn)
     });
   }
 
@@ -89,16 +78,16 @@ export function $steps<
     name: Extract<N, string>,
     global?: Record<any, any>
   ): L[N] {
-    return scope.local[toCamelCase(name)](global);
+    return scope.steps[toCamelCase(name)](global);
   }
 
   async function run(i: any, c: any) {
-    if (!Object.keys(scope.local)?.at(-1)) {
+    if (!Object.keys(scope.steps)?.at(-1)) {
       return undefined;
     }
 
     if (stepsType === "parallel") {
-      const promises = Object.values(scope.local).map(async (fn) => {
+      const promises = Object.values(scope.steps).map(async (fn) => {
         const res = await fn(scope.global);
 
         if (isAction(res)) {
@@ -111,13 +100,13 @@ export function $steps<
       const res = await Promise.all(promises);
 
       return Object.fromEntries(
-        Object.keys(scope.local).map((key, index) => [key, res[index]])
+        Object.keys(scope.steps).map((key, index) => [key, res[index]])
       );
     }
 
     const res: any[] = [];
 
-    for (const [name, fn] of Object.entries(scope.local)) {
+    for (const [name, fn] of Object.entries(scope.steps)) {
       let value = await fn(scope.global);
 
       if (isAction(value)) {
@@ -125,6 +114,8 @@ export function $steps<
       }
 
       scope.global = { ...scope.global, [name]: value };
+      scope.local = { ...scope.local, [name]: value };
+
       res.push(value);
     }
 

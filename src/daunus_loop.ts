@@ -87,26 +87,11 @@ function $loopSteps<
     name: N,
     fn: ($: FormatScope<Global>) => T | Promise<T>
   ) {
-    const result = (scope: any) => {
-      return fn(scope);
-    };
-
-    result.meta = {
-      name,
-      fn
-    };
-
     return $loopSteps({
       list,
       itemVariable,
       stepsType,
-      $: new Scope({
-        global: scope.global,
-        local: {
-          ...scope.local,
-          [toCamelCase(name)]: result
-        }
-      })
+      $: scope.addStep(name, fn)
     });
   }
 
@@ -114,7 +99,7 @@ function $loopSteps<
     name: Extract<N, string>,
     global?: Record<any, any>
   ): Local[N] {
-    return scope.local[toCamelCase(name)](global);
+    return scope.steps[toCamelCase(name)](global);
   }
 
   async function run(i: any, c: any) {

@@ -55,7 +55,7 @@ describe("$steps", () => {
     );
 
     function toJson(factory: StepFactory<any, any>) {
-      const steps = Object.values(factory.scope.local).map((value) => {
+      const steps = Object.values(factory.scope.steps).map((value) => {
         const functionValue = value.meta.fn.toString();
 
         const body = functionValue?.split("=>")?.[1]?.trim();

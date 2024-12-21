@@ -1,15 +1,16 @@
+import { toCamelCase } from "./new_helpers";
 import { FormatScope, ValidateName } from "./type_helpers";
 
 export interface Action<R, I = unknown> {
   run: I extends object
     ? (input: I, ctx?: Map<string, any>) => R
-    : (ctx?: Map<string, any>) => R
+    : (ctx?: Map<string, any>) => R;
 }
 
 type WorkflowBackoff = "constant" | "linear" | "exponential";
 
 export interface StepConfig<N, L> {
-  name: ValidateName<N, L>
+  name: ValidateName<N, L>;
   retries?: {
     limit: number;
     delay: string | number;
@@ -18,31 +19,71 @@ export interface StepConfig<N, L> {
   timeout?: string | number;
 }
 
-export class Scope<
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
-> {
-  public global: G;
-  public local: L;
+type Steps<R extends Record<string, any>> = {
+  [K in keyof R]: R[K] & {
+    meta: {
+      name: K;
+      fn: ($: any) => R[K];
+    };
+  };
+};
 
-  constructor({ global, local }: { global?: G; local?: L }) {
-    this.global = global ?? ({} as G);
-    this.local = local ?? ({} as L);
+export class Scope<
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> {
+  public global: Global;
+  public local: Local;
+  public steps: Steps<Local>;
+
+  constructor({
+    global,
+    local,
+    steps
+  }: {
+    global?: Global;
+    local?: Local;
+    steps?: Steps<Local>;
+  }) {
+    this.global = global ?? ({} as Global);
+    this.local = local ?? ({} as Local);
+    this.steps = steps ?? ({} as Steps<Local>);
   }
 
-  addGlobal<N extends string, V>(name: N, value: V) {
-    return new Scope<G & Record<N, V>, L>({
+  addGlobal<Name extends string, Value>(name: Name, value: Value) {
+    return new Scope<Global & Record<Name, Value>, Local>({
       global: { ...this.global, [name]: value },
-      local: this.local
+      local: this.local,
+      steps: this.steps
+    });
+  }
+
+  addStep<Name extends string, Value>(
+    name: Name,
+    fn: ($: FormatScope<Global>) => Value | Promise<Value>
+  ) {
+    const step = (scope: any) => {
+      return fn(scope);
+    };
+
+    step.meta = {
+      name,
+      fn
+    };
+
+    return new Scope<Global, Local & Record<Name, Value>>({
+      global: this.global,
+      local: this.local,
+      steps: { ...this.steps, [toCamelCase(name)]: step }
     });
   }
 }
 
 export interface AbstractStepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
 > {
-  scope: Scope<FormatScope<G>, FormatScope<L>>;
+  scope: Scope<FormatScope<Global>, FormatScope<Local>>;
 
   get(name: string, scope?: Record<any, any>): any;
 
@@ -50,10 +91,10 @@ export interface AbstractStepFactory<
 }
 
 export interface StepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
-> extends AbstractStepFactory<G, L> {
-  get<N extends keyof L>(name: N, scope?: Record<any, any>): L[N];
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> extends AbstractStepFactory<Global, Local> {
+  get<N extends keyof Local>(name: N, scope?: Record<any, any>): Local[N];
 }
 
 export const resultKey: unique symbol = Symbol("resultKey");
