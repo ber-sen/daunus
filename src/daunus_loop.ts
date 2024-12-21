@@ -1,5 +1,5 @@
 import { $steps } from "./daunus_steps";
-import { isAction, toCamelCase } from "./new_helpers";
+import { toCamelCase } from "./new_helpers";
 import {
   Action,
   Scope,
@@ -36,7 +36,7 @@ export interface ParallelLoopStepFactory<
   G extends Record<string, any> = {},
   L extends Record<string, any> = {}
 > extends StepFactory<G, L>,
-    Action<Array<FormatScope<L>>, G["input"]> {
+    Action<Promise<Array<FormatScope<L>>>, G["input"]> {
   add<T, N extends string>(
     name: ValidateName<N, L> | StepConfig<N, L>,
     fn: ($: FormatScope<G>) => Promise<T> | T
@@ -52,7 +52,7 @@ function $loopSteps<
 >(
   params: {
     list: List;
-    itemVariable: itemVariable;
+    itemVariable?: itemVariable;
     $?: Scope<Global, Local> | Global;
   } & Options
 ): Options["stepsType"] extends "parallel"
@@ -78,10 +78,10 @@ function $loopSteps<
         >,
       Local
     > {
+  const { $, list, itemVariable, stepsType } = params ?? {};
+
   const scope =
-    params?.$ instanceof Scope
-      ? params?.$
-      : new Scope<Global, Local>({ global: params?.$ });
+    $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ });
 
   function add<T, N extends string>(
     name: N,
@@ -96,8 +96,10 @@ function $loopSteps<
       fn
     };
 
-    return $steps({
-      stepsType: params?.stepsType,
+    return $loopSteps({
+      list,
+      itemVariable,
+      stepsType,
       $: new Scope({
         global: scope.global,
         local: {
@@ -116,42 +118,16 @@ function $loopSteps<
   }
 
   async function run(i: any, c: any) {
-    if (!Object.keys(scope.local)?.at(-1)) {
-      return undefined;
-    }
-
-    if (params?.stepsType === "parallel") {
-      const promises = Object.values(scope.local).map(async (fn) => {
-        const res = await fn(scope.global);
-
-        if (isAction(res)) {
-          return await res.run(i, c);
-        }
-
-        return res;
+    const promises = list.map((value, index) => {
+      const rowScope = scope.addGlobal(itemVariable ?? "item", {
+        value,
+        index
       });
 
-      const res = await Promise.all(promises);
+      return $steps({ $: rowScope, stepsType }).run(i, c);
+    });
 
-      return Object.fromEntries(
-        Object.keys(scope.local).map((key, index) => [key, res[index]])
-      );
-    }
-
-    const res: any[] = [];
-
-    for (const [name, fn] of Object.entries(scope.local)) {
-      let value = await fn(scope.global);
-
-      if (isAction(value)) {
-        value = await value.run(i, c);
-      }
-
-      scope.global = { ...scope.global, [name]: value };
-      res.push(value);
-    }
-
-    return res.at(-1);
+    return await Promise.all(promises);
   }
 
   return { scope, run, add, get } as any;
@@ -161,20 +137,10 @@ export function $loop<
   List extends Array<any> | readonly any[],
   itemVariable extends string = "item",
   Global extends Record<string, any> = {}
->({
-  itemVariable = "item" as itemVariable,
-  $,
-  list
-}: {
-  list: List;
-  itemVariable?: itemVariable;
-  $?: Global;
-}) {
+>(params: { list: List; itemVariable?: itemVariable; $?: Global }) {
   function forEachItem<Options extends StepOptions>(options?: Options) {
     return $loopSteps({
-      list,
-      itemVariable,
-      $,
+      ...params,
       stepsType: options?.stepsType as Options["stepsType"]
     });
   }

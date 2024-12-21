@@ -53,10 +53,9 @@ export function $steps<
 ): T["stepsType"] extends "parallel"
   ? ParallelStepFactory<G, L>
   : DefaultStepFactory<G, L> {
-  const scope =
-  params?.$ instanceof Scope
-      ? params?.$
-      : new Scope<G, L>({ global: params?.$ });
+  const { $, stepsType } = params ?? {};
+
+  const scope = $ instanceof Scope ? $ : new Scope<G, L>({ global: $ });
 
   function add<T>(
     nameOrConfig: string | StepConfig<any, any>,
@@ -75,7 +74,7 @@ export function $steps<
     };
 
     return $steps({
-      stepsType: params?.stepsType,
+      stepsType,
       $: new Scope({
         global: scope.global,
         local: {
@@ -98,7 +97,7 @@ export function $steps<
       return undefined;
     }
 
-    if (params?.stepsType === "parallel") {
+    if (stepsType === "parallel") {
       const promises = Object.values(scope.local).map(async (fn) => {
         const res = await fn(scope.global);
 
