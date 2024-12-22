@@ -83,7 +83,7 @@ describe("$route", () => {
     });
   });
 
-  it("show work with loop and condition", async () => {
+  it("should work with loop and condition", async () => {
     const input = $input({ names: z.array(z.number()) });
 
     const useCase = $useCase({ input }).handle(($) =>
@@ -111,5 +111,21 @@ describe("$route", () => {
     type data = Expect<Equal<A, (string | number)[]>>;
 
     expect(data).toEqual([1, "2 is even", 3]);
+  });
+
+  it("should allow script version", async () => {
+    const input = $input({ names: z.array(z.number()) });
+
+    const useCase = $useCase({ input }).handle(($) => 
+      $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
+    );
+
+    const data = await useCase.run({ names: [1, 2, 3] });
+
+    type A = typeof data;
+
+    type data = Expect<Equal<A, (string | number)[]>>;
+
+    expect(data).toEqual(true);
   });
 });
