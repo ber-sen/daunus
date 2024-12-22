@@ -126,6 +126,6 @@ describe("$route", () => {
 
     type data = Expect<Equal<A, (string | number)[]>>;
 
-    expect(data).toEqual(true);
+    expect(data).toEqual([1, "2 is even", 3]);
   });
 });
