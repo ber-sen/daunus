@@ -5,7 +5,8 @@ import { $if, $input, $loop } from ".";
 
 describe("$route", () => {
   it("show work without input", async () => {
-    const useCase = $useCase().handle(() => "Hello world");
+    const useCase = $useCase() //
+      .handle(() => "Hello world");
 
     const data = await useCase.run();
 
@@ -19,7 +20,8 @@ describe("$route", () => {
   it("show work for single step", async () => {
     const input = $input({ name: z.string() });
 
-    const useCase = $useCase({ input }).handle(($) => $.input.name === "lorem");
+    const useCase = $useCase({ input }) //
+      .handle(($) => $.input.name === "lorem");
 
     const data = await useCase.run({ name: "lorem" });
 
@@ -86,23 +88,24 @@ describe("$route", () => {
   it("should work with loop and condition", async () => {
     const input = $input({ names: z.array(z.number()) });
 
-    const useCase = $useCase({ input }).handle(($) =>
-      $loop({ list: $.input.names, $ })
-        .forEachItem()
+    const useCase = $useCase({ input }) //
+      .handle(($) =>
+        $loop({ list: $.input.names, $ })
+          .forEachItem()
 
-        .add("module", ($) => $.item.value % 2)
+          .add("module", ($) => $.item.value % 2)
 
-        .add("check", ($) =>
-          $if({ condition: $.module === 0, $ })
-            .isTrue()
+          .add("check", ($) =>
+            $if({ condition: $.module === 0, $ })
+              .isTrue()
 
-            .add("even", ($) => `${$.item.value} is even`)
+              .add("even", ($) => `${$.item.value} is even`)
 
-            .isFalse()
+              .isFalse()
 
-            .add("odd", ($) => $.item.value)
-        )
-    );
+              .add("odd", ($) => $.item.value)
+          )
+      );
 
     const data = await useCase.run({ names: [1, 2, 3] });
 
@@ -116,9 +119,10 @@ describe("$route", () => {
   it("should allow script version", async () => {
     const input = $input({ names: z.array(z.number()) });
 
-    const useCase = $useCase({ input }).handle(($) => 
-      $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
-    );
+    const useCase = $useCase({ input }) //
+      .handle(($) =>
+        $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
+      );
 
     const data = await useCase.run({ names: [1, 2, 3] });
 
