@@ -7,7 +7,7 @@ import {
   StepOptions,
   resultKey
 } from "./new_types";
-import { createRun, getContext } from "./run_helpers";
+import { createRun } from "./run_helpers";
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultStepFactory<
@@ -80,9 +80,7 @@ export function $steps<
     });
   }
 
-  const run = createRun<Global["input"]>(async (...args) => {
-    const ctx = getContext(...args);
-
+  const run = createRun<Global["input"]>(async (ctx) => {
     if (!Object.keys(scope.steps)?.at(-1)) {
       return undefined;
     }

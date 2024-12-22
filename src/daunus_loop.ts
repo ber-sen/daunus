@@ -7,7 +7,7 @@ import {
   StepOptions,
   resultKey
 } from "./new_types";
-import { createRun, getContext } from "./run_helpers";
+import { createRun } from "./run_helpers";
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultLoopStepFactory<
@@ -33,14 +33,14 @@ export interface DefaultLoopStepFactory<
 }
 
 export interface ParallelLoopStepFactory<
-  G extends Record<string, any> = {},
-  L extends Record<string, any> = {}
-> extends StepFactory<G, L>,
-    Action<Promise<Array<FormatScope<L>>>, G["input"]> {
-  add<T, N extends string>(
-    name: ValidateName<N, L> | StepConfig<N, L>,
-    fn: ($: FormatScope<G>) => Promise<T> | T
-  ): ParallelLoopStepFactory<G, L & Record<N, T>>;
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> extends StepFactory<Global, Local>,
+    Action<Promise<Array<FormatScope<Local>>>, Global["input"]> {
+  add<Name extends string, Value>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: ($: FormatScope<Global>) => Promise<Value> | Value
+  ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>>;
 }
 
 function $loopSteps<
@@ -80,7 +80,15 @@ function $loopSteps<
     > {
   const { $, list, itemVariable, stepsType } = params ?? {};
 
-  const { get, scope } = $steps({ $, stepsType });
+  const scope =
+    $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ });
+
+  function get<Name extends keyof Local>(
+    name: Extract<Name, string>,
+    global?: Record<any, any>
+  ): Local[Name] {
+    return scope.get(name, global);
+  }
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
@@ -94,16 +102,14 @@ function $loopSteps<
     });
   }
 
-  const run = createRun<Global["input"]>(async (...args) => {
-    const ctx = getContext(...args);
-
+  const run = createRun<Global["input"]>(async (ctx) => {
     const promises = list.map((value, index) => {
       const rowScope = scope.addGlobal(itemVariable ?? "item", {
         value,
         index
       });
 
-      return $steps({ $: rowScope, stepsType }).run(ctx as any);
+      return $steps({ $: rowScope, stepsType }).run(ctx)
     });
 
     return await Promise.all(promises);

@@ -1,4 +1,5 @@
 import { $ctx } from "./daunus_helpers";
+import { DaunusCtx } from ".";
 
 export const getContext = <I>(
   ...args: [input: I, ctx?: Map<string, any>] | [ctx?: Map<string, any>]
@@ -27,11 +28,17 @@ export const getContext = <I>(
 };
 
 export const createRun = <I>(
-  fn: (
-    ...args: [ctx?: Map<string, any>] | [input: I, ctx?: Map<string, any>]
-  ) => any
+  fn: <T>(ctx: DaunusCtx) => any
 ): I extends object
   ? (input: I, ctx?: Map<string, any>) => Promise<any>
   : (ctx?: Map<string, any>) => Promise<any> => {
-  return fn as any;
+  const enhancedFn = (
+    ...args: [ctx?: Map<string, any>] | [input: I, ctx?: Map<string, any>]
+  ) => {
+    const ctx = getContext(...args);
+
+    return fn(ctx);
+  };
+
+  return enhancedFn as any;
 };
