@@ -16,20 +16,19 @@ type ConditionParams<P, T, C> =
 
 const condition = $action(
   { type: "condition", skipParse: true },
-  ({ parseParams, ctx }) =>
+  ({ ctx }) =>
     async <P, T, C>({
       if: $if,
       do: $then,
       else: $else
     }: ConditionParams<P, T, C>) => {
-      const condition = await parseParams(ctx, await resolveAction(ctx, $if));
+      const condition = await resolveAction(ctx, $if);
 
       if (!isException(condition) && condition) {
-        return (await parseParams(ctx, await resolveAction(ctx, $then))) as P;
+        return resolveAction(ctx, $then);
       }
 
-      return ((await parseParams(ctx, await resolveAction(ctx, $else))) ??
-        null) as T;
+      return await resolveAction(ctx, $else);
     }
 );
 

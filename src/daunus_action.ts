@@ -22,18 +22,15 @@ export const $action =
       name?: string;
       paramsSchema?: z.Schema<P>;
       skipParse?: boolean;
-      parseResponse?: boolean;
       skipPlaceholders?: boolean;
       envSchema?: z.Schema<E>;
       meta?: object;
     },
     fn: ({
       ctx,
-      parseParams,
       env
     }: {
       ctx: DaunusCtx;
-      parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
       env: E;
     }) => (params: P) => Promise<O> | O
   ) =>
@@ -68,17 +65,9 @@ export const $action =
               ? args.envSchema.parse(ctx.get(".env"))
               : (z.object({}) as E);
 
-            const value = await fn({ ctx, parseParams, env })(parsedParams!);
+            const value = await fn({ ctx, env })(parsedParams!);
 
-            if (!args.parseResponse) {
-              return value;
-            }
-
-            const parseValue = await parseParams(ctx, value, {
-              skipPlaceholders: true
-            });
-
-            return parseValue;
+            return value;
           };
 
           const value = parseResult<O>((await runFn()) as O);

@@ -18,16 +18,13 @@ const loop = $action(
        * Action
        * @ref https://taskwish.vercel.app/schema/action.json
        */
-      action: DaunusWorkflowAction<T> | DaunusActionWithOptions<T, unknown, {}>;
+      action: DaunusWorkflowAction<T>;
       itemName?: string;
     }) => {
       const res = list.map(async (value, index) => {
         ctx.set(itemName, { value, index });
 
-        const res =
-          "run" in action
-            ? await action.run(ctx)
-            : await runAction(ctx, action);
+        const res = await runAction(ctx, action);
 
         if (res.exception) {
           return res.exception;
