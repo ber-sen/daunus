@@ -71,11 +71,9 @@ export class Scope<
     name: Name,
     fn: (ctx: DaunusCtx) => Value
   ) {
-    return new Scope<Global & Record<Name, Value>, Local>({
-      global: { ...this.global, [name]: new LazyGlobal(fn) },
-      local: this.local,
-      steps: this.steps
-    });
+    this.global = { ...this.global, [name]: new LazyGlobal(fn) };
+
+    return this as Scope<Global & Record<Name, Value>, Local>;
   }
 
   getGlobal(ctx: DaunusCtx) {
@@ -91,11 +89,9 @@ export class Scope<
   }
 
   addLocal<Name extends string, Value>(name: Name, value: Value) {
-    return new Scope<Global, Local & Record<Name, Value>>({
-      global: this.global,
-      local: { ...this.local, [name]: value },
-      steps: this.steps
-    });
+    this.local = { ...this.local, [name]: value };
+
+    return this as Scope<Global, Local & Record<Name, Value>>;
   }
 
   addStep<Name extends string, Value>(
@@ -114,18 +110,20 @@ export class Scope<
       fn
     };
 
-    return new Scope<Global, Local & Record<Name, Value>>({
-      global: this.global,
-      local: this.local,
-      steps: { ...this.steps, [toCamelCase(name)]: step }
-    });
+    this.steps = { ...this.steps, [toCamelCase(name)]: step };
+
+    return this as Scope<Global, Local & Record<Name, Value>>;
   }
 
   get<Name extends keyof Local>(
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return this.steps[toCamelCase(name)](global);
+    if (this.steps[toCamelCase(name)]) {
+      return this.steps[toCamelCase(name)](global);
+    }
+
+    return this.local[toCamelCase(name)];
   }
 }
 

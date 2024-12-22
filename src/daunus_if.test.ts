@@ -14,7 +14,22 @@ describe("$if", () => {
     expect(data).toEqual(true);
   });
 
-  xit("should provide expected types for return", async () => {
+  it("should return value of condition", async () => {
+    const condition = $if({ condition: true })
+      .isTrue()
+
+      .add("first step", ($) => $.condition);
+
+    const data = await condition.run();
+
+    type A = typeof data;
+
+    type data = Expect<Equal<A, boolean>>;
+
+    expect(data).toEqual(true);
+  });
+
+  it("should provide expected types for return", async () => {
     const condition = $if({ condition: false })
       .isTrue()
 
@@ -43,7 +58,7 @@ describe("$if", () => {
     expect(data).toEqual({ foo: "bar" });
   });
 
-  xit("should return the scope of true case", () => {
+  it("should return the scope of true case", () => {
     const condition = $if({ condition: Math.random() > 0.5 })
       .isTrue()
 
@@ -71,7 +86,7 @@ describe("$if", () => {
     >;
   });
 
-  xit("should return the scope of false case", () => {
+  it("should return the scope of false case", () => {
     const condition = $if({ condition: Math.random() > 0.5 })
       .isTrue()
 

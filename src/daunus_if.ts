@@ -1,3 +1,4 @@
+import { $steps } from "./daunus_steps";
 import {
   AbstractStepFactory,
   Action,
@@ -141,45 +142,82 @@ export function $if<
   condition,
   key,
   $,
-  scopes: prevScopes
+  scope: prevScope
 }: {
   condition: Condition;
   $?: Global;
   key?: Key;
-  scopes?: Scope<any, any>;
+  scope?: Scope<any, any>;
 }): MainConditionStepFactory<Condition, Global, Local> {
-  const scopes =
-    prevScopes ??
+  const scope =
+    prevScope ??
     new Scope({
       local: {
-        true: new Scope({ global: $ }),
-        false: new Scope({ global: $ })
+        true: {
+          scope: new Scope({ global: $ })
+        },
+        false: {
+          scope: new Scope({ global: $ })
+        }
       }
     });
-
-  if (key) {
-    scopes.addLocal(key, $ instanceof Scope ? $ : new Scope({ global: $ }));
-  }
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scopes.get(name, global);
+    return scope.get(name, global);
   }
 
-  const run = createRun<Global["input"]>(() => {
+  function isTrue(): any {
+    return $if({
+      condition,
+      key: "true",
+      scope
+    });
+  }
+
+  function isFalse(): any {
+    return $if({
+      condition,
+      key: "false",
+      scope
+    });
+  }
+
+  function add(
+    nameOrConfig: string | StepConfig<any, any>,
+    fn: ($: any) => any
+  ): any {
+    scope.get(key ?? "").scope.addStep(nameOrConfig, fn);
+
+    return $if({
+      key,
+      condition,
+      scope
+    });
+  }
+
+  const run = createRun<Global["input"]>((ctx) => {
     const noSteps =
-      Object.values(scopes.local).filter(
-        (item: any) => Object.values(item.steps).length === 0
+      Object.values(scope.local).filter(
+        (item: any) => Object.values(item.scope.steps).length === 0
       ).length === 0;
 
     if (!noSteps) {
       return condition;
     }
 
-    return null;
+    if (condition) {
+      return $steps({
+        $: scope.get("true").scope.addGlobal("condition", condition)
+      }).run(ctx);
+    }
+
+    return $steps({
+      $: scope.get("false").scope.addGlobal("condition", condition)
+    }).run(ctx);
   });
 
-  return { run, get } as any
+  return { run, get, add, isTrue, isFalse, scope };
 }
