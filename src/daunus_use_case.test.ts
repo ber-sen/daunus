@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { $useCase } from "./daunus_use_case";
 import { Expect, Equal } from "./type_helpers";
-import { $input } from ".";
+import { $if, $input, $loop } from ".";
 
 describe("$route", () => {
   it("show work without input", async () => {
@@ -81,5 +81,31 @@ describe("$route", () => {
       },
       secondStep: 42
     });
+  });
+
+  it("show work with loop and condition", async () => {
+    const input = $input({ names: z.array(z.number()) });
+
+    const useCase = $useCase({ input }).handle(($) =>
+      $loop({ list: $.input.names, $ })
+        .forEachItem()
+
+        .add("module", ($) => $.item.value % 2)
+
+        .add("check", ($) =>
+          $if({ condition: $.module === 0, $ })
+            .isTrue()
+
+            .add("even", ($) => `${$.item.value} is even`)
+
+            .isFalse()
+
+            .add("odd", ($) => `${$.item.value} is odd`)
+        )
+    );
+
+    const data = await useCase.run({ names: [1, 2, 3] });
+
+    expect(data).toEqual(["1 is odd", "2 is even", "3 is odd"]);
   });
 });
