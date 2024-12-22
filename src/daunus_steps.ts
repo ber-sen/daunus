@@ -14,7 +14,12 @@ export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<Global, Local>,
-    Action<Promise<Local[typeof resultKey]>, Global["input"]> {
+    Action<
+      Local[typeof resultKey] extends Action<any, any>
+        ? Promise<Awaited<ReturnType<Local[typeof resultKey]["run"]>>>
+        : Promise<Local[typeof resultKey]>,
+      Global["input"]
+    > {
   add<Value extends Action<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: ($: FormatScope<Global>) => Promise<Value> | Value

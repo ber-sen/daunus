@@ -100,12 +100,16 @@ describe("$route", () => {
 
             .isFalse()
 
-            .add("odd", ($) => `${$.item.value} is odd`)
+            .add("odd", ($) => $.item.value)
         )
     );
 
     const data = await useCase.run({ names: [1, 2, 3] });
 
-    expect(data).toEqual(["1 is odd", "2 is even", "3 is odd"]);
+    type A = typeof data;
+
+    type data = Expect<Equal<A, (string | number)[]>>;
+
+    expect(data).toEqual([1, "2 is even", 3]);
   });
 });

@@ -14,7 +14,12 @@ export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<Global, Local>,
-    Action<Promise<Array<Local[typeof resultKey]>>, Global["input"]> {
+    Action<
+      Local[typeof resultKey] extends Action<any, any>
+        ? Promise<Array<Awaited<ReturnType<Local[typeof resultKey]["run"]>>>>
+        : Promise<Array<Local[typeof resultKey]>>,
+      Global["input"]
+    > {
   add<T extends Action<any, any>, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
     fn: ($: FormatScope<Global>) => Promise<T> | T
@@ -109,7 +114,7 @@ function $loopSteps<
         index
       });
 
-      return $steps({ $: rowScope, stepsType }).run(ctx)
+      return $steps({ $: rowScope, stepsType }).run(ctx);
     });
 
     return await Promise.all(promises);
