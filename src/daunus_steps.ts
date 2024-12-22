@@ -7,7 +7,7 @@ import {
   StepOptions,
   resultKey
 } from "./new_types";
-import { getContext } from "./run_helpers";
+import { createRun, getContext } from "./run_helpers";
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export interface DefaultStepFactory<
@@ -40,7 +40,7 @@ export interface ParallelStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 > extends StepFactory<Global, Local>,
-    Action<FormatScope<Local>, Global["input"]> {
+    Action<Promise<FormatScope<Local>>, Global["input"]> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: ($: FormatScope<Global>) => Promise<Value> | Value
@@ -80,7 +80,7 @@ export function $steps<
     });
   }
 
-  async function run(...args: any): Promise<any> {
+  const run = createRun<Global["input"]>(async (...args) => {
     const ctx = getContext(...args);
 
     if (!Object.keys(scope.steps)?.at(-1)) {
@@ -121,7 +121,7 @@ export function $steps<
     }
 
     return res.at(-1);
-  }
+  });
 
-  return { get, scope, add, run: run as any };
+  return { get, scope, add, run };
 }

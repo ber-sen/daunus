@@ -48,4 +48,38 @@ describe("$route", () => {
 
     expect(data).toEqual("Luna");
   });
+
+  it("should work with parallel steps", async () => {
+    const input = $input({ city: z.string() });
+
+    const route = $useCase({ input })
+      .steps({ stepsType: "parallel" })
+
+      .add("first step", ($) => $.input)
+
+      .add("second step", () => 42);
+
+    const data = await route.run({ city: "London" });
+
+    type A = typeof data;
+
+    type data = Expect<
+      Equal<
+        A,
+        {
+          firstStep: {
+            city: string;
+          };
+          secondStep: number;
+        }
+      >
+    >;
+
+    expect(data).toEqual({
+      firstStep: {
+        city: "London"
+      },
+      secondStep: 42
+    });
+  });
 });
