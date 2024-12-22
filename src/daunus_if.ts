@@ -1,6 +1,7 @@
 import {
   AbstractStepFactory,
   Action,
+  Scope,
   StepConfig,
   StepFactory,
   resultKey
@@ -29,7 +30,7 @@ type ConditionDefaultCaseStepFactoryWithout<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = {},
-  CurrentKey extends "true" | "false" | "" = "",
+  CurrentKey extends Key = "",
   Without extends string = ""
 > = Omit<
   ConditionDefaultCaseStepFactory<
@@ -46,7 +47,7 @@ interface ConditionDefaultCaseStepFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {},
-  CurrentKey extends "true" | "false" | "" = "",
+  CurrentKey extends Key = "",
   Without extends string = ""
 > extends AbstractStepFactory<Global, Local>,
     Action<
@@ -110,9 +111,11 @@ type ExcludeTruthy<Condition> = Exclude<Condition, Truthy<Condition>>;
 
 type GlobalWithoutFalcy<Global, Condition> = Omit<Global, "condition"> &
   Record<"condition", ExcludeFalsy<Condition>>;
-  
+
 type GlobalWithoutTruthy<Global, Condition> = Omit<Global, "condition"> &
   Record<"condition", ExcludeTruthy<Condition>>;
+
+type Key = "true" | "false" | "";
 
 type MainConditionStepFactory<
   Condition,
@@ -131,10 +134,26 @@ type MainConditionStepFactory<
 
 export function $if<C, G extends Record<string, any> = {}>({
   condition,
-  $
+  key,
+  $,
+  scopes: prevScopes
 }: {
   condition: C;
   $?: G;
+  key?: Key;
+  scopes?: {
+    true: any;
+    false: any;
+  };
 }) {
+  const scopes = prevScopes ?? {
+    true: new Scope({ global: $ }),
+    false: new Scope({ global: $ })
+  };
+
+  if (key) {
+    scopes[key] = $ instanceof Scope ? $ : new Scope({ global: $ });
+  }
+
   return {} as MainConditionStepFactory<C, G>;
 }
