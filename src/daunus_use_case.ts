@@ -3,19 +3,19 @@ import { $steps } from "./daunus_steps";
 import { Scope, StepOptions } from "./new_types";
 import { DaunusCtx } from ".";
 
-export function $useCase<T>(options?: { input?: z.ZodType<T> }) {
+export function $useCase<Input>(options?: { input?: z.ZodType<Input> }) {
   const scope = new Scope({}).addLazyGlobal("input", (ctx: DaunusCtx) =>
-    options?.input?.parse(ctx.get("input")) as T
+    options?.input?.parse(ctx.get("input")) as Input
   );
 
-  function steps<T extends StepOptions>(options?: T) {
+  function steps<Options extends StepOptions>(options?: Options) {
     return $steps({
       $: scope,
-      stepsType: options?.stepsType as T["stepsType"]
+      stepsType: options?.stepsType as Options["stepsType"]
     });
   }
 
-  function handle<Z>(fn: ($: typeof scope.global) => Z) {
+  function handle<Value>(fn: ($: typeof scope.global) => Value) {
     return $steps({
       $: scope
     }).add("handle", fn);
