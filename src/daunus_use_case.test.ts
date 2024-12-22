@@ -90,13 +90,13 @@ describe("$route", () => {
 
     const useCase = $useCase({ input }) //
       .handle(($) =>
-        $loop({ list: $.input.names, $ })
+        $loop({ $, list: $.input.names })
           .forEachItem()
 
           .add("module", ($) => $.item.value % 2)
 
           .add("check", ($) =>
-            $if({ condition: $.module === 0, $ })
+            $if({ $, condition: $.module === 0 })
               .isTrue()
 
               .add("even", ($) => `${$.item.value} is even`)
