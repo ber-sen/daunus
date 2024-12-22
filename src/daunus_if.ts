@@ -29,10 +29,16 @@ type ConditionDefaultCaseStepFactoryWithout<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = {},
-  ScopeKey extends string = "",
+  CurrentKey extends "true" | "false" | "" = "",
   Without extends string = ""
 > = Omit<
-  ConditionDefaultCaseStepFactory<Condition, Global, Local, ScopeKey, Without>,
+  ConditionDefaultCaseStepFactory<
+    Condition,
+    Global,
+    Local,
+    CurrentKey,
+    Without
+  >,
   Without
 >;
 
@@ -40,8 +46,8 @@ interface ConditionDefaultCaseStepFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {},
-  K extends string = "",
-  E extends string = ""
+  CurrentKey extends "true" | "false" | "" = "",
+  Without extends string = ""
 > extends AbstractStepFactory<Global, Local>,
     Action<
       Promise<ExtractValuesByKey<Local, typeof resultKey>>,
@@ -49,7 +55,7 @@ interface ConditionDefaultCaseStepFactory<
     > {
   isTrue(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Omit<Global, "condition"> & Record<"condition", ExcludeFalsy<Condition>>,
+    GlobalWithoutFalcy<Global, Condition>,
     Local,
     "true",
     "isTrue"
@@ -57,7 +63,7 @@ interface ConditionDefaultCaseStepFactory<
 
   isFalse(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Omit<Global, "condition"> & Record<"condition", ExcludeTruthy<Condition>>,
+    GlobalWithoutTruthy<Global, Condition>,
     Local,
     "false",
     "isFalse"
@@ -69,11 +75,11 @@ interface ConditionDefaultCaseStepFactory<
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    DeepOmitByPath<Local, [K, typeof resultKey]> &
-      Record<K, Record<N, T>> &
-      Record<K, Record<typeof resultKey, T>>,
-    K,
-    E
+    DeepOmitByPath<Local, [CurrentKey, typeof resultKey]> &
+      Record<CurrentKey, Record<N, T>> &
+      Record<CurrentKey, Record<typeof resultKey, T>>,
+    CurrentKey,
+    Without
   >;
 
   add<T, N extends string>(
@@ -82,11 +88,11 @@ interface ConditionDefaultCaseStepFactory<
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, N> & Record<N, Awaited<T>>,
-    DeepOmitByPath<Local, [K, typeof resultKey]> &
-      Record<K, Record<N, T>> &
-      Record<K, Record<typeof resultKey, T>>,
-    K,
-    E
+    DeepOmitByPath<Local, [CurrentKey, typeof resultKey]> &
+      Record<CurrentKey, Record<N, T>> &
+      Record<CurrentKey, Record<typeof resultKey, T>>,
+    CurrentKey,
+    Without
   >;
 
   get<N extends keyof Local>(
@@ -101,6 +107,12 @@ type Truthy<T> = Exclude<T, Falsy>;
 type ExcludeFalsy<Condition> = Exclude<Condition, Falsy>;
 
 type ExcludeTruthy<Condition> = Exclude<Condition, Truthy<Condition>>;
+
+type GlobalWithoutFalcy<Global, Condition> = Omit<Global, "condition"> &
+  Record<"condition", ExcludeFalsy<Condition>>;
+  
+type GlobalWithoutTruthy<Global, Condition> = Omit<Global, "condition"> &
+  Record<"condition", ExcludeTruthy<Condition>>;
 
 type MainConditionStepFactory<
   Condition,
