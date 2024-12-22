@@ -6,6 +6,7 @@ import {
   StepFactory,
   resultKey
 } from "./new_types";
+import { createRun } from "./run_helpers";
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
 
 export type ExtractValuesByKey<T, K extends keyof any> =
@@ -119,7 +120,13 @@ type Key = "true" | "false" | "";
 
 type MainConditionStepFactory<
   Condition,
-  G extends Record<string, any> = {},
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> = ConditionDefaultCaseStepFactory<Condition, Global, Local, "", "add">;
+
+export function $if<
+  Condition,
+  Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<
     "true",
     Record<"condition", Exclude<Condition, Falsy>> &
@@ -130,30 +137,49 @@ type MainConditionStepFactory<
       Record<"condition", ExcludeTruthy<Condition>> &
         Record<typeof resultKey, ExcludeTruthy<Condition>>
     >
-> = ConditionDefaultCaseStepFactory<Condition, G, Local, "", "add">;
-
-export function $if<C, G extends Record<string, any> = {}>({
+>({
   condition,
   key,
   $,
   scopes: prevScopes
 }: {
-  condition: C;
-  $?: G;
+  condition: Condition;
+  $?: Global;
   key?: Key;
-  scopes?: {
-    true: any;
-    false: any;
-  };
-}) {
-  const scopes = prevScopes ?? {
-    true: new Scope({ global: $ }),
-    false: new Scope({ global: $ })
-  };
+  scopes?: Scope<any, any>;
+}): MainConditionStepFactory<Condition, Global, Local> {
+  const scopes =
+    prevScopes ??
+    new Scope({
+      local: {
+        true: new Scope({ global: $ }),
+        false: new Scope({ global: $ })
+      }
+    });
 
   if (key) {
-    scopes[key] = $ instanceof Scope ? $ : new Scope({ global: $ });
+    scopes.addLocal(key, $ instanceof Scope ? $ : new Scope({ global: $ }));
   }
 
-  return {} as MainConditionStepFactory<C, G>;
+  function get<Name extends keyof Local>(
+    name: Extract<Name, string>,
+    global?: Record<any, any>
+  ): Local[Name] {
+    return scopes.get(name, global);
+  }
+
+  const run = createRun<Global["input"]>(() => {
+    const noSteps =
+      Object.values(scopes.local).filter(
+        (item: any) => Object.values(item.steps).length === 0
+      ).length === 0;
+
+    if (!noSteps) {
+      return condition;
+    }
+
+    return null;
+  });
+
+  return { run, get } as any
 }

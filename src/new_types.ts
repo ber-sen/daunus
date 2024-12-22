@@ -90,6 +90,14 @@ export class Scope<
     );
   }
 
+  addLocal<Name extends string, Value>(name: Name, value: Value) {
+    return new Scope<Global, Local & Record<Name, Value>>({
+      global: this.global,
+      local: { ...this.local, [name]: value },
+      steps: this.steps
+    });
+  }
+
   addStep<Name extends string, Value>(
     nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: ($: FormatScope<Global>) => Value | Promise<Value>

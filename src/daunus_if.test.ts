@@ -2,8 +2,20 @@ import { $if } from "./daunus_if";
 import { Expect, Equal } from "./type_helpers";
 
 describe("$if", () => {
-  xit("should provide expected types for return", () => {
-    const condition = $if({ condition: Math.random() > 0.5 })
+  it("should work without steps", async () => {
+    const condition = $if({ condition: true });
+
+    const data = await condition.run();
+
+    type A = typeof data;
+
+    type data = Expect<Equal<A, boolean>>;
+
+    expect(data).toEqual(true);
+  });
+
+  xit("should provide expected types for return", async () => {
+    const condition = $if({ condition: false })
       .isTrue()
 
       .add("first step", ($) => $.condition)
@@ -14,21 +26,21 @@ describe("$if", () => {
 
       .add("false step", () => ({ foo: "bar" }));
 
-    const data = condition.run();
+    const data = await condition.run();
 
     type A = typeof data;
 
     type data = Expect<
       Equal<
         A,
-        Promise<
-          | true
-          | {
-              foo: string;
-            }
-        >
+        | true
+        | {
+            foo: string;
+          }
       >
     >;
+
+    expect(data).toEqual({ foo: "bar" });
   });
 
   xit("should return the scope of true case", () => {
