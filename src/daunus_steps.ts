@@ -1,3 +1,4 @@
+import type { MainConditionStepFactory } from "./daunus_if";
 import { isAction } from "./new_helpers";
 import {
   Action,
@@ -22,7 +23,14 @@ export interface DefaultStepFactory<
     > {
   add<Value extends Action<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: ($: FormatScope<Global>) => Promise<Value> | Value
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): DefaultStepFactory<
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
     Omit<Local, typeof resultKey> &
@@ -32,7 +40,14 @@ export interface DefaultStepFactory<
 
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: ($: FormatScope<Global>) => Promise<Value> | Value
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): DefaultStepFactory<
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
     Omit<Local, typeof resultKey> &
@@ -77,7 +92,7 @@ export function $steps<
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: ($: any) => any
+    fn: ($: any, helpers: any) => any
   ): any {
     return $steps({
       stepsType,

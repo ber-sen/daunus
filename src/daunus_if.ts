@@ -119,7 +119,7 @@ type GlobalWithoutTruthy<Global, Condition> = Omit<Global, "condition"> &
 
 type Key = "true" | "false" | "";
 
-type MainConditionStepFactory<
+export type MainConditionStepFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}

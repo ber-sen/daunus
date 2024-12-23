@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { $useCase } from "./daunus_use_case";
 import { Expect, Equal } from "./type_helpers";
-import { $if, $input, $loop } from ".";
+import { $input, $loop } from ".";
 
 describe("$route", () => {
   it("show work without input", async () => {
@@ -95,8 +95,8 @@ describe("$route", () => {
 
           .add("module", ($) => $.item.value % 2)
 
-          .add("check", ($) =>
-            $if({ $, condition: $.module === 0 })
+          .add("check", ($, { $if }) =>
+            $if({ condition: $.module === 0 })
               .isTrue()
 
               .add("even", ($) => `${$.item.value} is even`)

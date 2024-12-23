@@ -1,3 +1,4 @@
+import type { MainConditionStepFactory } from "./daunus_if";
 import { $steps } from "./daunus_steps";
 import {
   Action,
@@ -20,20 +21,41 @@ export interface DefaultLoopStepFactory<
         : Promise<Array<Local[typeof resultKey]>>,
       Global["input"]
     > {
-  add<T extends Action<any, any>, N extends string>(
+  add<Value extends Action<any, any>, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $loop: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
-    Overwrite<Global, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
-    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, N> & Record<N, Awaited<ReturnType<Value["run"]>>>,
+    Omit<Local, typeof resultKey> &
+      Record<N, Value> &
+      Record<typeof resultKey, Value>
   >;
 
-  add<T, N extends string>(
+  add<Value, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
-    Overwrite<Global, N> & Record<N, Awaited<T>>,
-    Omit<Local, typeof resultKey> & Record<N, T> & Record<typeof resultKey, T>
+    Overwrite<Global, N> & Record<N, Awaited<Value>>,
+    Omit<Local, typeof resultKey> &
+      Record<N, Value> &
+      Record<typeof resultKey, Value>
   >;
 }
 
@@ -44,7 +66,14 @@ export interface ParallelLoopStepFactory<
     Action<Promise<Array<FormatScope<Local>>>, Global["input"]> {
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: ($: FormatScope<Global>) => Promise<Value> | Value
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>>;
 }
 
@@ -97,7 +126,7 @@ function $loopSteps<
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: ($: any) => any
+    fn: ($: any, helpers: any) => any
   ): any {
     return $loopSteps({
       list,

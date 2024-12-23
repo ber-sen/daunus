@@ -1,6 +1,6 @@
 import { toCamelCase } from "./new_helpers";
 import { FormatScope, ValidateName } from "./type_helpers";
-import { DaunusCtx } from ".";
+import { $if, DaunusCtx } from ".";
 
 export interface Action<R, I = unknown> {
   run: I extends object
@@ -96,13 +96,15 @@ export class Scope<
 
   addStep<Name extends string, Value>(
     nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: ($: FormatScope<Global>) => Value | Promise<Value>
+    fn: ($: FormatScope<Global>, options: any) => Value | Promise<Value>
   ) {
     const name =
       typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
 
     const step = (scope: any) => {
-      return fn(scope);
+      return fn(scope, {
+        $if: (options: any) => $if({ $: scope, ...options })
+      });
     };
 
     step.meta = {
