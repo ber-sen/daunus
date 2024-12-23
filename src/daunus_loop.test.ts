@@ -6,9 +6,9 @@ describe("$loop", () => {
     const loop = $loop({ list: [1, 2, 3] })
       .forEachItem()
 
-      .add("first step", ($) => $.item)
+      .add("first step", ({ $ }) => $.item)
 
-      .add("second step", ($) => $.firstStep.value);
+      .add("second step", ({ $ }) => $.firstStep.value);
 
     const data = await loop.run();
 
@@ -23,7 +23,7 @@ describe("$loop", () => {
     const loop = $loop({ list: [1, 2], itemVariable: "i" })
       .forEachItem()
 
-      .add("first step", ($) => $.i.value);
+      .add("first step", ({ $ }) => $.i.value);
 
     const data = await loop.run();
 
@@ -38,7 +38,7 @@ describe("$loop", () => {
     const loop = $loop({ list: [1, 2, 3] })
       .forEachItem({ stepsType: "parallel" })
 
-      .add("first step", ($) => $.item)
+      .add("first step", ({ $ }) => $.item)
 
       .add("second step", () => 42);
 

@@ -1,10 +1,12 @@
-import { $steps } from "./daunus_steps";
+import { type LoopFactory } from "./daunus_loop";
+import { $steps, type StepsFactory } from "./daunus_steps";
 import {
   AbstractStepFactory,
   Action,
   Scope,
   StepConfig,
   StepFactory,
+  StepOptions,
   resultKey
 } from "./new_types";
 import { createRun } from "./run_helpers";
@@ -74,14 +76,22 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value extends Action<any, any>>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (
-      $: FormatScope<Global>,
-      helpers: {
-        $if: <Condition>(options: {
-          condition: Condition;
-        }) => MainConditionStepFactory<Condition, Global>;
-      }
-    ) => Promise<Value> | Value
+    fn: (helpers: {
+      $: FormatScope<Global>;
+      $if: <Condition>(options: {
+        condition: Condition;
+      }) => ConditionFactory<Condition, Global>;
+      $steps: <Options extends StepOptions>(
+        options: Options
+      ) => StepsFactory<Options, Global>;
+      $loop: <
+        List extends Array<any> | readonly any[],
+        ItemVariable extends string = "item"
+      >(options: {
+        list: List;
+        itemVariable?: ItemVariable;
+      }) => LoopFactory<List, ItemVariable, Global>;
+    }) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
@@ -94,14 +104,22 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (
-      $: FormatScope<Global>,
-      helpers: {
-        $if: <Condition>(options: {
-          condition: Condition;
-        }) => MainConditionStepFactory<Condition, Global>;
-      }
-    ) => Promise<Value> | Value
+    fn: (helpers: {
+      $: FormatScope<Global>;
+      $if: <Condition>(options: {
+        condition: Condition;
+      }) => ConditionFactory<Condition, Global>;
+      $steps: <Options extends StepOptions>(
+        options: Options
+      ) => StepsFactory<Options, Global>;
+      $loop: <
+        List extends Array<any> | readonly any[],
+        ItemVariable extends string = "item"
+      >(options: {
+        list: List;
+        itemVariable?: ItemVariable;
+      }) => LoopFactory<List, ItemVariable, Global>;
+    }) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
@@ -133,7 +151,7 @@ type GlobalWithoutTruthy<Global, Condition> = Omit<Global, "condition"> &
 
 type Key = "true" | "false" | "";
 
-export type MainConditionStepFactory<
+export type ConditionFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
@@ -162,7 +180,7 @@ export function $if<
   $?: Global;
   key?: Key;
   scope?: Scope<any, any>;
-}): MainConditionStepFactory<Condition, Global, Local> {
+}): ConditionFactory<Condition, Global, Local> {
   const scope =
     prevScope ??
     new Scope({
@@ -201,7 +219,7 @@ export function $if<
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: ($: any, helpers: any) => any
+    fn: (helpers: any) => any
   ): any {
     scope.get(key ?? "").scope.addStep(nameOrConfig, fn);
 

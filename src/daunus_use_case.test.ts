@@ -21,7 +21,7 @@ describe("$route", () => {
     const input = $input({ name: z.string() });
 
     const useCase = $useCase({ input }) //
-      .handle(($) => $.input.name === "lorem");
+      .handle(({ $ }) => $.input.name === "lorem");
 
     const data = await useCase.run({ name: "lorem" });
 
@@ -38,9 +38,9 @@ describe("$route", () => {
     const route = $useCase({ input })
       .steps()
 
-      .add("first step", ($) => $.input)
+      .add("first step", ({ $ }) => $.input)
 
-      .add("second step", ($) => $.firstStep.name);
+      .add("second step", ({ $ }) => $.firstStep.name);
 
     const data = await route.run({ name: "Luna" });
 
@@ -57,7 +57,7 @@ describe("$route", () => {
     const route = $useCase({ input })
       .steps({ stepsType: "parallel" })
 
-      .add("first step", ($) => $.input)
+      .add("first step", ({ $ }) => $.input)
 
       .add("second step", () => 42);
 
@@ -89,21 +89,21 @@ describe("$route", () => {
     const input = $input({ names: z.array(z.number()) });
 
     const useCase = $useCase({ input }) //
-      .handle(($) =>
-        $loop({ $, list: $.input.names })
+      .handle(({ $loop, $ }) =>
+        $loop({ list: $.input.names })
           .forEachItem()
 
-          .add("module", ($) => $.item.value % 2)
+          .add("module", ({ $ }) => $.item.value % 2)
 
-          .add("check", ($, { $if }) =>
+          .add("check", ({ $if, $ }) =>
             $if({ condition: $.module === 0 })
               .isTrue()
 
-              .add("even", ($) => `${$.item.value} is even`)
+              .add("even", ({ $ }) => `${$.item.value} is even`)
 
               .isFalse()
 
-              .add("odd", ($) => $.item.value)
+              .add("odd", ({ $ }) => $.item.value)
           )
       );
 
@@ -120,7 +120,7 @@ describe("$route", () => {
     const input = $input({ names: z.array(z.number()) });
 
     const useCase = $useCase({ input }) //
-      .handle(($) =>
+      .handle(({ $ }) =>
         $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
       );
 

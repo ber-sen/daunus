@@ -96,15 +96,13 @@ export class Scope<
 
   addStep<Name extends string, Value>(
     nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: ($: FormatScope<Global>, options: any) => Value | Promise<Value>
+    fn: (helpers: any) => Value | Promise<Value>
   ) {
     const name =
       typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
 
-    const step = (scope: any) => {
-      return fn(scope, {
-        $if: (options: any) => $if({ $: scope, ...options })
-      });
+    const step = (helpers: any) => {
+      return fn(helpers);
     };
 
     step.meta = {

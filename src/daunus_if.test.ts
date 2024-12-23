@@ -18,7 +18,7 @@ describe("$if", () => {
     const condition = $if({ condition: true })
       .isTrue()
 
-      .add("first step", ($) => $.condition);
+      .add("first step", ({ $ }) => $.condition);
 
     const data = await condition.run();
 
@@ -33,9 +33,9 @@ describe("$if", () => {
     const condition = $if({ condition: false })
       .isTrue()
 
-      .add("first step", ($) => $.condition)
+      .add("first step", ({ $ }) => $.condition)
 
-      .add("second step", ($) => $.firstStep)
+      .add("second step", ({ $ }) => $.firstStep)
 
       .isFalse()
 
@@ -64,7 +64,7 @@ describe("$if", () => {
 
       .add("first step", () => Promise.resolve([1, 2, 3]))
 
-      .add("second step", ($) => $.condition)
+      .add("second step", ({ $ }) => $.condition)
 
       .isFalse()
 
@@ -92,7 +92,7 @@ describe("$if", () => {
 
       .add("first step", () => Promise.resolve([1, 2, 3]))
 
-      .add("second step", ($) => $.condition)
+      .add("second step", ({ $ }) => $.condition)
 
       .isFalse()
 
