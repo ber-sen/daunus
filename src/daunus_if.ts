@@ -72,28 +72,42 @@ interface ConditionDefaultCaseStepFactory<
     "isFalse"
   >;
 
-  add<T extends Action<any, any>, N extends string>(
-    name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
+  add<Name extends string, Value extends Action<any, any>>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Overwrite<Global, N> & Record<N, Awaited<ReturnType<T["run"]>>>,
+    Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
     DeepOmitByPath<Local, [CurrentKey, typeof resultKey]> &
-      Record<CurrentKey, Record<N, T>> &
-      Record<CurrentKey, Record<typeof resultKey, T>>,
+      Record<CurrentKey, Record<Name, Value>> &
+      Record<CurrentKey, Record<typeof resultKey, Value>>,
     CurrentKey,
     Without
   >;
 
-  add<T, N extends string>(
-    name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: ($: FormatScope<Global>) => Promise<T> | T
+  add<Name extends string, Value>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: (
+      $: FormatScope<Global>,
+      helpers: {
+        $if: <Condition>(options: {
+          condition: Condition;
+        }) => MainConditionStepFactory<Condition, Global>;
+      }
+    ) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Overwrite<Global, N> & Record<N, Awaited<T>>,
+    Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
     DeepOmitByPath<Local, [CurrentKey, typeof resultKey]> &
-      Record<CurrentKey, Record<N, T>> &
-      Record<CurrentKey, Record<typeof resultKey, T>>,
+      Record<CurrentKey, Record<Name, Value>> &
+      Record<CurrentKey, Record<typeof resultKey, Value>>,
     CurrentKey,
     Without
   >;
@@ -187,7 +201,7 @@ export function $if<
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: ($: any) => any
+    fn: ($: any, helpers: any) => any
   ): any {
     scope.get(key ?? "").scope.addStep(nameOrConfig, fn);
 

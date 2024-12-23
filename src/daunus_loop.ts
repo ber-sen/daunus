@@ -26,9 +26,6 @@ export interface DefaultLoopStepFactory<
     fn: (
       $: FormatScope<Global>,
       helpers: {
-        $loop: <Condition>(options: {
-          condition: Condition;
-        }) => MainConditionStepFactory<Condition, Global>;
         $if: <Condition>(options: {
           condition: Condition;
         }) => MainConditionStepFactory<Condition, Global>;
