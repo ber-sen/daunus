@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { $useCase } from "./daunus_use_case"
 import { Expect, Equal } from "./type_helpers"
-import { $input, $loop } from "."
+import { $input } from "."
 
 describe("$route", () => {
   it("show work without input", async () => {
