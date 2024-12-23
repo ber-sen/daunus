@@ -5,7 +5,7 @@ import { $input } from "."
 
 describe("$route", () => {
   it("show work without input", async () => {
-    const useCase = $useCase() //
+    const useCase = $useCase()
       .handle(() => "Hello world")
 
     const data = await useCase.run()
@@ -20,7 +20,7 @@ describe("$route", () => {
   it("show work for single step", async () => {
     const input = $input({ name: z.string() })
 
-    const useCase = $useCase({ input }) //
+    const useCase = $useCase({ input })
       .handle(({ $ }) => $.input.name === "lorem")
 
     const data = await useCase.run({ name: "lorem" })
@@ -88,19 +88,17 @@ describe("$route", () => {
   it("should work with loop and condition", async () => {
     const input = $input({ names: z.array(z.number()) })
 
-    const useCase = $useCase({ input }) //
+    const useCase = $useCase({ input })
       .handle(({ $loop, $ }) =>
-        // 
         $loop({ list: $.input.names })
-          //
+
           .forEachItem()
 
           .add("module", ({ $ }) => $.item.value % 2)
 
           .add("check", ({ $if, $ }) =>
-            //
             $if({ condition: $.module === 0 })
-              //
+
               .isTrue()
 
               .add("even", ({ $ }) => `${$.item.value} is even`)

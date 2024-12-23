@@ -1,4 +1,6 @@
 {
   "trailingComma": "none",
-  "semi": false
+  "semi": false,
+  "alignObjectProperties": "none",
+  "plugins": ["@yikes2000/prettier-plugin-merge-extras"]
 }
