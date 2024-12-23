@@ -1,8 +1,8 @@
-import { DaunusException } from "../..";
-import { $ctx, $delay, $stream } from "../../daunus_helpers";
-import { $query } from "../../daunus_query";
+import { DaunusException } from "../.."
+import { $ctx, $delay, $stream } from "../../daunus_helpers"
+import { $query } from "../../daunus_query"
 
-import workflow from "./index";
+import workflow from "./index"
 
 describe("workflow", () => {
   it("should work for basic example", async () => {
@@ -24,12 +24,12 @@ describe("workflow", () => {
           ]
         }
       }
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual("Foo Bar");
-  });
+    expect(res.data).toStrictEqual("Foo Bar")
+  })
 
   it("should be able to pass exeptions", async () => {
     const action = workflow({
@@ -62,13 +62,13 @@ describe("workflow", () => {
           ]
         }
       }
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual(undefined);
-    expect(res.exception).toStrictEqual(new DaunusException({ status: 403 }));
-  });
+    expect(res.data).toStrictEqual(undefined)
+    expect(res.exception).toStrictEqual(new DaunusException({ status: 403 }))
+  })
 
   it("should work with streams", async () => {
     const action = workflow({
@@ -81,10 +81,10 @@ describe("workflow", () => {
               name: "file",
               type: ["struct"],
               params: $stream(async function* () {
-                yield { name: "Alice", age: 30 };
-                yield { name: "Bob", age: 25 };
-                await $delay(100);
-                yield { name: "Charlie", age: 35 };
+                yield { name: "Alice", age: 30 }
+                yield { name: "Bob", age: 25 }
+                await $delay(100)
+                yield { name: "Charlie", age: 35 }
               })
             },
             {
@@ -103,14 +103,14 @@ describe("workflow", () => {
           ]
         }
       }
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
     expect(res.data).toStrictEqual(
       "Foo\nname,age\r\nAlice,30\r\nBob,25\r\nCharlie,35"
-    );
-  });
+    )
+  })
 
   it("should work with condition", async () => {
     const action = workflow({
@@ -147,12 +147,12 @@ describe("workflow", () => {
           ]
         }
       }
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual({ success: true });
-  });
+    expect(res.data).toStrictEqual({ success: true })
+  })
 
   it("should work with loops", async () => {
     const action = workflow({
@@ -181,10 +181,10 @@ describe("workflow", () => {
           ]
         }
       }
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual([1, 2]);
-  });
-});
+    expect(res.data).toStrictEqual([1, 2])
+  })
+})

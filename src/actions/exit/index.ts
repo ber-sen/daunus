@@ -1,5 +1,5 @@
-import { $action } from "../../daunus_action";
-import { DaunusException } from "../../types";
+import { $action } from "../../daunus_action"
+import { DaunusException } from "../../types"
 
 const exit = $action(
   {
@@ -7,11 +7,11 @@ const exit = $action(
   },
   () =>
     <S extends number = 500, D = undefined, P = undefined>(params: {
-      status?: S;
-      data?: D;
-      paths?: P;
+      status?: S
+      data?: D
+      paths?: P
     }) =>
       new DaunusException(params)
-);
+)
 
-export default exit;
+export default exit

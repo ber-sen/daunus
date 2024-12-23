@@ -1,5 +1,5 @@
-import type { ConditionFactory } from "./daunus_if";
-import { $steps, type StepsFactory } from "./daunus_steps";
+import type { ConditionFactory } from "./daunus_if"
+import { $steps, type StepsFactory } from "./daunus_steps"
 import {
   Action,
   Scope,
@@ -7,9 +7,9 @@ import {
   StepFactory,
   StepOptions,
   resultKey
-} from "./new_types";
-import { createRun } from "./run_helpers";
-import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
+} from "./new_types"
+import { createRun } from "./run_helpers"
+import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},
@@ -24,52 +24,52 @@ export interface DefaultLoopStepFactory<
   add<Value extends Action<any, any>, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
     fn: (helpers: {
-      $: FormatScope<Global>;
+      $: FormatScope<Global>
       $if: <Condition>(options: {
-        condition: Condition;
-      }) => ConditionFactory<Condition, Global>;
+        condition: Condition
+      }) => ConditionFactory<Condition, Global>
       $steps: <Options extends StepOptions>(
         options: Options
-      ) => StepsFactory<Options, Global>;
+      ) => StepsFactory<Options, Global>
       $loop: <
         List extends Array<any> | readonly any[],
         ItemVariable extends string = "item"
       >(options: {
-        list: List;
+        list: List
         itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>;
+      }) => LoopFactory<List, ItemVariable, Global>
     }) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
     Overwrite<Global, N> & Record<N, Awaited<ReturnType<Value["run"]>>>,
     Omit<Local, typeof resultKey> &
       Record<N, Value> &
       Record<typeof resultKey, Value>
-  >;
+  >
 
   add<Value, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
     fn: (helpers: {
-      $: FormatScope<Global>;
+      $: FormatScope<Global>
       $if: <Condition>(options: {
-        condition: Condition;
-      }) => ConditionFactory<Condition, Global>;
+        condition: Condition
+      }) => ConditionFactory<Condition, Global>
       $steps: <Options extends StepOptions>(
         options: Options
-      ) => StepsFactory<Options, Global>;
+      ) => StepsFactory<Options, Global>
       $loop: <
         List extends Array<any> | readonly any[],
         ItemVariable extends string = "item"
       >(options: {
-        list: List;
-        itemVariable?: ItemVariable;
-      }) => LoopFactory<List, ItemVariable, Global>;
+        list: List
+        itemVariable?: ItemVariable
+      }) => LoopFactory<List, ItemVariable, Global>
     }) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
     Overwrite<Global, N> & Record<N, Awaited<Value>>,
     Omit<Local, typeof resultKey> &
       Record<N, Value> &
       Record<typeof resultKey, Value>
-  >;
+  >
 }
 
 export interface ParallelLoopStepFactory<
@@ -80,22 +80,22 @@ export interface ParallelLoopStepFactory<
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (helpers: {
-      $: FormatScope<Global>;
+      $: FormatScope<Global>
       $if: <Condition>(options: {
-        condition: Condition;
-      }) => ConditionFactory<Condition, Global>;
+        condition: Condition
+      }) => ConditionFactory<Condition, Global>
       $steps: <Options extends StepOptions>(
         options: Options
-      ) => StepsFactory<Options, Global>;
+      ) => StepsFactory<Options, Global>
       $loop: <
         List extends Array<any> | readonly any[],
         ItemVariable extends string = "item"
       >(options: {
-        list: List;
-        itemVariable?: ItemVariable;
-      }) => LoopFactory<List, ItemVariable, Global>;
+        list: List
+        itemVariable?: ItemVariable
+      }) => LoopFactory<List, ItemVariable, Global>
     }) => Promise<Value> | Value
-  ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>>;
+  ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>>
 }
 
 function $loopSteps<
@@ -106,9 +106,9 @@ function $loopSteps<
   Local extends Record<string, any> = {}
 >(
   params: {
-    list: List;
-    itemVariable?: itemVariable;
-    $?: Scope<Global, Local> | Global;
+    list: List
+    itemVariable?: itemVariable
+    $?: Scope<Global, Local> | Global
   } & Options
 ): Options["stepsType"] extends "parallel"
   ? ParallelLoopStepFactory<
@@ -116,8 +116,8 @@ function $loopSteps<
         Record<
           itemVariable,
           {
-            value: List[number];
-            index: number;
+            value: List[number]
+            index: number
           }
         >,
       Local
@@ -127,22 +127,21 @@ function $loopSteps<
         Record<
           itemVariable,
           {
-            value: List[number];
-            index: number;
+            value: List[number]
+            index: number
           }
         >,
       Local
     > {
-  const { $, list, itemVariable, stepsType } = params ?? {};
+  const { $, list, itemVariable, stepsType } = params ?? {}
 
-  const scope =
-    $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ });
+  const scope = $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scope.get(name, global);
+    return scope.get(name, global)
   }
 
   function add(
@@ -154,7 +153,7 @@ function $loopSteps<
       itemVariable,
       stepsType,
       $: scope.addStep(nameOrConfig, fn)
-    });
+    })
   }
 
   const run = createRun<Global["input"]>(async (ctx) => {
@@ -162,22 +161,22 @@ function $loopSteps<
       const rowScope = scope.addGlobal(itemVariable ?? "item", {
         value,
         index
-      });
+      })
 
-      return $steps({ $: rowScope, stepsType }).run(ctx);
-    });
+      return $steps({ $: rowScope, stepsType }).run(ctx)
+    })
 
-    return await Promise.all(promises);
-  });
+    return await Promise.all(promises)
+  })
 
-  return { get, scope, add, run };
+  return { get, scope, add, run }
 }
 
 export type LoopFactory<
   List extends Array<any> | readonly any[],
   ItemVariable extends string = "item",
   Global extends Record<string, any> = {}
-> = ReturnType<typeof $loop<List, ItemVariable, Global>>;
+> = ReturnType<typeof $loop<List, ItemVariable, Global>>
 
 export function $loop<
   List extends Array<any> | readonly any[],
@@ -188,8 +187,8 @@ export function $loop<
     return $loopSteps({
       ...params,
       stepsType: options?.stepsType as Options["stepsType"]
-    });
+    })
   }
 
-  return { forEachItem };
+  return { forEachItem }
 }

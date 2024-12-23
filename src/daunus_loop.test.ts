@@ -1,5 +1,5 @@
-import { $loop } from "./daunus_loop";
-import { Expect, Equal } from "./type_helpers";
+import { $loop } from "./daunus_loop"
+import { Expect, Equal } from "./type_helpers"
 
 describe("$loop", () => {
   it("should provide expected types for return", async () => {
@@ -8,31 +8,31 @@ describe("$loop", () => {
 
       .add("first step", ({ $ }) => $.item)
 
-      .add("second step", ({ $ }) => $.firstStep.value);
+      .add("second step", ({ $ }) => $.firstStep.value)
 
-    const data = await loop.run();
+    const data = await loop.run()
 
-    type A = typeof data;
+    type A = typeof data
 
-    type data = Expect<Equal<A, number[]>>;
+    type data = Expect<Equal<A, number[]>>
 
-    expect(data).toEqual([1, 2, 3]);
-  });
+    expect(data).toEqual([1, 2, 3])
+  })
 
   it("should work with different item variable", async () => {
     const loop = $loop({ list: [1, 2], itemVariable: "i" })
       .forEachItem()
 
-      .add("first step", ({ $ }) => $.i.value);
+      .add("first step", ({ $ }) => $.i.value)
 
-    const data = await loop.run();
+    const data = await loop.run()
 
-    type A = typeof data;
+    type A = typeof data
 
-    type data = Expect<Equal<A, number[]>>;
+    type data = Expect<Equal<A, number[]>>
 
-    expect(data).toEqual([1, 2]);
-  });
+    expect(data).toEqual([1, 2])
+  })
 
   it("should work with parallel", async () => {
     const loop = $loop({ list: [1, 2, 3] })
@@ -40,24 +40,24 @@ describe("$loop", () => {
 
       .add("first step", ({ $ }) => $.item)
 
-      .add("second step", () => 42);
+      .add("second step", () => 42)
 
-    const data = await loop.run();
+    const data = await loop.run()
 
-    type A = typeof data;
+    type A = typeof data
 
     type data = Expect<
       Equal<
         A,
         Array<{
           firstStep: {
-            value: number;
-            index: number;
-          };
-          secondStep: number;
+            value: number
+            index: number
+          }
+          secondStep: number
         }>
       >
-    >;
+    >
 
     expect(data).toEqual([
       {
@@ -81,6 +81,6 @@ describe("$loop", () => {
         },
         secondStep: 42
       }
-    ]);
-  });
-});
+    ])
+  })
+})

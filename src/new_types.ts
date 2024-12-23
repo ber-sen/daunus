@@ -1,39 +1,39 @@
-import { toCamelCase } from "./new_helpers";
-import { FormatScope, ValidateName } from "./type_helpers";
-import { $if, DaunusCtx } from ".";
+import { toCamelCase } from "./new_helpers"
+import { FormatScope, ValidateName } from "./type_helpers"
+import { $if, DaunusCtx } from "."
 
 export interface Action<R, I = unknown> {
   run: I extends object
     ? (input: I, ctx?: Map<string, any>) => R
-    : (ctx?: Map<string, any>) => R;
+    : (ctx?: Map<string, any>) => R
 }
 
-type WorkflowBackoff = "constant" | "linear" | "exponential";
+type WorkflowBackoff = "constant" | "linear" | "exponential"
 
 export interface StepConfig<N, L> {
-  name: ValidateName<N, L>;
+  name: ValidateName<N, L>
   retries?: {
-    limit: number;
-    delay: string | number;
-    backoff?: WorkflowBackoff;
-  };
-  timeout?: string | number;
+    limit: number
+    delay: string | number
+    backoff?: WorkflowBackoff
+  }
+  timeout?: string | number
 }
 
 type Steps<R extends Record<string, any>> = {
   [K in keyof R]: R[K] & {
     meta: {
-      name: K;
-      fn: ($: any) => R[K];
-    };
-  };
-};
+      name: K
+      fn: ($: any) => R[K]
+    }
+  }
+}
 
 class LazyGlobal<Value> {
-  public run: (ctx: DaunusCtx) => Value;
+  public run: (ctx: DaunusCtx) => Value
 
   constructor(fn: (ctx: DaunusCtx) => Value) {
-    this.run = fn;
+    this.run = fn
   }
 }
 
@@ -41,22 +41,22 @@ export class Scope<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 > {
-  public global: Global;
-  public local: Local;
-  public steps: Steps<Local>;
+  public global: Global
+  public local: Local
+  public steps: Steps<Local>
 
   constructor({
     global,
     local,
     steps
   }: {
-    global?: Global;
-    local?: Local;
-    steps?: Steps<Local>;
+    global?: Global
+    local?: Local
+    steps?: Steps<Local>
   }) {
-    this.global = global ?? ({} as Global);
-    this.local = local ?? ({} as Local);
-    this.steps = steps ?? ({} as Steps<Local>);
+    this.global = global ?? ({} as Global)
+    this.local = local ?? ({} as Local)
+    this.steps = steps ?? ({} as Steps<Local>)
   }
 
   addGlobal<Name extends string, Value>(name: Name, value: Value) {
@@ -64,34 +64,34 @@ export class Scope<
       global: { ...this.global, [name]: value },
       local: this.local,
       steps: this.steps
-    });
+    })
   }
 
   addLazyGlobal<Name extends string, Value>(
     name: Name,
     fn: (ctx: DaunusCtx) => Value
   ) {
-    this.global = { ...this.global, [name]: new LazyGlobal(fn) };
+    this.global = { ...this.global, [name]: new LazyGlobal(fn) }
 
-    return this as Scope<Global & Record<Name, Value>, Local>;
+    return this as Scope<Global & Record<Name, Value>, Local>
   }
 
   getGlobal(ctx: DaunusCtx) {
     return Object.fromEntries(
       Object.entries(this.global).map(([key, value]) => {
         if (value instanceof LazyGlobal) {
-          return [key, value.run(ctx)];
+          return [key, value.run(ctx)]
         }
 
-        return [key, value];
+        return [key, value]
       })
-    );
+    )
   }
 
   addLocal<Name extends string, Value>(name: Name, value: Value) {
-    this.local = { ...this.local, [name]: value };
+    this.local = { ...this.local, [name]: value }
 
-    return this as Scope<Global, Local & Record<Name, Value>>;
+    return this as Scope<Global, Local & Record<Name, Value>>
   }
 
   addStep<Name extends string, Value>(
@@ -99,20 +99,20 @@ export class Scope<
     fn: (helpers: any) => Value | Promise<Value>
   ) {
     const name =
-      typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name;
+      typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name
 
     const step = (helpers: any) => {
-      return fn(helpers);
-    };
+      return fn(helpers)
+    }
 
     step.meta = {
       name,
       fn
-    };
+    }
 
-    this.steps = { ...this.steps, [toCamelCase(name)]: step };
+    this.steps = { ...this.steps, [toCamelCase(name)]: step }
 
-    return this as Scope<Global, Local & Record<Name, Value>>;
+    return this as Scope<Global, Local & Record<Name, Value>>
   }
 
   get<Name extends keyof Local>(
@@ -120,10 +120,10 @@ export class Scope<
     global?: Record<any, any>
   ): Local[Name] {
     if (this.steps[toCamelCase(name)]) {
-      return this.steps[toCamelCase(name)](global);
+      return this.steps[toCamelCase(name)](global)
     }
 
-    return this.local[toCamelCase(name)];
+    return this.local[toCamelCase(name)]
   }
 }
 
@@ -131,22 +131,22 @@ export interface AbstractStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 > {
-  scope: Scope<FormatScope<Global>, FormatScope<Local>>;
+  scope: Scope<FormatScope<Global>, FormatScope<Local>>
 
-  get(name: string, scope?: Record<any, any>): any;
+  get(name: string, scope?: Record<any, any>): any
 
-  add(...params: any): any;
+  add(...params: any): any
 }
 
 export interface StepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 > extends AbstractStepFactory<Global, Local> {
-  get<N extends keyof Local>(name: N, scope?: Record<any, any>): Local[N];
+  get<N extends keyof Local>(name: N, scope?: Record<any, any>): Local[N]
 }
 
-export const resultKey: unique symbol = Symbol("resultKey");
+export const resultKey: unique symbol = Symbol("resultKey")
 
 export interface StepOptions {
-  stepsType?: "default" | "parallel" | "serial";
+  stepsType?: "default" | "parallel" | "serial"
 }

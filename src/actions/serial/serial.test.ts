@@ -1,7 +1,7 @@
-import { $query } from "../..";
-import { $ctx } from "../../daunus_helpers";
+import { $query } from "../.."
+import { $ctx } from "../../daunus_helpers"
 
-import serial from "./index";
+import serial from "./index"
 
 describe("serial", () => {
   it("should work with two actions", async () => {
@@ -20,12 +20,12 @@ describe("serial", () => {
           params: "test"
         }
       ]
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual({ test: { foo: "bar" }, test2: "test" });
-  });
+    expect(res.data).toStrictEqual({ test: { foo: "bar" }, test2: "test" })
+  })
 
   it("should work with with nested serial", async () => {
     const action = serial({
@@ -54,15 +54,15 @@ describe("serial", () => {
           params: $query(($) => $.test.nested1)
         }
       ]
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
     expect(res.data).toStrictEqual({
       test: { nested1: "action.1.1", nested2: "action.1.2" },
       test2: "action.1.1"
-    });
-  });
+    })
+  })
 
   it("should be able to access return of the first action from the second", async () => {
     const action = serial({
@@ -80,13 +80,13 @@ describe("serial", () => {
           params: $query(($) => $.test)
         }
       ]
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
     expect(res.data).toStrictEqual({
       test: { foo: "bar" },
       test2: { foo: "bar" }
-    });
-  });
-});
+    })
+  })
+})

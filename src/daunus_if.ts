@@ -1,5 +1,5 @@
-import { type LoopFactory } from "./daunus_loop";
-import { $steps, type StepsFactory } from "./daunus_steps";
+import { type LoopFactory } from "./daunus_loop"
+import { $steps, type StepsFactory } from "./daunus_steps"
 import {
   AbstractStepFactory,
   Action,
@@ -8,16 +8,16 @@ import {
   StepFactory,
   StepOptions,
   resultKey
-} from "./new_types";
-import { createRun } from "./run_helpers";
-import { ValidateName, FormatScope, Overwrite } from "./type_helpers";
+} from "./new_types"
+import { createRun } from "./run_helpers"
+import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
     ? T extends Record<K, infer R>
       ? R
       : { [P in keyof T]: ExtractValuesByKey<T[P], K> }[keyof T]
-    : never;
+    : never
 
 export type DeepOmitByPath<
   T,
@@ -28,7 +28,7 @@ export type DeepOmitByPath<
       ? { [K in keyof T]: K extends Key ? DeepOmitByPath<T[K], Rest> : T[K] }
       : Omit<T, Key>
     : T
-  : T;
+  : T
 
 type ConditionDefaultCaseStepFactoryWithout<
   Condition,
@@ -45,7 +45,7 @@ type ConditionDefaultCaseStepFactoryWithout<
     Without
   >,
   Without
->;
+>
 
 interface ConditionDefaultCaseStepFactory<
   Condition,
@@ -64,7 +64,7 @@ interface ConditionDefaultCaseStepFactory<
     Local,
     "true",
     "isTrue"
-  >;
+  >
 
   isFalse(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
@@ -72,25 +72,25 @@ interface ConditionDefaultCaseStepFactory<
     Local,
     "false",
     "isFalse"
-  >;
+  >
 
   add<Name extends string, Value extends Action<any, any>>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (helpers: {
-      $: FormatScope<Global>;
+      $: FormatScope<Global>
       $if: <Condition>(options: {
-        condition: Condition;
-      }) => ConditionFactory<Condition, Global>;
+        condition: Condition
+      }) => ConditionFactory<Condition, Global>
       $steps: <Options extends StepOptions>(
         options: Options
-      ) => StepsFactory<Options, Global>;
+      ) => StepsFactory<Options, Global>
       $loop: <
         List extends Array<any> | readonly any[],
         ItemVariable extends string = "item"
       >(options: {
-        list: List;
-        itemVariable?: ItemVariable;
-      }) => LoopFactory<List, ItemVariable, Global>;
+        list: List
+        itemVariable?: ItemVariable
+      }) => LoopFactory<List, ItemVariable, Global>
     }) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
@@ -100,25 +100,25 @@ interface ConditionDefaultCaseStepFactory<
       Record<CurrentKey, Record<typeof resultKey, Value>>,
     CurrentKey,
     Without
-  >;
+  >
 
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (helpers: {
-      $: FormatScope<Global>;
+      $: FormatScope<Global>
       $if: <Condition>(options: {
-        condition: Condition;
-      }) => ConditionFactory<Condition, Global>;
+        condition: Condition
+      }) => ConditionFactory<Condition, Global>
       $steps: <Options extends StepOptions>(
         options: Options
-      ) => StepsFactory<Options, Global>;
+      ) => StepsFactory<Options, Global>
       $loop: <
         List extends Array<any> | readonly any[],
         ItemVariable extends string = "item"
       >(options: {
-        list: List;
-        itemVariable?: ItemVariable;
-      }) => LoopFactory<List, ItemVariable, Global>;
+        list: List
+        itemVariable?: ItemVariable
+      }) => LoopFactory<List, ItemVariable, Global>
     }) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
@@ -128,34 +128,34 @@ interface ConditionDefaultCaseStepFactory<
       Record<CurrentKey, Record<typeof resultKey, Value>>,
     CurrentKey,
     Without
-  >;
+  >
 
   get<N extends keyof Local>(
     name: N,
     scope?: Record<any, any>
-  ): StepFactory<Global, Local[N]>;
+  ): StepFactory<Global, Local[N]>
 }
-type Falsy = false | 0 | -0 | 0n | "" | null | undefined | typeof Number.NaN;
+type Falsy = false | 0 | -0 | 0n | "" | null | undefined | typeof Number.NaN
 
-type Truthy<T> = Exclude<T, Falsy>;
+type Truthy<T> = Exclude<T, Falsy>
 
-type ExcludeFalsy<Condition> = Exclude<Condition, Falsy>;
+type ExcludeFalsy<Condition> = Exclude<Condition, Falsy>
 
-type ExcludeTruthy<Condition> = Exclude<Condition, Truthy<Condition>>;
+type ExcludeTruthy<Condition> = Exclude<Condition, Truthy<Condition>>
 
 type GlobalWithoutFalcy<Global, Condition> = Omit<Global, "condition"> &
-  Record<"condition", ExcludeFalsy<Condition>>;
+  Record<"condition", ExcludeFalsy<Condition>>
 
 type GlobalWithoutTruthy<Global, Condition> = Omit<Global, "condition"> &
-  Record<"condition", ExcludeTruthy<Condition>>;
+  Record<"condition", ExcludeTruthy<Condition>>
 
-type Key = "true" | "false" | "";
+type Key = "true" | "false" | ""
 
 export type ConditionFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
-> = ConditionDefaultCaseStepFactory<Condition, Global, Local, "", "add">;
+> = ConditionDefaultCaseStepFactory<Condition, Global, Local, "", "add">
 
 export function $if<
   Condition,
@@ -176,10 +176,10 @@ export function $if<
   $,
   scope: prevScope
 }: {
-  condition: Condition;
-  $?: Global;
-  key?: Key;
-  scope?: Scope<any, any>;
+  condition: Condition
+  $?: Global
+  key?: Key
+  scope?: Scope<any, any>
 }): ConditionFactory<Condition, Global, Local> {
   const scope =
     prevScope ??
@@ -192,13 +192,13 @@ export function $if<
           scope: new Scope({ global: $ })
         }
       }
-    });
+    })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scope.get(name, global);
+    return scope.get(name, global)
   }
 
   function isTrue(): any {
@@ -206,7 +206,7 @@ export function $if<
       condition,
       key: "true",
       scope
-    });
+    })
   }
 
   function isFalse(): any {
@@ -214,42 +214,42 @@ export function $if<
       condition,
       key: "false",
       scope
-    });
+    })
   }
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
     fn: (helpers: any) => any
   ): any {
-    scope.get(key ?? "").scope.addStep(nameOrConfig, fn);
+    scope.get(key ?? "").scope.addStep(nameOrConfig, fn)
 
     return $if({
       key,
       condition,
       scope
-    });
+    })
   }
 
   const run = createRun<Global["input"]>((ctx) => {
     const noSteps =
       Object.values(scope.local).filter(
         (item: any) => Object.values(item.scope.steps).length === 0
-      ).length === 0;
+      ).length === 0
 
     if (!noSteps) {
-      return condition;
+      return condition
     }
 
     if (condition) {
       return $steps({
         $: scope.get("true").scope.addGlobal("condition", condition)
-      }).run(ctx);
+      }).run(ctx)
     }
 
     return $steps({
       $: scope.get("false").scope.addGlobal("condition", condition)
-    }).run(ctx);
-  });
+    }).run(ctx)
+  })
 
-  return { run, get, add, isTrue, isFalse, scope };
+  return { run, get, add, isTrue, isFalse, scope }
 }

@@ -1,21 +1,21 @@
-import { $action } from "../../daunus_action";
-import { Wait } from "../../types";
+import { $action } from "../../daunus_action"
+import { Wait } from "../../types"
 
 export type WaitParams =
   | {
-      delay: string;
+      delay: string
     }
   | {
-      until: Date;
-    };
+      until: Date
+    }
 
 const wait = $action(
   {
     type: "wait"
   },
   () => (params: WaitParams) => {
-    return new Wait(params);
+    return new Wait(params)
   }
-);
+)
 
-export default wait;
+export default wait

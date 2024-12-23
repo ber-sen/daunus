@@ -15,6 +15,7 @@
     ],
     "@typescript-eslint/no-non-null-assertion": 0,
     "@typescript-eslint/no-unused-vars": 0,
-    "unicorn/consistent-function-scoping": 0
+    "unicorn/consistent-function-scoping": 0,
+    "no-multiple-empty-lines": "off"
   }
 }

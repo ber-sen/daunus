@@ -1,13 +1,6 @@
-import { exit, struct } from "./actions";
-import { $router } from "./daunus_router";
-import {
-  $input,
-  DaunusException,
-  DaunusInferReturn,
-  Equal,
-  Expect,
-  z
-} from ".";
+import { exit, struct } from "./actions"
+import { $router } from "./daunus_router"
+import { $input, DaunusException, DaunusInferReturn, Equal, Expect, z } from "."
 
 describe("$router", () => {
   // xit("should work with multiple routes", async () => {
@@ -64,40 +57,40 @@ describe("$router", () => {
   // });
 
   it("should work with simple inputs", async () => {
-    const userInput = $input({ firstName: z.string() });
+    const userInput = $input({ firstName: z.string() })
 
-    const user = struct({ name: "user" }).createRoute(userInput);
+    const user = struct({ name: "user" }).createRoute(userInput)
 
-    const game = struct({ score: 10 }).createRoute();
+    const game = struct({ score: 10 }).createRoute()
 
-    const errorInput = $input({ error: z.boolean() });
+    const errorInput = $input({ error: z.boolean() })
 
     const error = exit({
       status: 404
-    }).createRoute(errorInput);
+    }).createRoute(errorInput)
 
     const makeApi = {
       createInput: (action: any, name: any) => {
         return z.object({
           path: z.literal(`/${name}`),
           body: action?.meta?.iSchema || z.undefined()
-        });
+        })
       },
       parseInput: (action: any) => {
-        return action.body;
+        return action.body
       }
-    };
+    }
 
     const router = $router(makeApi)
       .add("user", user)
       .add("game", game)
-      .add("error", error);
+      .add("error", error)
 
-    const data = await router.rawInput({ path: "/game" }).run();
+    const data = await router.rawInput({ path: "/game" }).run()
 
-    expect(data).toEqual({ data: { score: 10 }, exception: undefined });
+    expect(data).toEqual({ data: { score: 10 }, exception: undefined })
 
-    type A = DaunusInferReturn<typeof router>;
+    type A = DaunusInferReturn<typeof router>
 
     type data = Expect<
       Equal<
@@ -105,14 +98,14 @@ describe("$router", () => {
         {
           data:
             | {
-                name: string;
+                name: string
               }
             | {
-                score: number;
-              };
-          exception: DaunusException<404, undefined>;
+                score: number
+              }
+          exception: DaunusException<404, undefined>
         }
       >
-    >;
-  });
-});
+    >
+  })
+})

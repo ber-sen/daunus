@@ -1,8 +1,8 @@
-import { $ctx } from "../../daunus_helpers";
-import { DaunusException } from "../../types";
+import { $ctx } from "../../daunus_helpers"
+import { DaunusException } from "../../types"
 
-import { $query } from "../..";
-import steps from ".";
+import { $query } from "../.."
+import steps from "."
 
 describe("steps", () => {
   it("should work for basic example", async () => {
@@ -16,12 +16,12 @@ describe("steps", () => {
           }
         }
       ]
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual({ foo: "bar" });
-  });
+    expect(res.data).toStrictEqual({ foo: "bar" })
+  })
 
   it("should work with query", async () => {
     const action = steps({
@@ -39,12 +39,12 @@ describe("steps", () => {
           params: $query(($) => $.test.foo)
         }
       ]
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual("bar");
-  });
+    expect(res.data).toStrictEqual("bar")
+  })
 
   it("should stop on error", async () => {
     const action = steps({
@@ -69,15 +69,15 @@ describe("steps", () => {
           params: $query(($) => $.test.foo)
         }
       ]
-    });
+    })
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.exception).toStrictEqual(new DaunusException({ status: 404 }));
-  });
+    expect(res.exception).toStrictEqual(new DaunusException({ status: 404 }))
+  })
 
   it("should work with nested steps", async () => {
-    const ctx = $ctx();
+    const ctx = $ctx()
 
     const action = steps({
       actions: [
@@ -107,10 +107,10 @@ describe("steps", () => {
           }
         }
       ]
-    });
+    })
 
-    const res = await action.run(ctx);
+    const res = await action.run(ctx)
 
-    expect(res.data).toStrictEqual({ foo: "barasd" });
-  });
-});
+    expect(res.data).toStrictEqual({ foo: "barasd" })
+  })
+})

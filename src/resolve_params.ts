@@ -1,4 +1,4 @@
-import { ReadableStream } from "isomorphic-web-streams";
+import { ReadableStream } from "isomorphic-web-streams"
 import {
   isArray,
   isException,
@@ -7,7 +7,7 @@ import {
   isDaunusQuery,
   resolveDaunusPlaceholder,
   resolveDaunusVar
-} from "./helpers";
+} from "./helpers"
 
 export const resolveParams = async <T>(
   ctx: Map<string, unknown>,
@@ -15,44 +15,44 @@ export const resolveParams = async <T>(
   options?: { skipPlaceholders?: boolean }
 ): Promise<T> => {
   if (params instanceof ReadableStream) {
-    return params;
+    return params
   }
 
   if (isException(params)) {
-    return params;
+    return params
   }
 
   if (!options?.skipPlaceholders && isDaunusPlaceholder(params)) {
-    return await resolveDaunusPlaceholder(ctx, params);
+    return await resolveDaunusPlaceholder(ctx, params)
   }
 
   if (isDaunusQuery(params)) {
-    return resolveParams(ctx, await resolveDaunusVar(ctx, params), options);
+    return resolveParams(ctx, await resolveDaunusVar(ctx, params), options)
   }
 
   if (isArray(params)) {
-    const result: any = [];
+    const result: any = []
 
     for (const key in params) {
-      const value = await resolveParams(ctx, params[key], options);
+      const value = await resolveParams(ctx, params[key], options)
 
-      result[key] = value;
+      result[key] = value
     }
 
-    return result as any;
+    return result as any
   }
 
   if (isObject(params)) {
-    const result: any = {};
+    const result: any = {}
 
     for (const key of Object.keys(params)) {
-      const value = await resolveParams(ctx, (params as any)[key], options);
+      const value = await resolveParams(ctx, (params as any)[key], options)
 
-      result[key] = value;
+      result[key] = value
     }
 
-    return result as any;
+    return result as any
   }
 
-  return params;
-};
+  return params
+}

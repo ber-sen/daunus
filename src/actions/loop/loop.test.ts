@@ -1,8 +1,7 @@
-import { struct } from "..";
-import { $query } from "../..";
-import { $ctx } from "../../daunus_helpers";
+import { $query } from "../.."
+import { $ctx } from "../../daunus_helpers"
 
-import loop from "./index";
+import loop from "./index"
 
 describe("loop", () => {
   it("should work for basic example", async () => {
@@ -17,10 +16,10 @@ describe("loop", () => {
         }
       },
       { name: "items" }
-    );
+    )
 
-    const res = await action.run($ctx());
+    const res = await action.run($ctx())
 
-    expect(res.data).toStrictEqual([1, 2]);
-  });
-});
+    expect(res.data).toStrictEqual([1, 2])
+  })
+})
