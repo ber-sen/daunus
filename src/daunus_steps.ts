@@ -6,7 +6,7 @@ import {
   Scope,
   StepConfig,
   StepFactory,
-  StepHelpers,
+  StepProps,
   StepOptions,
   resultKey
 } from "./new_types"
@@ -25,7 +25,7 @@ export interface DefaultStepFactory<
     > {
   add<Value extends Action<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
     Omit<Local, typeof resultKey> &
@@ -35,7 +35,7 @@ export interface DefaultStepFactory<
 
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
     Omit<Local, typeof resultKey> &
@@ -51,7 +51,7 @@ export interface ParallelStepFactory<
     Action<Promise<FormatScope<Local>>, Global["input"]> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
+    fn: (helpers: StepProps<Global>) => Promise<Value> | Value
   ): ParallelStepFactory<Global, Local & Record<Name, Value>>
 }
 

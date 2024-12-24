@@ -5,7 +5,7 @@ import {
   Scope,
   StepConfig,
   StepFactory,
-  StepHelpers,
+  StepProps,
   resultKey
 } from "./new_types"
 import { createRun } from "./run_helpers"
@@ -75,7 +75,7 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value extends Action<any, any>>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
+    fn: (helpers: StepProps<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
@@ -88,7 +88,7 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
+    fn: (helpers: StepProps<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,

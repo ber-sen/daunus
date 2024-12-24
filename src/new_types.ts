@@ -166,7 +166,7 @@ export interface StepOptions {
   stepsType?: "default" | "parallel" | "serial"
 }
 
-export interface StepHelpers<Global extends Record<string, any> = {}> {
+export interface StepProps<Global extends Record<string, any> = {}> {
   $: FormatScope<Global>
   $if: <Condition>(options: {
     condition: Condition

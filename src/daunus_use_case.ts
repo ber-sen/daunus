@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { $steps } from "./daunus_steps"
-import { Scope, StepHelpers, StepOptions } from "./new_types"
+import { Scope, StepProps, StepOptions } from "./new_types"
 import { DaunusCtx } from "."
 
 export function $useCase<Input>(options?: { input?: z.ZodType<Input> }) {
@@ -17,7 +17,7 @@ export function $useCase<Input>(options?: { input?: z.ZodType<Input> }) {
   }
 
   function handle<Value>(
-    fn: (helpers: StepHelpers<typeof scope.global>) => Promise<Value> | Value
+    fn: (props: StepProps<typeof scope.global>) => Promise<Value> | Value
   ) {
     return $steps({
       $: scope
