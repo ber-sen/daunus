@@ -6,13 +6,13 @@ import { $input } from "."
 describe("$route", () => {
   it("show work without input", async () => {
     const useCase = $useCase("hello word")
-      .handle(() => "Hello world")
+      .handle(({ $ }) => $.useCase.originalName)
 
     const data = await useCase.run()
 
     type A = typeof data
 
-    type data = Expect<Equal<A, string>>
+    type data = Expect<Equal<A, "hello word">>
 
     expect(data).toEqual("Hello world")
   })
