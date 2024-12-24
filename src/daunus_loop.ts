@@ -1,10 +1,10 @@
-import type { ConditionFactory } from "./daunus_if"
-import { $steps, type StepsFactory } from "./daunus_steps"
+import { $steps } from "./daunus_steps"
 import {
   Action,
   Scope,
   StepConfig,
   StepFactory,
+  StepHelpers,
   StepOptions,
   resultKey
 } from "./new_types"
@@ -23,22 +23,7 @@ export interface DefaultLoopStepFactory<
     > {
   add<Value extends Action<any, any>, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
     Overwrite<Global, N> & Record<N, Awaited<ReturnType<Value["run"]>>>,
     Omit<Local, typeof resultKey> &
@@ -48,22 +33,7 @@ export interface DefaultLoopStepFactory<
 
   add<Value, N extends string>(
     name: ValidateName<N, Local> | StepConfig<N, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
     Overwrite<Global, N> & Record<N, Awaited<Value>>,
     Omit<Local, typeof resultKey> &
@@ -79,60 +49,30 @@ export interface ParallelLoopStepFactory<
     Action<Promise<Array<FormatScope<Local>>>, Global["input"]> {
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>>
+}
+
+type Item<List extends Array<any> | readonly any[]> = {
+  value: List[number]
+  index: number
 }
 
 function $loopSteps<
   List extends Array<any> | readonly any[],
-  itemVariable extends string = "item",
+  ItemVariable extends string = "item",
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 >(
   params: {
     list: List
-    itemVariable?: itemVariable
+    itemVariable?: ItemVariable
     $?: Scope<Global, Local> | Global
   } & Options
 ): Options["stepsType"] extends "parallel"
-  ? ParallelLoopStepFactory<
-      Global &
-        Record<
-          itemVariable,
-          {
-            value: List[number]
-            index: number
-          }
-        >,
-      Local
-    >
-  : DefaultLoopStepFactory<
-      Global &
-        Record<
-          itemVariable,
-          {
-            value: List[number]
-            index: number
-          }
-        >,
-      Local
-    > {
+  ? ParallelLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local>
+  : DefaultLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local> {
   const { $, list, itemVariable, stepsType } = params ?? {}
 
   const scope = $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ })

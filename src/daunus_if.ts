@@ -1,31 +1,30 @@
-import { type LoopFactory } from "./daunus_loop"
-import { $steps, type StepsFactory } from "./daunus_steps"
+import { $steps } from "./daunus_steps"
 import {
   AbstractStepFactory,
   Action,
   Scope,
   StepConfig,
   StepFactory,
-  StepOptions,
+  StepHelpers,
   resultKey
 } from "./new_types"
 import { createRun } from "./run_helpers"
-import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
+import { ValidateName, Overwrite } from "./type_helpers"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
     ? T extends Record<K, infer R>
       ? R
-      : { [P in keyof T]: ExtractValuesByKey<T[P], K> }[keyof T]
+      : { [P in keyof T]: T[P] extends Record<K, infer S> ? S : never }[keyof T]
     : never
 
-export type DeepOmitByPath<
+export type OmitNestedByPath<
   T,
   Path extends [keyof any, ...any[]]
-> = Path extends [infer Key, ...infer Rest]
+> = Path extends [infer Key, infer SecondKey]
   ? Key extends keyof T
-    ? Rest extends [keyof any, ...any[]]
-      ? { [K in keyof T]: K extends Key ? DeepOmitByPath<T[K], Rest> : T[K] }
+    ? SecondKey extends keyof T[Key]
+      ? { [K in keyof T]: K extends Key ? Omit<T[K], SecondKey> : T[K] }
       : Omit<T, Key>
     : T
   : T
@@ -76,26 +75,11 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value extends Action<any, any>>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
-    DeepOmitByPath<Local, [CurrentKey, typeof resultKey]> &
+    OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
       Record<CurrentKey, Record<typeof resultKey, Value>>,
     CurrentKey,
@@ -104,26 +88,11 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
-    DeepOmitByPath<Local, [CurrentKey, typeof resultKey]> &
+    OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
       Record<CurrentKey, Record<typeof resultKey, Value>>,
     CurrentKey,
@@ -183,16 +152,13 @@ export function $if<
 }): ConditionFactory<Condition, Global, Local> {
   const scope =
     prevScope ??
-    new Scope({
-      local: {
-        true: {
-          scope: new Scope({ global: $ })
-        },
-        false: {
-          scope: new Scope({ global: $ })
-        }
-      }
-    })
+    new Scope({})
+      .addLocal("true", {
+        scope: new Scope({ global: $ })
+      })
+      .addLocal("false", {
+        scope: new Scope({ global: $ })
+      })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,

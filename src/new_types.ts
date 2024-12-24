@@ -1,6 +1,14 @@
 import { toCamelCase } from "./new_helpers"
 import { FormatScope, ValidateName } from "./type_helpers"
-import { $if, $loop, $steps, DaunusCtx } from "."
+import {
+  $if,
+  $loop,
+  $steps,
+  ConditionFactory,
+  DaunusCtx,
+  LoopFactory,
+  StepsFactory
+} from "."
 
 export interface Action<R, I = unknown> {
   run: I extends object
@@ -156,4 +164,21 @@ export const resultKey: unique symbol = Symbol("resultKey")
 
 export interface StepOptions {
   stepsType?: "default" | "parallel" | "serial"
+}
+
+export interface StepHelpers<Global extends Record<string, any> = {}> {
+  $: FormatScope<Global>
+  $if: <Condition>(options: {
+    condition: Condition
+  }) => ConditionFactory<Condition, Global>
+  $steps: <Options extends StepOptions>(
+    options?: Options
+  ) => StepsFactory<Options, Global>
+  $loop: <
+    List extends Array<any> | readonly any[],
+    ItemVariable extends string = "item"
+  >(options: {
+    list: List
+    itemVariable?: ItemVariable
+  }) => LoopFactory<List, ItemVariable, Global>
 }

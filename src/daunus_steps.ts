@@ -1,11 +1,12 @@
-import { $loop, type LoopFactory } from "./daunus_loop"
-import { $if, type ConditionFactory } from "./daunus_if"
+import { $loop } from "./daunus_loop"
+import { $if } from "./daunus_if"
 import { isAction } from "./new_helpers"
 import {
   Action,
   Scope,
   StepConfig,
   StepFactory,
+  StepHelpers,
   StepOptions,
   resultKey
 } from "./new_types"
@@ -24,22 +25,7 @@ export interface DefaultStepFactory<
     > {
   add<Value extends Action<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options?: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
     Omit<Local, typeof resultKey> &
@@ -49,22 +35,7 @@ export interface DefaultStepFactory<
 
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options?: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
     Omit<Local, typeof resultKey> &
@@ -80,22 +51,7 @@ export interface ParallelStepFactory<
     Action<Promise<FormatScope<Local>>, Global["input"]> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: {
-      $: FormatScope<Global>
-      $if: <Condition>(options: {
-        condition: Condition
-      }) => ConditionFactory<Condition, Global>
-      $steps: <Options extends StepOptions>(
-        options?: Options
-      ) => StepsFactory<Options, Global>
-      $loop: <
-        List extends Array<any> | readonly any[],
-        ItemVariable extends string = "item"
-      >(options: {
-        list: List
-        itemVariable?: ItemVariable
-      }) => LoopFactory<List, ItemVariable, Global>
-    }) => Promise<Value> | Value
+    fn: (helpers: StepHelpers<Global>) => Promise<Value> | Value
   ): ParallelStepFactory<Global, Local & Record<Name, Value>>
 }
 
