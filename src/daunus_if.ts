@@ -75,7 +75,7 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value extends Action<any, any>>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepProps<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
@@ -88,7 +88,7 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepProps<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
@@ -185,7 +185,7 @@ export function $if<
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: (helpers: any) => any
+    fn: (props: any) => any
   ): any {
     scope.get(key ?? "").scope.addStep(nameOrConfig, fn)
 

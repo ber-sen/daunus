@@ -51,7 +51,7 @@ export interface ParallelStepFactory<
     Action<Promise<FormatScope<Local>>, Global["input"]> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: StepProps<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): ParallelStepFactory<Global, Local & Record<Name, Value>>
 }
 
@@ -85,7 +85,7 @@ export function $steps<
 
   function add(
     nameOrConfig: string | StepConfig<any, any>,
-    fn: (helpers: any) => any
+    fn: (props: any) => any
   ): any {
     return $steps({
       stepsType,

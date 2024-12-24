@@ -104,12 +104,12 @@ export class Scope<
 
   addStep<Name extends string, Value>(
     nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (helpers: any) => Value | Promise<Value>
+    fn: (props: any) => Value | Promise<Value>
   ) {
     const name =
       typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name
 
-    const step = (helpers: any) => {
+    const step = (props: any) => {
       return fn(helpers)
     }
 
