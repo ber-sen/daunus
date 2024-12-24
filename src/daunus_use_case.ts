@@ -1,13 +1,21 @@
 import { z } from "zod"
 import { $steps } from "./daunus_steps"
 import { Scope, StepProps, StepOptions } from "./new_types"
+import { toCamelCase } from "./new_helpers"
 import { DaunusCtx } from "."
 
-export function $useCase<Input>(options?: { input?: z.ZodType<Input> }) {
-  const scope = new Scope({}).addLazyGlobal(
-    "input",
-    (ctx: DaunusCtx) => options?.input?.parse(ctx.get("input")) as Input
-  )
+export function $useCase<Name extends string, Input>(
+  originalName: Name,
+  options?: { input?: z.ZodType<Input> }
+) {
+  const name = toCamelCase(originalName)
+
+  const scope = new Scope({})
+    .addGlobal("useCase", { name, originalName })
+    .addLazyGlobal(
+      "input",
+      (ctx: DaunusCtx) => options?.input?.parse(ctx.get("input")) as Input
+    )
 
   function steps<Options extends StepOptions>(options?: Options) {
     return $steps({
@@ -24,5 +32,5 @@ export function $useCase<Input>(options?: { input?: z.ZodType<Input> }) {
     }).add("handle", fn)
   }
 
-  return { steps, handle }
+  return { steps, handle, originalName, name }
 }

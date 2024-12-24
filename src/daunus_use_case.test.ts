@@ -5,7 +5,7 @@ import { $input } from "."
 
 describe("$route", () => {
   it("show work without input", async () => {
-    const useCase = $useCase()
+    const useCase = $useCase("hello word")
       .handle(() => "Hello world")
 
     const data = await useCase.run()
@@ -20,7 +20,7 @@ describe("$route", () => {
   it("show work for single step", async () => {
     const input = $input({ name: z.string() })
 
-    const useCase = $useCase({ input })
+    const useCase = $useCase("name", { input })
       .handle(({ $ }) => $.input.name === "lorem")
 
     const data = await useCase.run({ name: "lorem" })
@@ -35,7 +35,7 @@ describe("$route", () => {
   it("should provide expected types for return", async () => {
     const input = $input({ name: z.string() })
 
-    const route = $useCase({ input })
+    const route = $useCase("My use case", { input })
       .steps()
 
       .add("first step", ({ $ }) => $.input)
@@ -54,7 +54,7 @@ describe("$route", () => {
   it("should work with parallel steps", async () => {
     const input = $input({ city: z.string() })
 
-    const route = $useCase({ input })
+    const route = $useCase("Example", { input })
       .steps({ stepsType: "parallel" })
 
       .add("first step", ({ $ }) => $.input)
@@ -86,11 +86,11 @@ describe("$route", () => {
   })
 
   it("should work with loop and condition", async () => {
-    const input = $input({ names: z.array(z.number()) })
+    const input = $input({ array: z.array(z.number()) })
 
-    const useCase = $useCase({ input })
+    const useCase = $useCase("Loop and condition", { input })
       .handle(({ $loop, $ }) =>
-        $loop({ list: $.input.names })
+        $loop({ list: $.input.array })
 
           .forEachItem()
 
@@ -109,7 +109,7 @@ describe("$route", () => {
           )
       )
 
-    const data = await useCase.run({ names: [1, 2, 3] })
+    const data = await useCase.run({ array: [1, 2, 3] })
 
     type A = typeof data
 
@@ -121,7 +121,7 @@ describe("$route", () => {
   it("should allow script version", async () => {
     const input = $input({ names: z.array(z.number()) })
 
-    const useCase = $useCase({ input }) //
+    const useCase = $useCase("Script", { input })
       .handle(({ $ }) =>
         $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
       )
