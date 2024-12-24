@@ -5,14 +5,14 @@ import { $input } from "."
 
 describe("$route", () => {
   it("show work without input", async () => {
-    const useCase = $useCase("hello word")
+    const useCase = $useCase("Hello world")
       .handle(({ $ }) => $.useCase.originalName)
 
     const data = await useCase.run()
 
     type A = typeof data
 
-    type data = Expect<Equal<A, "hello word">>
+    type data = Expect<Equal<A, "Hello world">>
 
     expect(data).toEqual("Hello world")
   })

@@ -110,7 +110,7 @@ export class Scope<
       typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name
 
     const step = (props: any) => {
-      return fn(helpers)
+      return fn(props)
     }
 
     step.meta = {
@@ -138,7 +138,7 @@ export class Scope<
       return this.steps[toCamelCase(name)](getHelpers(global ?? {}))
     }
 
-    return this.local[toCamelCase(name)]
+    return this.local[toCamelCase(name) as any] 
   }
 }
 
