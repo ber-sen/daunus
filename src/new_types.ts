@@ -1,6 +1,6 @@
 import { toCamelCase } from "./new_helpers"
 import { FormatScope, ValidateName } from "./type_helpers"
-import { $if, DaunusCtx } from "."
+import { $if, $loop, $steps, DaunusCtx } from "."
 
 export interface Action<R, I = unknown> {
   run: I extends object
@@ -120,7 +120,14 @@ export class Scope<
     global?: Record<any, any>
   ): Local[Name] {
     if (this.steps[toCamelCase(name)]) {
-      return this.steps[toCamelCase(name)](global)
+      const getHelpers = (global: any) => ({
+        $: global,
+        $if: (options: any) => $if({ $: global, ...options }),
+        $loop: (options: any) => $loop({ $: global, ...options }),
+        $steps: (options: any) => $steps({ $: global, ...options })
+      })
+
+      return this.steps[toCamelCase(name)](getHelpers(global ?? {}))
     }
 
     return this.local[toCamelCase(name)]
