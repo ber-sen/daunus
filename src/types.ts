@@ -82,6 +82,29 @@ export type DaunusAction<Return, Env = {}> = {
   }>
 }
 
+export type DaunusActionWithInput<Input, Return, Env = {}> = {
+  name: string
+  env: Env
+  run: (
+    input: Input,
+    ctx?: DaunusCtx
+  ) => Promise<{
+    data: ResolveDaunusVarData<Return>
+    exception: NonUndefined<ExtractDaunusExceptions<Return>>
+  }>
+  input: (input: Input) => DaunusAction<Return, Env>
+}
+
+export interface DaunusActionOrActionWithInput<
+  Return,
+  Env = {},
+  Input = unknown,
+> {
+  run: Input extends object
+    ? DaunusActionWithInput<Input, Return, Env>
+    : DaunusAction<Return, Env>
+}
+
 export type DaunusWorkflowAction<T> = {
   type: string[]
   params?: T
