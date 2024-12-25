@@ -10,7 +10,7 @@ export function $useCase<Name extends string, Input>(
 ) {
   const name = toCamelCase(originalName)
 
-  const scope = new Scope({})
+  const scope = new Scope()
     .addGlobal("useCase", { name, originalName })
     .addLazyGlobal(
       "input",

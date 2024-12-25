@@ -93,13 +93,6 @@ export function $steps<
     })
   }
 
-  const getHelpers = (global: any) => ({
-    $: global,
-    $if: (options: any) => $if({ $: global, ...options }),
-    $loop: (options: any) => $loop({ $: global, ...options }),
-    $steps: (options: any) => $steps({ $: global, ...options })
-  })
-
   const run = createRun<Global["input"]>(async (ctx) => {
     if (!Object.keys(scope.steps)?.at(-1)) {
       return undefined
@@ -107,7 +100,7 @@ export function $steps<
 
     if (stepsType === "parallel") {
       const promises = Object.values(scope.steps).map(async (fn) => {
-        const res = await fn(getHelpers(scope.getGlobal(ctx)))
+        const res = await fn(scope.getStepsProps(ctx))
 
         if (isAction(res)) {
           return res.run(ctx)
@@ -126,7 +119,7 @@ export function $steps<
     const res: any[] = []
 
     for (const [name, fn] of Object.entries(scope.steps)) {
-      let value = await fn(getHelpers(scope.getGlobal(ctx)))
+      let value = await fn(scope.getStepsProps((ctx)))
 
       if (isAction(value)) {
         value = await value.run(ctx)

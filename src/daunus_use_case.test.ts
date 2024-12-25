@@ -90,8 +90,8 @@ describe("$route", () => {
   it("should work with loop and condition", async () => {
     const input = $input({ array: z.array(z.number()) })
 
-    const useCase = $useCase("Loop and condition", { input }).handle(
-      ({ $loop, $ }) =>
+    const useCase = $useCase("Loop and condition", { input }) //
+      .handle(({ $loop, $ }) =>
         $loop({ list: $.input.array })
           .forEachItem()
 
@@ -100,14 +100,12 @@ describe("$route", () => {
           .add("check", ({ $if, $ }) =>
             $if({ condition: $.module === 0 })
               .isTrue()
-
               .add("even", ({ $ }) => `${$.item.value} is even`)
 
               .isFalse()
-
               .add("odd", ({ $ }) => $.item.value)
           )
-    )
+      )
 
     const data = await useCase.run({ array: [1, 2, 3] })
 

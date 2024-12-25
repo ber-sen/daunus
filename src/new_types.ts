@@ -53,18 +53,14 @@ export class Scope<
   public local: Local
   public steps: Steps<Local>
 
-  constructor({
-    global,
-    local,
-    steps
-  }: {
+  constructor(options?: {
     global?: Global
     local?: Local
     steps?: Steps<Local>
   }) {
-    this.global = global ?? ({} as Global)
-    this.local = local ?? ({} as Local)
-    this.steps = steps ?? ({} as Steps<Local>)
+    this.global = options?.global ?? ({} as Global)
+    this.local = options?.local ?? ({} as Local)
+    this.steps = options?.steps ?? ({} as Steps<Local>)
   }
 
   addGlobal<Name extends string, Value>(name: Name, value: Value) {
@@ -84,7 +80,7 @@ export class Scope<
     return this as Scope<Global & Record<Name, Value>, Local>
   }
 
-  getGlobal(ctx: DaunusCtx) {
+  getGlobal(ctx: DaunusCtx): Global {
     return Object.fromEntries(
       Object.entries(this.global).map(([key, value]) => {
         if (value instanceof LazyGlobal) {
@@ -93,13 +89,28 @@ export class Scope<
 
         return [key, value]
       })
-    )
+    ) as any
+  }
+
+  getStepsProps(ctx: DaunusCtx) {
+    const global = this.getGlobal(ctx)
+
+    return this.getProps(global)
   }
 
   addLocal<Name extends string, Value>(name: Name, value: Value) {
     this.local = { ...this.local, [name]: value }
 
     return this as Scope<Global, Local & Record<Name, Value>>
+  }
+
+  getProps(global: Global) {
+    return {
+      $: global,
+      $if: (options: any) => $if({ $: global, ...options }),
+      $loop: (options: any) => $loop({ $: global, ...options }),
+      $steps: (options: any) => $steps({ $: global, ...options })
+    }
   }
 
   addStep<Name extends string, Value>(
@@ -128,17 +139,10 @@ export class Scope<
     global?: Record<any, any>
   ): Local[Name] {
     if (this.steps[toCamelCase(name)]) {
-      const getHelpers = (global: any) => ({
-        $: global,
-        $if: (options: any) => $if({ $: global, ...options }),
-        $loop: (options: any) => $loop({ $: global, ...options }),
-        $steps: (options: any) => $steps({ $: global, ...options })
-      })
-
-      return this.steps[toCamelCase(name)](getHelpers(global ?? {}))
+      return this.steps[toCamelCase(name)](this.getProps(global ?? {}))
     }
 
-    return this.local[toCamelCase(name) as any] 
+    return this.local[toCamelCase(name) as any]
   }
 }
 
