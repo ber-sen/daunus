@@ -95,14 +95,15 @@ export type DaunusActionWithInput<Input, Return, Env = {}> = {
   input: (input: Input) => DaunusAction<Return, Env>
 }
 
-export interface DaunusActionOrActionWithInput<
-  Return,
-  Env = {},
-  Input = unknown,
-> {
+export type DaunusActionOrActionWithInput<Input, Return, Env = {}> = {
+  name: string
+  env: Env
   run: Input extends object
-    ? DaunusActionWithInput<Input, Return, Env>
-    : DaunusAction<Return, Env>
+    ? DaunusActionWithInput<Input, Return, Env>["run"]
+    : DaunusAction<Return, Env>["run"]
+  input: Input extends object
+    ? (input: Input) => DaunusAction<Return, Env>
+    : undefined
 }
 
 export type DaunusWorkflowAction<T> = {

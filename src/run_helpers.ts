@@ -1,5 +1,5 @@
 import { $ctx } from "./daunus_helpers"
-import { DaunusCtx } from "."
+import { DaunusCtx, DaunusActionOrActionWithInput } from "."
 
 export const getContext = <I>(
   ...args: [input: I, ctx?: Map<string, any>] | [ctx?: Map<string, any>]
@@ -27,17 +27,17 @@ export const getContext = <I>(
   }
 }
 
-export const createRun = <I>(
-  fn: <T>(ctx: DaunusCtx) => any
-): I extends object
-  ? (input: I, ctx?: Map<string, any>) => Promise<any>
-  : (ctx?: Map<string, any>) => Promise<any> => {
-  const enhancedFn = (
-    ...args: [ctx?: Map<string, any>] | [input: I, ctx?: Map<string, any>]
+export const createRun = <Input>(
+  fn: (ctx: DaunusCtx) => any
+): DaunusActionOrActionWithInput<Input, any, any>["run"] => {
+  const enhancedFn = async (
+    ...args: [ctx?: Map<string, any>] | [input: Input, ctx?: Map<string, any>]
   ) => {
     const ctx = getContext(...args)
 
-    return fn(ctx)
+    const data = await fn(ctx)
+
+    return { data }
   }
 
   return enhancedFn as any

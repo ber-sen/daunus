@@ -3,13 +3,13 @@ import { $useCase } from "./daunus_use_case"
 import { Expect, Equal } from "./type_helpers"
 import { $input } from "."
 
-describe("$route", () => {
-  it("show work without input", async () => {
+describe("$usecase", () => {
+  it("should work without input", async () => {
     const useCase = $useCase("Hello world").handle(
       ({ $ }) => $.useCase.originalName
     )
 
-    const data = await useCase.run()
+    const { data } = await useCase.run()
 
     type A = typeof data
 
@@ -18,14 +18,14 @@ describe("$route", () => {
     expect(data).toEqual("Hello world")
   })
 
-  it("show work for single step", async () => {
+  it("should work for single step", async () => {
     const input = $input({ name: z.string() })
 
     const useCase = $useCase("name", { input }).handle(
       ({ $ }) => $.input.name === "lorem"
     )
 
-    const data = await useCase.run({ name: "lorem" })
+    const { data } = await useCase.run({ name: "lorem" })
 
     type A = typeof data
 
@@ -44,7 +44,7 @@ describe("$route", () => {
 
       .add("second step", ({ $ }) => $.firstStep.name)
 
-    const data = await route.run({ name: "Luna" })
+    const { data } = await route.run({ name: "Luna" })
 
     type A = typeof data
 
@@ -63,7 +63,7 @@ describe("$route", () => {
 
       .add("second step", () => 42)
 
-    const data = await route.run({ city: "London" })
+    const { data } = await route.run({ city: "London" })
 
     type A = typeof data
 
@@ -107,7 +107,7 @@ describe("$route", () => {
           )
       )
 
-    const data = await useCase.run({ array: [1, 2, 3] })
+    const { data } = await useCase.run({ array: [1, 2, 3] })
 
     type A = typeof data
 
@@ -123,7 +123,7 @@ describe("$route", () => {
       $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
     )
 
-    const data = await useCase.run({ names: [1, 2, 3] })
+    const { data } = await useCase.run({ names: [1, 2, 3] })
 
     type A = typeof data
 

@@ -28,12 +28,13 @@ describe("$steps", () => {
   })
 
   it("should work with one step", async () => {
-    const steps = $steps()
-      .add("first step", () => ({
-        foo: "bar"
-      }))
+    const steps = $steps().add("first step", () => ({
+      foo: "bar"
+    }))
 
-    expect(await steps.run()).toEqual({ foo: "bar" })
+    const { data } = await steps.run()
+
+    expect(data).toEqual({ foo: "bar" })
   })
 
   it("should return the return value of last key by default", async () => {
@@ -44,18 +45,18 @@ describe("$steps", () => {
 
       .add("second step", ({ $ }) => $)
 
-    expect(await steps.run()).toEqual({ firstStep: { foo: "bar" } })
+    const { data } = await steps.run()
+
+    expect(data).toEqual({ firstStep: { foo: "bar" } })
   })
 
   it("should provide an easy way to extend", () => {
-    const nested = $steps()
-      .add("sub", ({ $steps }) =>
-        $steps()
+    const nested = $steps().add("sub", ({ $steps }) =>
+      $steps()
+        .add("first step", () => ({ foo: "bar" }))
 
-          .add("first step", () => ({ foo: "bar" }))
-
-          .add("second step", ({ $ }) => $.firstStep.foo.toString())
-      )
+        .add("second step", ({ $ }) => $.firstStep.foo.toString())
+    )
 
     function toJson(factory: StepFactory<any, any>) {
       const steps = Object.values(factory.scope.steps).map((value) => {
@@ -124,7 +125,6 @@ describe("$steps", () => {
     const steps = $steps()
       .add("nested", ({ $steps }) =>
         $steps()
-
           .add("nested", () => ({
             foo: "bar"
           }))
@@ -134,7 +134,9 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.nested)
 
-    expect(await steps.run()).toEqual("bar")
+    const { data } = await steps.run()
+
+    expect(data).toEqual("bar")
   })
 
   it("should display proper types for parallel ", () => {
@@ -143,7 +145,6 @@ describe("$steps", () => {
 
       .add("parallel", ({ $steps }) =>
         $steps({ stepsType: "parallel" })
-
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -152,7 +153,7 @@ describe("$steps", () => {
       )
       .add("return", ({ $ }) => $.parallel)
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
 
     type steps = Expect<
       Equal<
@@ -175,7 +176,9 @@ describe("$steps", () => {
 
       .add("return", () => true)
 
-    expect(await steps.run()).toEqual(true)
+    const { data } = await steps.run()
+
+    expect(data).toEqual(true)
   })
 
   it("should return the all values if type is parallel", async () => {
@@ -184,7 +187,6 @@ describe("$steps", () => {
 
       .add("parallel", ({ $steps }) =>
         $steps({ stepsType: "parallel" })
-
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -194,7 +196,9 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.parallel)
 
-    expect(await steps.run()).toEqual({
+    const { data } = await steps.run()
+
+    expect(data).toEqual({
       firstStep: { foo: "bar" },
       secondStep: [1, 2, 3]
     })
@@ -206,14 +210,12 @@ describe("$steps", () => {
 
       .add("parallel", ({ $steps }) =>
         $steps({ stepsType: "parallel" })
-
           .add("first step", () => ({
             foo: "bar"
           }))
 
           .add("second step", ({ $steps }) =>
             $steps()
-
               .add("nested", ({ $ }) => ({
                 foo: $.data
               }))
@@ -224,7 +226,9 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.parallel)
 
-    expect(await steps.run()).toEqual({
+    const { data } = await steps.run()
+
+    expect(data).toEqual({
       firstStep: { foo: "bar" },
       secondStep: [1, 2, 3]
     })
@@ -232,10 +236,8 @@ describe("$steps", () => {
 
   it("should resolve promises", async () => {
     const steps = $steps()
-
       .add("nested", ({ $steps }) =>
         $steps()
-
           .add("nested", () =>
             Promise.resolve({
               foo: "bar"
@@ -247,15 +249,15 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.nested)
 
-    expect(await steps.run()).toEqual("bar")
+    const { data } = await steps.run()
+
+    expect(data).toEqual("bar")
   })
 
   it("should resolve nested values inside promise", async () => {
     const steps = $steps()
-
       .add("nested", ({ $steps }) =>
         $steps()
-
           .add("sub", ({ $steps }) =>
             Promise.resolve($steps().add("sub", () => [1, 2, 3]))
           )
@@ -265,7 +267,9 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.nested)
 
-    expect(await steps.run()).toEqual([1, 2, 3])
+    const { data } = await steps.run()
+
+    expect(data).toEqual([1, 2, 3])
   })
 
   it("should resolve promises in parallel", async () => {
@@ -274,7 +278,6 @@ describe("$steps", () => {
 
       .add("parallel", ({ $steps }) =>
         $steps({ stepsType: "parallel" })
-
           .add("first step", () =>
             Promise.resolve({
               foo: "bar"
@@ -297,7 +300,9 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.parallel)
 
-    expect(await steps.run()).toEqual({
+    const { data } = await steps.run()
+
+    expect(data).toEqual({
       firstStep: { foo: "bar" },
       secondStep: [1, 2, 3]
     })

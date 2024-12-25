@@ -1,8 +1,6 @@
-import { $loop } from "./daunus_loop"
-import { $if } from "./daunus_if"
+import { DaunusAction, DaunusActionOrActionWithInput } from "./types"
 import { isAction } from "./new_helpers"
 import {
-  Action,
   Scope,
   StepConfig,
   StepFactory,
@@ -17,17 +15,22 @@ export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<Global, Local>,
-    Action<
-      Local[typeof resultKey] extends Action<any, any>
-        ? Promise<Awaited<ReturnType<Local[typeof resultKey]["run"]>>>
-        : Promise<Local[typeof resultKey]>,
-      Global["input"]
+    DaunusActionOrActionWithInput<
+      Global["input"],
+      Local[typeof resultKey] extends DaunusActionOrActionWithInput<
+        any,
+        any,
+        any
+      >
+        ? Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]
+        : Local[typeof resultKey]
     > {
-  add<Value extends Action<any, any>, Name extends string>(
+  add<Value extends DaunusAction<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): DefaultStepFactory<
-    Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
+    Overwrite<Global, Name> &
+      Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>,
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<typeof resultKey, Value>
@@ -48,7 +51,7 @@ export interface ParallelStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 > extends StepFactory<Global, Local>,
-    Action<Promise<FormatScope<Local>>, Global["input"]> {
+    DaunusActionOrActionWithInput<Global["input"], FormatScope<Local>> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
@@ -68,6 +71,7 @@ export function $steps<
 >(
   params?: {
     $?: Scope<Global, Local> | Global
+    name?: string
   } & Options
 ): Options["stepsType"] extends "parallel"
   ? ParallelStepFactory<Global, Local>
@@ -103,7 +107,7 @@ export function $steps<
         const res = await fn(scope.getStepsProps(ctx))
 
         if (isAction(res)) {
-          return res.run(ctx)
+          return (await res.run(ctx)).data
         }
 
         return res
@@ -119,10 +123,10 @@ export function $steps<
     const res: any[] = []
 
     for (const [name, fn] of Object.entries(scope.steps)) {
-      let value = await fn(scope.getStepsProps((ctx)))
+      let value = await fn(scope.getStepsProps(ctx))
 
       if (isAction(value)) {
-        value = await value.run(ctx)
+        value = (await value.run(ctx)).data
       }
 
       scope.global = { ...scope.global, [name]: value }
@@ -134,5 +138,14 @@ export function $steps<
     return res.at(-1)
   })
 
-  return { get, scope, add, run }
+  // TODO
+  const env = {}
+
+  const name = params?.name as string
+
+  const input: any = () => {
+    return {} as any
+  }
+
+  return { get, scope, add, run, name, env, input }
 }

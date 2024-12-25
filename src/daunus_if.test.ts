@@ -5,7 +5,7 @@ describe("$if", () => {
   it("should work without steps", async () => {
     const condition = $if({ condition: true })
 
-    const data = await condition.run()
+    const { data } = await condition.run()
 
     type A = typeof data
 
@@ -20,7 +20,7 @@ describe("$if", () => {
 
       .add("first step", ({ $ }) => $.condition)
 
-    const data = await condition.run()
+    const { data } = await condition.run()
 
     type A = typeof data
 
@@ -41,7 +41,7 @@ describe("$if", () => {
 
       .add("false step", () => ({ foo: "bar" }))
 
-    const data = await condition.run()
+    const { data } = await condition.run()
 
     type A = typeof data
 

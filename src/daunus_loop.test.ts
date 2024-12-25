@@ -10,7 +10,7 @@ describe("$loop", () => {
 
       .add("second step", ({ $ }) => $.firstStep.value)
 
-    const data = await loop.run()
+    const { data } = await loop.run()
 
     type A = typeof data
 
@@ -25,7 +25,7 @@ describe("$loop", () => {
 
       .add("first step", ({ $ }) => $.i.value)
 
-    const data = await loop.run()
+    const { data } = await loop.run()
 
     type A = typeof data
 
@@ -42,7 +42,7 @@ describe("$loop", () => {
 
       .add("second step", () => 42)
 
-    const data = await loop.run()
+    const { data } = await loop.run()
 
     type A = typeof data
 

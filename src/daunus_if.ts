@@ -1,7 +1,6 @@
 import { $steps } from "./daunus_steps"
 import {
   AbstractStepFactory,
-  Action,
   Scope,
   StepConfig,
   StepFactory,
@@ -10,6 +9,7 @@ import {
 } from "./new_types"
 import { createRun } from "./run_helpers"
 import { ValidateName, Overwrite } from "./type_helpers"
+import { DaunusAction, DaunusActionOrActionWithInput } from "./types"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
@@ -53,9 +53,9 @@ interface ConditionDefaultCaseStepFactory<
   CurrentKey extends Key = "",
   Without extends string = ""
 > extends AbstractStepFactory<Global, Local>,
-    Action<
-      Promise<ExtractValuesByKey<Local, typeof resultKey>>,
-      Global["input"] extends unknown ? undefined : Global["input"]
+    DaunusActionOrActionWithInput<
+      Global["input"],
+      ExtractValuesByKey<Local, typeof resultKey>
     > {
   isTrue(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
@@ -73,12 +73,13 @@ interface ConditionDefaultCaseStepFactory<
     "isFalse"
   >
 
-  add<Name extends string, Value extends Action<any, any>>(
+  add<Name extends string, Value extends DaunusAction<any, any>>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Overwrite<Global, Name> & Record<Name, Awaited<ReturnType<Value["run"]>>>,
+    Overwrite<Global, Name> &
+      Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>,
     OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
       Record<CurrentKey, Record<typeof resultKey, Value>>,
@@ -143,12 +144,14 @@ export function $if<
   condition,
   key,
   $,
-  scope: prevScope
+  scope: prevScope,
+  name: actionName
 }: {
   condition: Condition
   $?: Global
   key?: Key
   scope?: Scope<any, any>
+  name?: string
 }): ConditionFactory<Condition, Global, Local> {
   const scope =
     prevScope ??
@@ -196,7 +199,7 @@ export function $if<
     })
   }
 
-  const run = createRun<Global["input"]>((ctx) => {
+  const run = createRun<Global["input"]>(async (ctx) => {
     const noSteps =
       Object.values(scope.local).filter(
         (item: any) => Object.values(item.scope.steps).length === 0
@@ -207,15 +210,28 @@ export function $if<
     }
 
     if (condition) {
-      return $steps({
+      const { data } = await $steps({
         $: scope.get("true").scope.addGlobal("condition", condition)
       }).run(ctx)
+
+      return data
     }
 
-    return $steps({
+    const { data } = await $steps({
       $: scope.get("false").scope.addGlobal("condition", condition)
     }).run(ctx)
+
+    return data
   })
 
-  return { run, get, add, isTrue, isFalse, scope }
+  // TODO
+  const env = {}
+
+  const name = actionName as string
+
+  const input: any = () => {
+    return {} as any
+  }
+
+  return { run, get, add, isTrue, isFalse, scope, env, name, input }
 }

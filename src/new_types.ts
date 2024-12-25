@@ -10,12 +10,6 @@ import {
   StepsFactory
 } from "."
 
-export interface Action<R, I = unknown> {
-  run: I extends object
-    ? (input: I, ctx?: Map<string, any>) => R
-    : (ctx?: Map<string, any>) => R
-}
-
 type WorkflowBackoff = "constant" | "linear" | "exponential"
 
 export interface StepConfig<N, L> {
