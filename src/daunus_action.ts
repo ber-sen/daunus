@@ -24,7 +24,6 @@ export const $action =
       skipParse?: boolean
       skipPlaceholders?: boolean
       envSchema?: z.Schema<E>
-      meta?: object
     },
     fn: ({
       ctx,
@@ -103,9 +102,8 @@ export const $action =
     const action: DaunusAction<O, E> = {
       ...actionCtx,
       name,
-      envSchema: args.envSchema,
-      run: makeRun(),
-      actionMeta: args.meta
+      env: args.envSchema?._type ?? {} as E,
+      run: makeRun()
     }
 
     const actionWithOptions: DaunusActionWithOptions<

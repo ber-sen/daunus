@@ -75,8 +75,7 @@ export type NonUndefined<T> = T extends undefined ? never : T
 
 export type DaunusAction<Return, Env = {}> = {
   name: string
-  envSchema?: z.Schema<Env>
-  actionMeta?: object
+  env: Env
   run: (ctx?: DaunusCtx) => Promise<{
     data: ResolveDaunusVarData<Return>
     exception: NonUndefined<ExtractDaunusExceptions<Return>>

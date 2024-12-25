@@ -118,10 +118,32 @@ describe("$action", () => {
       }
     )
 
-    type A = z.infer<NonNullable<ReturnType<typeof test>["envSchema"]>>
+    type A = ReturnType<typeof test>["env"]
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     type test = Expect<Equal<A, {}>>
+  })
+
+  it("Should work without env return", () => {
+    const test = $action(
+      {
+        type: "user.app.snake_method",
+        envSchema: z.object({ API_KEY: z.string() })
+      },
+      () => (_: string) => {
+        return "test"
+      }
+    )
+
+    type A = ReturnType<typeof test>["env"]
+
+    type test = Expect<
+      Equal<
+        A,
+        {
+          API_KEY: string
+        }
+      >
+    >
   })
 
   it("Should populate openapi by when struct matches", () => {
@@ -170,16 +192,5 @@ describe("$action", () => {
     type A = typeof data
 
     type test = Expect<Equal<A, { success: boolean }>>
-  })
-
-  it("Should pass meta", () => {
-    const action = $action(
-      { type: "foo", meta: { foo: "baz" } },
-      () => (params: string) => {
-        return params
-      }
-    )("")
-
-    expect(action.actionMeta).toEqual({ foo: "baz" })
   })
 })
