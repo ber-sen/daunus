@@ -49,6 +49,31 @@ describe("$steps", () => {
     })
   })
 
+  xit("should allow mixture of actions and value", async () => {
+    const steps = $steps().add(
+      "first step",
+      () => Math.random() > 0.5 && struct({ success: true })
+    )
+
+    const { data } = await steps.run()
+
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+
+    type steps = Expect<
+      Equal<
+        A,
+        | false
+        | {
+            success: boolean
+          }
+      >
+    >
+
+    expect(data).toEqual({
+      success: true
+    })
+  })
+
   it("should work with one step", async () => {
     const steps = $steps().add("first step", () => ({
       foo: "bar"

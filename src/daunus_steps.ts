@@ -95,12 +95,19 @@ export interface DefaultStepFactory<
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): DefaultStepFactory<
-    Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
-    Omit<Local, typeof resultKey> &
-      Record<Name, Value> &
-      Record<typeof resultKey, Value>
-  >
+  ): Value extends DaunusAction<infer R, any>
+    ? DefaultStepFactory< // TODO fix eexception and remove overloading
+        Overwrite<Global, Name> & Record<Name, R>,
+        Omit<Local, typeof resultKey> &
+          Record<Name, Value> &
+          Record<typeof resultKey, R>
+      >
+    : DefaultStepFactory<
+        Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
+        Omit<Local, typeof resultKey> &
+          Record<Name, Value> &
+          Record<typeof resultKey, Value> 
+      >
 }
 
 export interface ParallelStepFactory<
