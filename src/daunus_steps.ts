@@ -17,20 +17,43 @@ export interface DefaultStepFactory<
 > extends StepFactory<Global, Local>,
     DaunusActionOrActionWithInput<
       Global["input"],
-      Local[typeof resultKey] extends DaunusActionOrActionWithInput<
-        any,
-        any,
-        any
-      >
-        ? Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]
+      Local[typeof resultKey] extends DaunusAction<any, any>
+        ?
+            | Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]
+            | Awaited<ReturnType<Local[typeof resultKey]["run"]>>["exception"]
         : Local[typeof resultKey]
     > {
   add<Value extends DaunusAction<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: StepProps<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Promise<Value>
   ): DefaultStepFactory<
-    Overwrite<Global, Name> &
-      Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>,
+    Awaited<ReturnType<Value["run"]>>["exception"] extends never
+      ? Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]>
+      : Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]> &
+          Record<
+            "exceptions",
+            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+          >,
+    Omit<Local, typeof resultKey> &
+      Record<Name, Value> &
+      Record<typeof resultKey, Value>
+  >
+
+  add<Value extends DaunusAction<any, any>, Name extends string>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    fn: (props: StepProps<Global>) => Value
+  ): DefaultStepFactory<
+    Awaited<ReturnType<Value["run"]>>["exception"] extends never
+      ? Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]>
+      : Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]> &
+          Record<
+            "exceptions",
+            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+          >,
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<typeof resultKey, Value>

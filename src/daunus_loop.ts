@@ -17,17 +17,29 @@ export interface DefaultLoopStepFactory<
 > extends StepFactory<Global, Local>,
     DaunusActionOrActionWithInput<
       Global["input"],
-      Local[typeof resultKey] extends DaunusActionOrActionWithInput<any, any, any>
+      Local[typeof resultKey] extends DaunusActionOrActionWithInput<
+        any,
+        any,
+        any
+      >
         ? Array<Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]>
         : Array<Local[typeof resultKey]>
     > {
-  add<Value extends DaunusAction<any, any>, N extends string>(
-    name: ValidateName<N, Local> | StepConfig<N, Local>,
+  add<Name extends string, Value extends DaunusAction<any, any>>(
+    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): DefaultLoopStepFactory<
-    Overwrite<Global, N> & Record<N, Awaited<ReturnType<Value["run"]>>["data"]>,
+    Awaited<ReturnType<Value["run"]>>["exception"] extends never
+      ? Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>
+      : Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Value["run"]>>["data"]> &
+          Record<
+            "exceptions",
+            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+          >,
     Omit<Local, typeof resultKey> &
-      Record<N, Value> &
+      Record<Name, Value> &
       Record<typeof resultKey, Value>
   >
 

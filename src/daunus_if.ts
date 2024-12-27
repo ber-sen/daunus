@@ -78,8 +78,15 @@ interface ConditionDefaultCaseStepFactory<
     fn: (props: StepProps<Global>) => Promise<Value> | Value
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Overwrite<Global, Name> &
-      Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>,
+    Awaited<ReturnType<Value["run"]>>["exception"] extends never
+      ? Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>
+      : Overwrite<Global, Name> &
+          Record<Name, Awaited<ReturnType<Value["run"]>>["data"]> &
+          Record<
+            "exceptions",
+            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+          >,
     OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
       Record<CurrentKey, Record<typeof resultKey, Value>>,

@@ -1,7 +1,8 @@
 import { $steps } from "./daunus_steps"
 import { StepFactory } from "./new_types"
 
-import { Equal, Expect } from "./types"
+import { DaunusException, Equal, Expect } from "./types"
+import { exit, struct } from "."
 
 describe("$steps", () => {
   it("should convert keys to cammel case", () => {
@@ -119,6 +120,58 @@ describe("$steps", () => {
         ]
       }
     })
+  })
+
+  it("should return exceptions", async () => {
+    const steps = $steps().add("nested", () =>
+      exit({ status: 600, data: { foo: "bar" } })
+    )
+
+    const { data, exception } = await steps.run()
+
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
+
+    type steps = Expect<
+      Equal<
+        A,
+        DaunusException<
+          600,
+          {
+            foo: string
+          },
+          undefined
+        >
+      >
+    >
+
+    expect(data).toEqual(undefined)
+    expect(exception).toEqual(
+      new DaunusException({ status: 600, data: { foo: "bar" } })
+    )
+  })
+
+  xit("should join exceptions", async () => {
+    const steps = $steps()
+      .add("sub", ({ $steps }) =>
+        $steps()
+          .add("no exception", () => struct({ success: true }))
+
+          .add("nested", () => exit({ status: 600 }))
+
+          .add("another level", ({ $steps }) =>
+            $steps()
+              .add("deep1", () => true)
+              .add("deep2", () => exit({ status: 502, data: "lorem" }))
+          )
+
+          .add("second step", ({ $ }) => $)
+      )
+
+      .add("return", ({ $ }) => $.sub.noException.success)
+
+    const { data, exception } = await steps.run()
+
+    expect(data).toEqual("bar")
   })
 
   it("should return the return value of last key by default in nested", async () => {
