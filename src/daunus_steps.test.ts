@@ -242,7 +242,11 @@ describe("$steps", () => {
         $steps()
           .add("no exception", () => struct({ success: true }))
 
-          .add("nested", () => exit({ status: 600 }))
+          .add("nested", () =>
+            Math.random() > 0.5
+              ? struct({ success: true })
+              : exit({ status: 600 })
+          )
 
           .add("another level", ({ $steps }) =>
             $steps()
@@ -253,11 +257,19 @@ describe("$steps", () => {
           .add("second step", ({ $ }) => $)
       )
 
-      .add("return", ({ $ }) => $.sub.anotherLevel)
+      .add("return", ({ $ }) => $)
 
-    const { data, exception } = await steps.run()
+    const res = await steps.run()
 
-    expect(data).toEqual("bar")
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
+
+    type steps = Expect<
+      Equal<
+        A,
+        | DaunusException<600, undefined, undefined>
+        | DaunusException<502, string, undefined>
+      >
+    >
   })
 
   it("should return the return value of last key by default in nested", async () => {
