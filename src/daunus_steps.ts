@@ -1,4 +1,8 @@
-import { DaunusAction, DaunusActionOrActionWithInput } from "./types"
+import {
+  DaunusAction,
+  DaunusActionOrActionWithInput,
+  ExtractDaunusExceptions
+} from "./types"
 import { isAction } from "./new_helpers"
 import {
   Scope,
@@ -17,11 +21,19 @@ export interface DefaultStepFactory<
 > extends StepFactory<Global, Local>,
     DaunusActionOrActionWithInput<
       Global["input"],
-      Local[typeof resultKey] extends DaunusAction<any, any>
+      Local[typeof resultKey] extends DaunusActionOrActionWithInput<
+        any,
+        any,
+        any
+      >
         ?
             | Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]
-            | Awaited<ReturnType<Local[typeof resultKey]["run"]>>["exception"]
-        : Local[typeof resultKey]
+            | ExtractDaunusExceptions<Local["exceptions"]>
+        : ExtractDaunusExceptions<Local["exceptions"]> extends undefined
+          ? Local[typeof resultKey]
+          :
+              | Local[typeof resultKey]
+              | ExtractDaunusExceptions<Local["exceptions"]>
     > {
   add<Value extends DaunusAction<any, any>, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
@@ -30,15 +42,25 @@ export interface DefaultStepFactory<
     Awaited<ReturnType<Value["run"]>>["exception"] extends never
       ? Overwrite<Global, Name> &
           Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]>
-      : Overwrite<Global, Name> &
-          Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]> &
-          Record<
-            "exceptions",
-            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
-          >,
+      : Awaited<ReturnType<Value["run"]>>["data"] extends never
+        ? Overwrite<Global, Name> &
+            Record<
+              "exceptions",
+              Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+            >
+        : Overwrite<Global, Name> &
+            Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]> &
+            Record<
+              "exceptions",
+              Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+            >,
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
-      Record<typeof resultKey, Value>
+      Record<typeof resultKey, Value> &
+      Record<
+        "exceptions",
+        Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+      >
   >
 
   add<Value extends DaunusAction<any, any>, Name extends string>(
@@ -48,15 +70,25 @@ export interface DefaultStepFactory<
     Awaited<ReturnType<Value["run"]>>["exception"] extends never
       ? Overwrite<Global, Name> &
           Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]>
-      : Overwrite<Global, Name> &
-          Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]> &
-          Record<
-            "exceptions",
-            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
-          >,
+      : Awaited<ReturnType<Value["run"]>>["data"] extends never
+        ? Overwrite<Global, Name> &
+            Record<
+              "exceptions",
+              Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+            >
+        : Overwrite<Global, Name> &
+            Record<Name, Awaited<ReturnType<Awaited<Value>["run"]>>["data"]> &
+            Record<
+              "exceptions",
+              Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+            >,
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
-      Record<typeof resultKey, Value>
+      Record<typeof resultKey, Value> &
+      Record<
+        "exceptions",
+        Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
+      >
   >
 
   add<Value, Name extends string>(

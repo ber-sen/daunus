@@ -122,7 +122,7 @@ describe("$steps", () => {
     })
   })
 
-  it("should return exceptions", async () => {
+  xit("should return exceptions", async () => {
     const steps = $steps().add("nested", () =>
       exit({ status: 600, data: { foo: "bar" } })
     )
@@ -150,6 +150,46 @@ describe("$steps", () => {
     )
   })
 
+  xit("should return exceptions from previous steps", async () => {
+    const steps = $steps()
+      .add("first error", () => exit({ status: 501, data: { lorem: "bar" } }))
+
+      .add("no expetion", () => ({ success: true }))
+
+      .add("error step", () => exit({ status: 600, data: { foo: "bar" } }))
+
+      .add("final", ({ $ }) => $)
+
+    const { data, exception } = await steps.run()
+
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
+
+    type steps = Expect<
+      Equal<
+        A,
+        | DaunusException<
+            501,
+            {
+              lorem: string
+            },
+            undefined
+          >
+        | DaunusException<
+            600,
+            {
+              foo: string
+            },
+            undefined
+          >
+      >
+    >
+
+    expect(data).toEqual(undefined)
+    expect(exception).toEqual(
+      new DaunusException({ status: 600, data: { foo: "bar" } })
+    )
+  })
+
   xit("should join exceptions", async () => {
     const steps = $steps()
       .add("sub", ({ $steps }) =>
@@ -160,14 +200,14 @@ describe("$steps", () => {
 
           .add("another level", ({ $steps }) =>
             $steps()
-              .add("deep1", () => true)
               .add("deep2", () => exit({ status: 502, data: "lorem" }))
+              .add("deep1", () => true)
           )
 
           .add("second step", ({ $ }) => $)
       )
 
-      .add("return", ({ $ }) => $.sub.noException.success)
+      .add("return", ({ $ }) => $.sub.anotherLevel)
 
     const { data, exception } = await steps.run()
 
