@@ -158,7 +158,7 @@ describe("$steps", () => {
 
       .add("error step", () => exit({ status: 600, data: { foo: "bar" } }))
 
-      .add("final", ({ $ }) => $)
+      .add("final", ({ $ }) => $.noExpetion)
 
     const { data, exception } = await steps.run()
 
