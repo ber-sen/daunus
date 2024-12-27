@@ -28,6 +28,27 @@ describe("$steps", () => {
     >
   })
 
+  it("should allow actions", async () => {
+    const steps = $steps().add("first step", () => struct({ success: true }))
+
+    const { data, exception } = await steps.run()
+
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+
+    type steps = Expect<
+      Equal<
+        A,
+        {
+          success: boolean
+        }
+      >
+    >
+
+    expect(data).toEqual({
+      success: true
+    })
+  })
+
   it("should work with one step", async () => {
     const steps = $steps().add("first step", () => ({
       foo: "bar"
