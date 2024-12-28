@@ -26,19 +26,9 @@ export interface DefaultStepFactory<
 > extends StepFactory<Global, Local>,
     DaunusActionOrActionWithInput<
       Global["input"],
-      Local[typeof resultKey] extends DaunusAction<any, any>
-        ?
-            | Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]
-            | ExtractDaunusExceptions<Local["exceptions"]>
-        : Local[typeof resultKey] extends DaunusActionWithInput<any, any>
-          ?
-              | Awaited<ReturnType<Local[typeof resultKey]["run"]>>["data"]
-              | ExtractDaunusExceptions<Local["exceptions"]>
-          : ExtractDaunusExceptions<Local["exceptions"]> extends undefined
-            ? Local[typeof resultKey]
-            :
-                | Local[typeof resultKey]
-                | ExtractDaunusExceptions<Local["exceptions"]>
+      ExtractDaunusExceptions<Local["exceptions"]> extends undefined
+        ? Local[typeof resultKey]
+        : Local[typeof resultKey] | ExtractDaunusExceptions<Local["exceptions"]>
     > {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
