@@ -4,13 +4,10 @@ import { z } from "zod"
 import { v4 } from "@lukeed/uuid"
 import { resolveParams } from "./resolve_params"
 import {
-  ExceptionParams,
   DaunusAction,
   DaunusCtx,
-  DaunusActionWithOptions,
   DaunusException,
-  ResolveDaunusVarData,
-  NonUndefined,
+  ExtractData,
   ExtractDaunusExceptions
 } from "./types"
 import { isException, parseResult } from "./helpers"
@@ -93,8 +90,8 @@ export const $action =
             data: undefined,
             exception
           } as {
-            data: ResolveDaunusVarData<O>
-            exception: NonUndefined<ExtractDaunusExceptions<O>>
+            data: ExtractData<O>
+            exception: ExtractDaunusExceptions<O>
           }
         }
       }
@@ -102,7 +99,7 @@ export const $action =
     const action: DaunusAction<O, E> = {
       ...actionCtx,
       name,
-      env: args.envSchema?._type ?? {} as E,
+      env: args.envSchema?._type ?? ({} as E),
       run: makeRun()
     }
 

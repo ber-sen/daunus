@@ -1,6 +1,5 @@
 import { get } from "./get"
 import {
-  ResolveDaunusVarData,
   ExtractDaunusExceptions,
   DaunusException,
   DaunusCtx,
@@ -119,7 +118,7 @@ function extractDaunusExceptions<T>(obj: T): DaunusException<any>[] {
 export const parseResult = <Return>(
   data: Return
 ): {
-  data: ResolveDaunusVarData<Return>
+  data: any
   exception: NonUndefined<ExtractDaunusExceptions<Return>>
 } => {
   if (Array.isArray(data) && data.length === 2 && isException(data[1])) {

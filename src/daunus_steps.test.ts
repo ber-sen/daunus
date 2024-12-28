@@ -75,9 +75,46 @@ describe("$steps", () => {
   })
 
   it("should work with one step", async () => {
-    const steps = $steps().add("first step", () => ({
-      foo: "bar"
-    }))
+    const steps = $steps() //
+      .add("first step", () => ({
+        foo: "bar"
+      }))
+
+    const { data } = await steps.run()
+
+    expect(data).toEqual({ foo: "bar" })
+  })
+
+  xit("should allow mixture of actions and value", async () => {
+    const steps = $steps()
+      .add("first step", () => Math.random() > 0.5 && struct({ success: true }))
+
+      .add("second step", ({ $ }) => $.firstStep)
+
+    const { data } = await steps.run()
+
+    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+
+    type steps = Expect<
+      Equal<
+        A,
+        | false
+        | {
+            success: boolean
+          }
+      >
+    >
+
+    expect(data).toEqual({
+      success: true
+    })
+  })
+
+  it("should work with one step", async () => {
+    const steps = $steps() //
+      .add("first step", () => ({
+        foo: "bar"
+      }))
 
     const { data } = await steps.run()
 
@@ -98,12 +135,13 @@ describe("$steps", () => {
   })
 
   it("should provide an easy way to extend", () => {
-    const nested = $steps().add("sub", ({ $steps }) =>
-      $steps()
-        .add("first step", () => ({ foo: "bar" }))
+    const nested = $steps() //
+      .add("sub", ({ $steps }) =>
+        $steps()
+          .add("first step", () => ({ foo: "bar" }))
 
-        .add("second step", ({ $ }) => $.firstStep.foo.toString())
-    )
+          .add("second step", ({ $ }) => $.firstStep.foo.toString())
+      )
 
     function toJson(factory: StepFactory<any, any>) {
       const steps = Object.values(factory.scope.steps).map((value) => {
@@ -200,7 +238,7 @@ describe("$steps", () => {
     const steps = $steps()
       .add("first error", () => exit({ status: 501, data: { lorem: "bar" } }))
 
-      .add("no expetion", () => ({ success: true }))
+      .add("no expetion", () => struct({ success: true }))
 
       .add("error step", () => exit({ status: 600, data: { foo: "bar" } }))
 
@@ -237,27 +275,24 @@ describe("$steps", () => {
   })
 
   xit("should join exceptions", async () => {
-    const steps = $steps()
-      .add("sub", ({ $steps }) =>
-        $steps()
-          .add("no exception", () => struct({ success: true }))
+    const steps = $steps().add("sub", ({ $steps }) =>
+      $steps()
+        .add("no exception", () => struct({ success: true }))
 
-          .add("nested", () =>
-            Math.random() > 0.5
-              ? struct({ success: true })
-              : exit({ status: 600 })
-          )
+        .add("nested", () =>
+          Math.random() > 0.5
+            ? struct({ success: true })
+            : exit({ status: 600 })
+        )
 
-          .add("another level", ({ $steps }) =>
-            $steps()
-              .add("deep2", () => exit({ status: 502, data: "lorem" }))
-              .add("deep1", () => true)
-          )
+        .add("another level", ({ $steps }) =>
+          $steps()
+            .add("deep2", () => exit({ status: 502, data: "lorem" }))
+            .add("deep1", ({ $ }) => $)
+        )
 
-          .add("second step", ({ $ }) => $)
-      )
-
-      .add("return", ({ $ }) => $)
+        .add("second step", ({ $ }) => $)
+    )
 
     const res = await steps.run()
 

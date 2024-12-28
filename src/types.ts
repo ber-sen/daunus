@@ -6,58 +6,6 @@ export type DaunusInput<T> = z.ZodType<T>
 
 export type DaunusCtx = Map<any, any>
 
-export type ResolveDaunusVarData<T> =
-  T extends ReadableStream<infer Z>
-    ? ReadableStream<Z>
-    : T extends DaunusQuery<infer U>
-      ? U extends DaunusQuery<infer Z>
-        ? DaunusExcludeException<Z>
-        : U extends Array<infer A>
-          ? Array<ResolveDaunusVarData<A>>
-          : U extends DaunusException<any, any>
-            ? DaunusExcludeException<U>
-            : U extends object
-              ? {
-                  [K in keyof U]: ResolveDaunusVarData<U[K]>
-                }
-              : U
-      : T extends Array<infer A>
-        ? Array<ResolveDaunusVarData<A>>
-        : T extends Date
-          ? T
-          : T extends DaunusException<any, any>
-            ? DaunusExcludeException<T>
-            : T extends object
-              ? {
-                  [K in keyof T]: ResolveDaunusVarData<T[K]>
-                }
-              : T
-
-export type ResolveDaunusVarExceptions<T> =
-  T extends DaunusQuery<infer U>
-    ? U extends DaunusQuery<infer Z>
-      ? DaunusGetExceptions<Z>
-      : U extends Array<infer A>
-        ? Array<ResolveDaunusVarExceptions<A>>
-        : U extends DaunusException<any, any>
-          ? DaunusGetExceptions<U>
-          : U extends object
-            ? {
-                [K in keyof U]: ResolveDaunusVarExceptions<U[K]>
-              }
-            : never
-    : T extends Array<infer A>
-      ? Array<ResolveDaunusVarExceptions<A>>
-      : T extends Date
-        ? T
-        : T extends DaunusException<any, any>
-          ? T
-          : T extends object
-            ? {
-                [K in keyof T]: ResolveDaunusVarExceptions<T[K]>
-              }
-            : never
-
 export type ExtractDaunusExceptions<T> =
   T extends DaunusException<any, any>
     ? T
@@ -73,12 +21,14 @@ export type ExtractDaunusExceptions<T> =
 
 export type NonUndefined<T> = T extends undefined ? never : T
 
+export type ExtractData<Return> = Exclude<Return, DaunusException<any, any>>
+
 export type DaunusAction<Return, Env = {}> = {
   name: string
   env: Env
   run: (ctx?: DaunusCtx) => Promise<{
-    data: ResolveDaunusVarData<Return>
-    exception: NonUndefined<ExtractDaunusExceptions<Return>>
+    data: ExtractData<Return>
+    exception: ExtractDaunusExceptions<Return>
   }>
 }
 
@@ -89,8 +39,8 @@ export type DaunusActionWithInput<Input, Return, Env = {}> = {
     input: Input,
     ctx?: DaunusCtx
   ) => Promise<{
-    data: ResolveDaunusVarData<Return>
-    exception: NonUndefined<ExtractDaunusExceptions<Return>>
+    data: ExtractData<Return>
+    exception: ExtractDaunusExceptions<Return>
   }>
   input: (input: Input) => DaunusAction<Return, Env>
 }
