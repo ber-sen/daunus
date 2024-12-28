@@ -23,6 +23,12 @@ export type NonUndefined<T> = T extends undefined ? never : T
 
 export type ExtractData<Return> = Exclude<Return, DaunusException<any, any>>
 
+export type DataResponse<D> = { data: D }
+
+export type ExceptionReponse<E> = { exception: E }
+
+export type ActionReponse<D, E> = DataResponse<D> & ExceptionReponse<E>
+
 export type DaunusAction<Return, Env = {}> = {
   name: string
   env: Env

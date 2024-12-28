@@ -3,7 +3,8 @@ import {
   DaunusActionOrActionWithInput,
   DaunusActionWithInput,
   ExtractDaunusExceptions,
-  ExtractData
+  DataResponse,
+  ExceptionReponse
 } from "./types"
 import { isAction } from "./new_helpers"
 import {
@@ -16,9 +17,6 @@ import {
 } from "./new_types"
 import { createRun } from "./run_helpers"
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
-
-type Wrapp<T> = { data: T }
-type ExWrapp<T> = { exception: T }
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
@@ -38,7 +36,7 @@ export interface DefaultStepFactory<
       Record<
         Name,
         Value extends DaunusAction<any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends Wrapp<infer T>
+          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
@@ -48,7 +46,9 @@ export interface DefaultStepFactory<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["run"]>> extends ExWrapp<infer T>
+              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+                infer T
+              >
                 ? T
                 : never
             >
@@ -58,18 +58,22 @@ export interface DefaultStepFactory<
       Record<Name, Value> &
       Record<
         typeof resultKey,
-        Value extends DaunusAction<any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends Wrapp<infer T>
+        Value extends DaunusActionWithInput<any, any, any>
+          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
             ? T
             : never
-          : Value
+          : Value extends DaunusAction<any, any>
+            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+              ? T
+              : never
+            : Value
       > &
       (Value extends DaunusAction<any, any>
         ? Record<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["run"]>> extends ExWrapp<infer T>
+              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<infer T>
                 ? T
                 : never
             >
