@@ -35,13 +35,17 @@ export interface DefaultStepFactory<
     Overwrite<Global, Name> &
       Record<
         Name,
-        Value extends DaunusAction<any, any>
+        Value extends
+          | DaunusAction<any, any>
+          | DaunusActionWithInput<any, any, any>
           ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
       > &
-      (Value extends DaunusAction<any, any>
+      (Value extends
+        | DaunusAction<any, any>
+        | DaunusActionWithInput<any, any, any>
         ? Record<
             "exceptions",
             Record<
@@ -58,17 +62,17 @@ export interface DefaultStepFactory<
       Record<Name, Value> &
       Record<
         typeof resultKey,
-        Value extends DaunusActionWithInput<any, any, any>
+        Value extends
+          | DaunusAction<any, any>
+          | DaunusActionWithInput<any, any, any>
           ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
             ? T
             : never
-          : Value extends DaunusAction<any, any>
-            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
-              ? T
-              : never
-            : Value
+          : Value
       > &
-      (Value extends DaunusAction<any, any>
+      (Value extends
+        | DaunusAction<any, any>
+        | DaunusActionWithInput<any, any, any>
         ? Record<
             "exceptions",
             Record<

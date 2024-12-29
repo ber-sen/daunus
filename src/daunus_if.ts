@@ -9,7 +9,13 @@ import {
 } from "./new_types"
 import { createRun } from "./run_helpers"
 import { ValidateName, Overwrite } from "./type_helpers"
-import { DaunusAction, DaunusActionOrActionWithInput } from "./types"
+import {
+  DataResponse,
+  DaunusAction,
+  DaunusActionOrActionWithInput,
+  DaunusActionWithInput,
+  ExceptionReponse
+} from "./types"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
@@ -73,36 +79,67 @@ interface ConditionDefaultCaseStepFactory<
     "isFalse"
   >
 
-  add<Name extends string, Value extends DaunusAction<any, any>>(
+  add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: StepProps<Global>) => Promise<Value> | Value
+    fn: (props: StepProps<Global>) => Value | Promise<Value>
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Awaited<ReturnType<Value["run"]>>["exception"] extends never
-      ? Overwrite<Global, Name> &
-          Record<Name, Awaited<ReturnType<Value["run"]>>["data"]>
-      : Overwrite<Global, Name> &
-          Record<Name, Awaited<ReturnType<Value["run"]>>["data"]> &
-          Record<
+    Overwrite<Global, Name> &
+      Record<
+        Name,
+        Value extends
+          | DaunusAction<any, any>
+          | DaunusActionWithInput<any, any, any>
+          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+            ? T
+            : never
+          : Value
+      > &
+      (Value extends
+        | DaunusAction<any, any>
+        | DaunusActionWithInput<any, any, any>
+        ? Record<
             "exceptions",
-            Record<Name, Awaited<ReturnType<Value["run"]>>["exception"]>
-          >,
+            Record<
+              Name,
+              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+                infer T
+              >
+                ? T
+                : never
+            >
+          >
+        : {}),
     OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
-      Record<CurrentKey, Record<typeof resultKey, Value>>,
-    CurrentKey,
-    Without
-  >
-
-  add<Name extends string, Value>(
-    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ConditionDefaultCaseStepFactoryWithout<
-    Condition,
-    Overwrite<Global, Name> & Record<Name, Awaited<Value>>,
-    OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
-      Record<CurrentKey, Record<Name, Value>> &
-      Record<CurrentKey, Record<typeof resultKey, Value>>,
+      Record<
+        CurrentKey,
+        Record<
+          typeof resultKey,
+          Value extends
+            | DaunusAction<any, any>
+            | DaunusActionWithInput<any, any, any>
+            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+              ? T
+              : never
+            : Value
+        > &
+          (Value extends
+            | DaunusAction<any, any>
+            | DaunusActionWithInput<any, any, any>
+            ? Record<
+                "exceptions",
+                Record<
+                  Name,
+                  Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+                    infer T
+                  >
+                    ? T
+                    : never
+                >
+              >
+            : {})
+      >,
     CurrentKey,
     Without
   >

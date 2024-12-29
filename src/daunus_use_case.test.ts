@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { $useCase } from "./daunus_use_case"
 import { Expect, Equal } from "./type_helpers"
-import { $input } from "."
+import { $input, DaunusException, exit } from "."
 
 describe("$usecase", () => {
   it("should work without input", async () => {
@@ -114,6 +114,48 @@ describe("$usecase", () => {
     type data = Expect<Equal<A, (string | number)[]>>
 
     expect(data).toEqual([1, "2 is even", 3])
+  })
+
+  xit("should return error inside loop ", async () => {
+    const input = $input({ array: z.array(z.number()) })
+
+    const useCase = $useCase("Loop with error", { input }) //
+      .handle(({ $loop, $ }) =>
+        $loop({ list: $.input.array })
+          .forEachItem()
+
+          .add("exit", () => exit({ status: 500 }))
+      )
+
+    const { exception } = await useCase.run({ array: [1, 2, 3] })
+
+    type A = typeof exception
+
+    type exception = Expect<
+      Equal<A, DaunusException<500, undefined, undefined>>
+    >
+
+    expect(exception).toEqual(new DaunusException({ status: 500 }))
+  })
+
+  xit("should return error inside condition", async () => {
+    const input = $input({ array: z.array(z.number()) })
+
+    const useCase = $useCase("condition with error", { input }) //
+      .handle(({ $if, $ }) =>
+        $if({ condition: $.input.array.length > 1 }) //
+          .add("exit", () => exit({ status: 500 }))
+      )
+
+    const { exception } = await useCase.run({ array: [1, 2, 3] })
+
+    type A = typeof exception
+
+    type exception = Expect<
+      Equal<A, DaunusException<500, undefined, undefined>>
+    >
+
+    expect(exception).toEqual(new DaunusException({ status: 500 }))
   })
 
   it("should allow script version", async () => {
