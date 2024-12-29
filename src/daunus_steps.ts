@@ -73,7 +73,9 @@ export interface DefaultStepFactory<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<infer T>
+              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+                infer T
+              >
                 ? T
                 : never
             >
@@ -182,5 +184,5 @@ export function $steps<
     return {} as any
   }
 
-  return { get, scope, add, run, name, env, input } as any
+  return { get, scope, add, run, name, env, input }
 }
