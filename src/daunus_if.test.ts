@@ -86,6 +86,36 @@ describe("$if", () => {
     >
   })
 
+  it("should return the scope of false case", async () => {
+    const condition = $if({ condition: Math.random() > 0.5 })
+      .isTrue()
+
+      .add("first step", () => Promise.resolve([1, 2, 3]))
+
+      .add("second step", ({ $ }) => $.condition)
+
+      .isFalse()
+      
+      .add("false step", ({ $ }) => $.condition)
+
+      .add("false resukts", ({ $ }) => $)
+
+    const { data } = await condition.run()
+
+    type A = typeof data
+
+    type data = Expect<
+      Equal<
+        A,
+        | true
+        | {
+            condition: false
+            falseStep: false
+          }
+      >
+    >
+  })
+
   it("should return the scope of false case", () => {
     const condition = $if({ condition: Math.random() > 0.5 })
       .isTrue()

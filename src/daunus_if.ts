@@ -8,7 +8,7 @@ import {
   resultKey
 } from "./new_types"
 import { createRun } from "./run_helpers"
-import { ValidateName, Overwrite } from "./type_helpers"
+import { ValidateName } from "./type_helpers"
 import {
   DataResponse,
   DaunusAction,
@@ -38,6 +38,7 @@ export type OmitNestedByPath<
 type ConditionDefaultCaseStepFactoryWithout<
   Condition,
   Global extends Record<string, any> = {},
+  ScopedGlobal extends Record<string, any> = {},
   Local extends Record<any, any> = {},
   CurrentKey extends Key = "",
   Without extends string = ""
@@ -45,6 +46,7 @@ type ConditionDefaultCaseStepFactoryWithout<
   ConditionDefaultCaseStepFactory<
     Condition,
     Global,
+    ScopedGlobal,
     Local,
     CurrentKey,
     Without
@@ -55,6 +57,7 @@ type ConditionDefaultCaseStepFactoryWithout<
 interface ConditionDefaultCaseStepFactory<
   Condition,
   Global extends Record<string, any> = {},
+  ScopedGlobal extends Record<string, any> = {},
   Local extends Record<string, any> = {},
   CurrentKey extends Key = "",
   Without extends string = ""
@@ -65,7 +68,8 @@ interface ConditionDefaultCaseStepFactory<
     > {
   isTrue(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    GlobalWithoutFalcy<Global, Condition>,
+    Global,
+    ScopedGlobal & Record<"true", Record<"condition", ExcludeFalsy<Condition>>>,
     Local,
     "true",
     "isTrue"
@@ -73,7 +77,9 @@ interface ConditionDefaultCaseStepFactory<
 
   isFalse(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    GlobalWithoutTruthy<Global, Condition>,
+    Global,
+    ScopedGlobal &
+      Record<"false", Record<"condition", ExcludeTruthy<Condition>>>,
     Local,
     "false",
     "isFalse"
@@ -81,35 +87,41 @@ interface ConditionDefaultCaseStepFactory<
 
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: StepProps<Global>) => Value | Promise<Value>
+    fn: (
+      props: StepProps<Global & ScopedGlobal[CurrentKey]>
+    ) => Value | Promise<Value>
   ): ConditionDefaultCaseStepFactoryWithout<
     Condition,
-    Overwrite<Global, Name> &
+    Global,
+    ScopedGlobal &
       Record<
-        Name,
-        Value extends
-          | DaunusAction<any, any>
-          | DaunusActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
-            ? T
-            : never
-          : Value
-      > &
-      (Value extends
-        | DaunusAction<any, any>
-        | DaunusActionWithInput<any, any, any>
-        ? Record<
-            "exceptions",
-            Record<
-              Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-                infer T
+        CurrentKey,
+        Record<
+          Name,
+          Value extends
+            | DaunusAction<any, any>
+            | DaunusActionWithInput<any, any, any>
+            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+              ? T
+              : never
+            : Value
+        > &
+          (Value extends
+            | DaunusAction<any, any>
+            | DaunusActionWithInput<any, any, any>
+            ? Record<
+                "exceptions",
+                Record<
+                  Name,
+                  Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+                    infer T
+                  >
+                    ? T
+                    : never
+                >
               >
-                ? T
-                : never
-            >
-          >
-        : {}),
+            : {})
+      >,
     OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
       Record<
@@ -157,23 +169,26 @@ type ExcludeFalsy<Condition> = Exclude<Condition, Falsy>
 
 type ExcludeTruthy<Condition> = Exclude<Condition, Truthy<Condition>>
 
-type GlobalWithoutFalcy<Global, Condition> = Omit<Global, "condition"> &
-  Record<"condition", ExcludeFalsy<Condition>>
-
-type GlobalWithoutTruthy<Global, Condition> = Omit<Global, "condition"> &
-  Record<"condition", ExcludeTruthy<Condition>>
-
 type Key = "true" | "false" | ""
 
 export type ConditionFactory<
   Condition,
   Global extends Record<string, any> = {},
+  ScopeGlobal extends Record<string, any> = {},
   Local extends Record<string, any> = {}
-> = ConditionDefaultCaseStepFactory<Condition, Global, Local, "", "add">
+> = ConditionDefaultCaseStepFactory<
+  Condition,
+  Global,
+  ScopeGlobal,
+  Local,
+  "",
+  "add"
+>
 
 export function $if<
   Condition,
   Global extends Record<string, any> = {},
+  ScopeGlobal extends Record<string, any> = {},
   Local extends Record<any, any> = Record<
     "true",
     Record<"condition", Exclude<Condition, Falsy>> &
@@ -196,7 +211,7 @@ export function $if<
   key?: Key
   scope?: Scope<any, any>
   name?: string
-}): ConditionFactory<Condition, Global, Local> {
+}): ConditionFactory<Condition, Global, ScopeGlobal, Local> {
   const scope =
     prevScope ??
     new Scope({})
