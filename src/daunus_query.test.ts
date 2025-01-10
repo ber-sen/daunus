@@ -1,23 +1,23 @@
-import { resolveParams } from "./resolve_params";
-import { $query } from "./daunus_query";
+import { resolveParams } from "./resolve_params"
+import { $query } from "./daunus_query"
 
 const setContext = (value: object) => {
-  const ctx = new Map();
+  const ctx = new Map()
 
-  ctx.set("input", value);
+  ctx.set("input", value)
 
-  return ctx;
-};
+  return ctx
+}
 
 describe("$query", () => {
   it("should return the value", async () => {
-    const ctx = setContext({ name: "Earth" });
+    const ctx = setContext({ name: "Earth" })
 
     const res = await resolveParams(
       ctx,
       $query(($) => $.input.name)
-    );
+    )
 
-    expect(res).toStrictEqual("Earth");
-  });
-});
+    expect(res).toStrictEqual("Earth")
+  })
+})

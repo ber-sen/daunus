@@ -1,36 +1,36 @@
 type AnyObject<Key extends PropertyKey = PropertyKey, Value = any> = {
-  readonly [key in Key]: Value;
-};
+  readonly [key in Key]: Value
+}
 
-type Paths<P extends string, T> = P | `${P}${NextPath<T>}`;
+type Paths<P extends string, T> = P | `${P}${NextPath<T>}`
 
-type Position = `[${number}]`;
+type Position = `[${number}]`
 
 type NextPath<T> = T extends readonly (infer U)[]
   ? Paths<Position, U>
   : T extends Map<any, infer V>
     ? {
-        [K in keyof V]-?: K extends string ? `.${K}` : never;
+        [K in keyof V]-?: K extends string ? `.${K}` : never
       }[keyof V]
     : T extends AnyObject
       ? {
-          [K in keyof T]-?: K extends string ? `.${Paths<K, T[K]>}` : never;
+          [K in keyof T]-?: K extends string ? `.${Paths<K, T[K]>}` : never
         }[keyof T]
-      : never;
+      : never
 
 export type Path<T> = T extends readonly (infer U)[]
   ? Paths<Position, U>
   : T extends Map<any, infer V>
     ? {
-        [K in keyof V]-?: K extends string ? K : never;
+        [K in keyof V]-?: K extends string ? K : never
       }[keyof V]
     : T extends AnyObject
       ? {
-          [K in keyof T]-?: K extends string ? Paths<K, T[K]> : never;
+          [K in keyof T]-?: K extends string ? Paths<K, T[K]> : never
         }[keyof T]
-      : never;
+      : never
 
-type Accessor<T> = Position | Extract<keyof T, string>;
+type Accessor<T> = Position | Extract<keyof T, string>
 
 type NextTypeAtPath<T, P extends string> = P extends `.${infer P2}`
   ? P2 extends Path<T>
@@ -38,7 +38,7 @@ type NextTypeAtPath<T, P extends string> = P extends `.${infer P2}`
     : never
   : P extends Path<T>
     ? TypeAtPath<T, P>
-    : never;
+    : never
 
 type TypeAt<T, A extends string> = A extends Position
   ? T extends readonly (infer U)[]
@@ -48,7 +48,7 @@ type TypeAt<T, A extends string> = A extends Position
     ? T[A]
     : T extends Map<any, infer V>
       ? V
-      : never;
+      : never
 
 export type TypeAtPath<T, P extends Path<T>> =
   P extends Accessor<T>
@@ -57,18 +57,18 @@ export type TypeAtPath<T, P extends Path<T>> =
       ? P extends `${infer A}${P2}`
         ? NextTypeAtPath<TypeAt<Required<T>, A>, P2>
         : never
-      : never;
+      : never
 
 export function get<T, P extends Path<T>, U>(
   object: T,
   path: P,
   placeholder: U
-): TypeAtPath<T, P> | U;
+): TypeAtPath<T, P> | U
 
 export function get<T, P extends Path<T>>(
   object: T,
   path: P
-): TypeAtPath<T, P> | undefined;
+): TypeAtPath<T, P> | undefined
 
 export function get(data: any, path: string, defaultValue?: any): any {
   const value = path
@@ -76,10 +76,10 @@ export function get(data: any, path: string, defaultValue?: any): any {
     .filter(Boolean)
     .reduce<any>((value, key) => {
       if (value instanceof Map && typeof value.get === "function") {
-        return value.get(key);
+        return value.get(key)
       }
-      return (value as any)?.[key];
-    }, data);
+      return (value as any)?.[key]
+    }, data)
 
-  return value ?? defaultValue;
+  return value ?? defaultValue
 }

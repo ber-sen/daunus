@@ -1,14 +1,12 @@
-import { get } from "./get";
+import { get } from "./get"
 import {
-  ResolveDaunusVarData,
-  ResolveDaunusVarExceptions,
   ExtractDaunusExceptions,
   DaunusException,
   DaunusCtx,
-  DaunusVar,
   NonUndefined,
-  DaunusRoute
-} from "./types";
+  DaunusRoute,
+  DaunusQuery
+} from "./types"
 
 export const isObject = (value: any): value is object =>
   value === null ||
@@ -18,18 +16,18 @@ export const isObject = (value: any): value is object =>
   value instanceof Map ||
   value?.constructor === Date
     ? false
-    : typeof value === "object";
+    : typeof value === "object"
 
-export const isDaunusVar = (value: any) =>
-  typeof value === "function" && value.__type === "daunus_var";
+export const isDaunusQuery = (value: any) =>
+  typeof value === "function" && value.__type === "daunus_query"
 
 export const isDaunusPlaceholder = (value: any) =>
-  typeof value === "string" && /<%\s*([\S\s]*?)\s*%>/g.test(value);
+  typeof value === "string" && /<%\s*([\S\s]*?)\s*%>/g.test(value)
 
-export const isArray = (value: any): value is any[] => Array.isArray(value);
+export const isArray = (value: any): value is any[] => Array.isArray(value)
 
 export const isException = (value: any): value is DaunusException<any> =>
-  value instanceof DaunusException || value instanceof Error;
+  value instanceof DaunusException || value instanceof Error
 
 export const isMapLike = (value: any): value is Map<any, any> => {
   return (
@@ -37,13 +35,13 @@ export const isMapLike = (value: any): value is Map<any, any> => {
     value !== null &&
     typeof value.has === "function" &&
     typeof value.get === "function"
-  );
-};
+  )
+}
 
 export function isDaunusRoute(
   route: any
 ): route is DaunusRoute<any, any, any, any> {
-  return route && route.meta && route.meta.iSchema;
+  return route && route.meta && route.meta.iSchema
 }
 
 export const isAction = <T>(obj: T): obj is T & { type: [string] } => {
@@ -53,108 +51,103 @@ export const isAction = <T>(obj: T): obj is T & { type: [string] } => {
     isArray(obj.type) &&
     obj.type.length === 1 &&
     typeof obj.type[0] === "string"
-  );
-};
+  )
+}
 
-export const resolveDaunusVar = (ctx: DaunusCtx, $var: DaunusVar<any>) =>
-  $var(ctx);
+export const resolveDaunusVar = (ctx: DaunusCtx, $query: DaunusQuery<any>) =>
+  $query(ctx)
 
 export const resolveDaunusPlaceholder = (
   ctx: DaunusCtx,
-  str: DaunusVar<any>
+  str: DaunusQuery<any>
 ) => {
   const $ = new Proxy(ctx, {
     get(target, name) {
-      return get(target, name as any);
+      return get(target, name as any)
     }
-  });
+  })
 
   if (/^<%\s*([\S\s]*?)\s*%>$/g.test(str)) {
-    const match = /^<%\s*([\S\s]*?)\s*%>$/g.exec(str);
+    const match = /^<%\s*([\S\s]*?)\s*%>$/g.exec(str)
 
     if (match && ctx.has(".daunus-placeholder-resolver")) {
-      return ctx.get(".daunus-placeholder-resolver")($, match[1]);
+      return ctx.get(".daunus-placeholder-resolver")($, match[1])
     }
 
-    return get({ $ }, match && (match[1].trim() as any));
+    return get({ $ }, match && (match[1].trim() as any))
   }
 
   const interpolated = str.replace(
     /<%\s*([\S\s]*?)\s*%>/g,
     (_: any, key: string) => {
       if (ctx.has(".daunus-placeholder-resolver")) {
-        return ctx.get(".daunus-placeholder-resolver")($, key);
+        return ctx.get(".daunus-placeholder-resolver")($, key)
       }
 
-      return get({ $ }, key.trim() as any);
+      return get({ $ }, key.trim() as any)
     }
-  );
+  )
 
-  return interpolated;
-};
+  return interpolated
+}
 
 function extractDaunusExceptions<T>(obj: T): DaunusException<any>[] {
-  const DaunusExceptions: DaunusException<any>[] = [];
+  const daunusExceptions: DaunusException<any>[] = []
 
   if (obj instanceof ReadableStream) {
-    return DaunusExceptions;
+    return daunusExceptions
   }
 
   function traverseObject(obj: any): void {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const value = obj[key];
+        const value = obj[key]
         if (value instanceof DaunusException) {
-          DaunusExceptions.push(value);
+          daunusExceptions.push(value)
         } else if (typeof value === "object" && value !== null) {
-          traverseObject(value);
+          traverseObject(value)
         }
       }
     }
   }
 
-  traverseObject(obj);
-  return DaunusExceptions;
+  traverseObject(obj)
+  return daunusExceptions
 }
 
-export const parseResult = <T, P>(
-  data: T
+export const parseResult = <Return>(
+  data: Return
 ): {
-  data: ResolveDaunusVarData<T>;
-  exception: NonUndefined<
-    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
-    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
-  >;
+  data: any
+  exception: NonUndefined<ExtractDaunusExceptions<Return>>
 } => {
+  if (Array.isArray(data) && data.length === 2 && isException(data[1])) {
+    return {
+      data: data[0],
+      exception: data[1] as any
+    }
+  }
+
   if (isException(data)) {
     return {
-      data: undefined as ResolveDaunusVarData<T>,
-      exception: data as NonUndefined<
-        | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
-        | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
-      >
-    };
+      data: undefined as any,
+      exception: data as any
+    }
   }
 
   if (isObject(data)) {
-    const errors = extractDaunusExceptions(data);
+    const errors = extractDaunusExceptions(data)
 
     if (errors[0]) {
       return {
-        data: undefined as ResolveDaunusVarData<T>,
-        exception: errors[0] as NonUndefined<
-          | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
-          | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
-        >
-      };
+        data: undefined as any,
+        exception: errors[0] as any
+      }
     }
   }
 
   return {
-    data: data as ResolveDaunusVarData<T>,
-    exception: undefined as any as NonUndefined<
-      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
-      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
-    >
-  };
-};
+    data: data as any,
+    exception: undefined as any
+  }
+}

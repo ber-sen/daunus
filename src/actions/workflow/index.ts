@@ -1,20 +1,20 @@
-import { runAction } from "../../run_action";
-import { $action } from "../../daunus_action";
+import { runAction } from "../../run_action"
+import { $action } from "../../daunus_action"
 
 type Action =
   | {
-      type: string[];
-      params: Action[] | object;
+      type: string[]
+      params: Action[] | object
     }
-  | object;
+  | object
 
 interface Workflow {
-  name: string;
-  id?: string;
+  name: string
+  id?: string
   action?: {
-    type: string[];
-    params: Action;
-  };
+    type: string[]
+    params: Action
+  }
 }
 
 const workflow = $action(
@@ -22,13 +22,13 @@ const workflow = $action(
   ({ ctx }) =>
     async (params: Workflow) => {
       if (!params.action) {
-        return undefined;
+        return undefined
       }
 
-      const res = await runAction(ctx, params.action);
+      const res = await runAction(ctx, params.action)
 
-      return res.data ?? res.error;
+      return res.data ?? res.exception
     }
-);
+)
 
-export default workflow;
+export default workflow

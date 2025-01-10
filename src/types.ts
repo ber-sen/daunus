@@ -1,88 +1,10 @@
-import { z } from "./zod";
+import { z } from "./zod"
 
-export type DaunusVar<T> =
-  DaunusExcludeException<T> extends never
-    ? T
-    : DaunusExcludeException<T> & ((ctx: DaunusCtx) => Promise<T>);
+export type DaunusQuery<T> = T & ((ctx: DaunusCtx) => Promise<T>)
 
-export type DaunusParams<T> = T; // TODO: fix type
+export type DaunusInput<T> = z.ZodType<T>
 
-export type DaunusInput<T> = z.ZodType<T>;
-
-export type DaunusCtx = Map<any, any>;
-
-export type ResolveDaunusVar<T> =
-  T extends DaunusVar<infer U>
-    ? U extends DaunusVar<infer Z>
-      ? Z
-      : U extends Array<infer A>
-        ? Array<ResolveDaunusVar<A>>
-        : U extends object
-          ? {
-              [K in keyof U]: ResolveDaunusVar<U[K]>;
-            }
-          : U
-    : T extends Array<infer A>
-      ? Array<ResolveDaunusVar<A>>
-      : T extends Date
-        ? T
-        : T extends object
-          ? {
-              [K in keyof T]: ResolveDaunusVar<T[K]>;
-            }
-          : T;
-
-export type ResolveDaunusVarData<T> =
-  T extends ReadableStream<infer Z>
-    ? ReadableStream<Z>
-    : T extends DaunusVar<infer U>
-      ? U extends DaunusVar<infer Z>
-        ? DaunusExcludeException<Z>
-        : U extends Array<infer A>
-          ? Array<ResolveDaunusVarData<A>>
-          : U extends DaunusException<any, any>
-            ? DaunusExcludeException<U>
-            : U extends object
-              ? {
-                  [K in keyof U]: ResolveDaunusVarData<U[K]>;
-                }
-              : U
-      : T extends Array<infer A>
-        ? Array<ResolveDaunusVarData<A>>
-        : T extends Date
-          ? T
-          : T extends DaunusException<any, any>
-            ? DaunusExcludeException<T>
-            : T extends object
-              ? {
-                  [K in keyof T]: ResolveDaunusVarData<T[K]>;
-                }
-              : T;
-
-export type ResolveDaunusVarExceptions<T> =
-  T extends DaunusVar<infer U>
-    ? U extends DaunusVar<infer Z>
-      ? DaunusGetExceptions<Z>
-      : U extends Array<infer A>
-        ? Array<ResolveDaunusVarExceptions<A>>
-        : U extends DaunusException<any, any>
-          ? DaunusGetExceptions<U>
-          : U extends object
-            ? {
-                [K in keyof U]: ResolveDaunusVarExceptions<U[K]>;
-              }
-            : never
-    : T extends Array<infer A>
-      ? Array<ResolveDaunusVarExceptions<A>>
-      : T extends Date
-        ? T
-        : T extends DaunusException<any, any>
-          ? T
-          : T extends object
-            ? {
-                [K in keyof T]: ResolveDaunusVarExceptions<T[K]>;
-              }
-            : never;
+export type DaunusCtx = Map<any, any>
 
 export type ExtractDaunusExceptions<T> =
   T extends DaunusException<any, any>
@@ -93,49 +15,58 @@ export type ExtractDaunusExceptions<T> =
         ? {
             [K in keyof T]: T[K] extends DaunusException<any, any>
               ? T[K]
-              : ExtractDaunusExceptions<T[K]>;
+              : ExtractDaunusExceptions<T[K]>
           }[keyof T]
-        : never;
+        : never
 
-export type NonUndefined<T> = T extends undefined ? never : T;
+export type NonUndefined<T> = T extends undefined ? never : T
 
-export type DaunusActionInfo<D, P> = {
-  name: string;
-  type: string;
-  params: any;
-  data?: ResolveDaunusVarData<D>;
-  exception?: NonUndefined<
-    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<D>>
-    | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
-  >;
-};
+export type ExtractData<Return> = Exclude<Return, DaunusException<any, any>>
 
-export type DaunusActionRunOptions<T, P> = {
-  onComplete?: (actionInfo: DaunusActionInfo<T, P>, ctx: DaunusCtx) => void;
-};
+export type DataResponse<D> = { data: D }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type DaunusAction<T, P, E = {}> = {
-  name: string;
-  envSchema?: z.Schema<E>;
-  actionMeta?: object;
+export type ExceptionReponse<E> = { exception: E }
+
+export type ActionReponse<D, E> = DataResponse<D> & ExceptionReponse<E>
+
+export type DaunusAction<Return, Env = {}> = {
+  name: string
+  env: Env
+  run: (ctx?: DaunusCtx) => Promise<{
+    data: ExtractData<Return>
+    exception: ExtractDaunusExceptions<Return>
+  }>
+}
+
+export type DaunusActionWithInput<Input, Return, Env = {}> = {
+  name: string
+  env: Env
   run: (
-    ctx?: DaunusCtx,
-    options?: DaunusActionRunOptions<T, P>
+    input: Input,
+    ctx?: DaunusCtx
   ) => Promise<{
-    data: ResolveDaunusVarData<T>;
-    exception: NonUndefined<
-      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<T>>
-      | ExtractDaunusExceptions<ResolveDaunusVarExceptions<P>>
-    >;
-  }>;
-};
+    data: ExtractData<Return>
+    exception: ExtractDaunusExceptions<Return>
+  }>
+  input: (input: Input) => DaunusAction<Return, Env>
+}
+
+export type DaunusActionOrActionWithInput<Input, Return, Env = {}> = {
+  name: string
+  env: Env
+  run: Input extends object
+    ? DaunusActionWithInput<Input, Return, Env>["run"]
+    : DaunusAction<Return, Env>["run"]
+  input: Input extends object
+    ? (input: Input) => DaunusAction<Return, Env>
+    : undefined
+}
 
 export type DaunusWorkflowAction<T> = {
-  type: string[];
-  params?: T;
-  name?: string;
-};
+  type: string[]
+  params?: T
+  name: string
+}
 
 export type DaunusOpenApiMethod =
   | "get"
@@ -145,140 +76,111 @@ export type DaunusOpenApiMethod =
   | "patch"
   | "head"
   | "options"
-  | "trace";
+  | "trace"
 
 export type DaunusOpenApi = z.ZodObject<{
-  method?: z.ZodType<any>;
-  contentType?: z.ZodType<any>;
-  path?: any;
-  body?: any;
-  query?: any;
-}>;
+  method?: z.ZodType<any>
+  contentType?: z.ZodType<any>
+  path?: any
+  body?: any
+  query?: any
+}>
 
 export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
   meta: {
-    iSchema: I;
+    iSchema: I
     openapi: {
       method: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["method"]>["_output"]
-        : "post";
+        : "post"
       contentType: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["contentType"]>["_output"]
-        : never;
+        : never
       path: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["path"]>["_output"]
-        : never;
+        : never
       body: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["body"]>["_output"]
-        : never;
+        : never
       query: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["query"]>["_output"]
-        : never;
-    };
-  };
-  input: (value: I["_type"]) => DaunusAction<D, P, E>;
-  rawInput: (value: unknown) => DaunusAction<D, P, E>;
-};
+        : never
+    }
+  }
+  input: (value: I["_type"]) => DaunusAction<D, E>
+  rawInput: (value: unknown) => DaunusAction<D, E>
+}
 
-export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, P, E> & {
-  createRoute<I extends z.ZodType<any>>(iSchema: I): DaunusRoute<D, P, E, I>;
-  createRoute(): DaunusAction<D, P, E>;
-};
+export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, E> & {
+  createRoute<I extends z.ZodType<any>>(iSchema: I): DaunusRoute<D, P, E, I>
+  createRoute(): DaunusAction<D, E>
+}
 
 export type DaunusExcludeException<T> =
-  T extends DaunusException<any, any> ? never : T;
+  T extends DaunusException<any, any> ? never : T
 
 export type DaunusGetExceptions<T> =
-  T extends DaunusException<any, any> ? T : never;
+  T extends DaunusException<any, any> ? T : never
 
 export type DaunusInferReturn<
-  T extends DaunusAction<any, any, any> | DaunusRoute<any, any, any, any>
+  T extends DaunusAction<any, any> | DaunusRoute<any, any, any, any>
 > =
   T extends DaunusRoute<any, any, any, any>
     ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
-    : T extends DaunusAction<any, any, any>
+    : T extends DaunusAction<any, any>
       ? Awaited<ReturnType<T["run"]>>
-      : never;
+      : never
 
 export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
-  T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never;
+  T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never
 
-export class DaunusException<S extends number, D = undefined> extends Error {
-  public status: S;
-  public data?: D;
+export class DaunusException<
+  S extends number = 500,
+  D = undefined,
+  P = undefined
+> {
+  public status: S
+  public data: D
+  public paths: P
 
-  constructor(status: S, data?: D) {
-    super("daunus_exception");
-    this.status = status;
-    this.data = data;
+  constructor(options?: { status?: S; data?: D; paths?: P }) {
+    this.status = options?.status ?? (500 as S)
+    this.data = options?.data as D
+    this.paths = options?.paths as P
   }
 }
 
 type WaitParams =
   | {
-      delay: string;
+      delay: string
     }
   | {
-      until: Date;
-    };
+      until: Date
+    }
 
 export class Wait extends DaunusException<102, WaitParams> {
   constructor(params: WaitParams) {
-    super(102, params);
+    super({ status: 102, data: params })
   }
 }
 
 export class Return extends DaunusException<200, WaitParams> {
   constructor(params: WaitParams) {
-    super(200, params);
+    super({ status: 200, data: params })
   }
 }
 
-export type Expect<T extends true> = T;
+export type Expect<T extends true> = T
 
 export type Equal<X, Y> =
   (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
     ? true
-    : false;
+    : false
 
 export type ExceptionParams<T, P> =
-  ExtractDaunusExceptions<T> extends never ? P : ExtractDaunusExceptions<T>;
+  ExtractDaunusExceptions<T> extends never ? P : ExtractDaunusExceptions<T>
 
 export type DaunusSchema<T> =
   | z.Schema<T>
   | { schema: z.Schema<T>; jsonSchema: string }
-  | { jsonSchema: string };
-
-export interface RouterFactory<
-  R extends Record<
-    string,
-    {
-      route: DaunusRoute<any, any, any, any> | DaunusAction<any, any, any>;
-      input: any;
-    }
-  >,
-  AI extends any | undefined,
-  AR extends any | undefined
-> extends DaunusRoute<
-    Exclude<AR, undefined>,
-    {},
-    {},
-    z.ZodType<Exclude<AI, undefined>>
-  > {
-  add<N extends string, D, P, E, I extends z.ZodTypeAny = z.ZodUndefined>(
-    name: N,
-    route: DaunusRoute<D, P, E, I>
-  ): RouterFactory<
-    R & Record<N, { route: DaunusRoute<D, P, E, I> }>,
-    AI | I["_output"],
-    AR | D
-  >;
-
-  add<N extends string, D, P, E>(
-    name: N,
-    route: DaunusAction<D, P, E>
-  ): RouterFactory<R & Record<N, { route: DaunusAction<D, P, E> }>, AI, AR | D>;
-
-  get<N extends keyof R>(name: N): R[N]["route"];
-  defs: R;
-}
+  | { jsonSchema: string }

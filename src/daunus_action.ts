@@ -1,94 +1,49 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { z } from "zod";
+import { z } from "zod"
 
-import { v4 } from "@lukeed/uuid";
-import { resolveParams } from "./resolve_params";
+import { v4 } from "@lukeed/uuid"
+import { resolveParams } from "./resolve_params"
 import {
-  ExceptionParams,
   DaunusAction,
-  DaunusActionInfo,
-  DaunusActionRunOptions,
   DaunusCtx,
-  DaunusParams,
-  DaunusActionWithOptions
-} from "./types";
-import { isException, parseResult } from "./helpers";
+  DaunusException,
+  ExtractData,
+  ExtractDaunusExceptions
+} from "./types"
+import { isException, parseResult } from "./helpers"
 
 export const $action =
-  <P, O, E = {}, T = O>(
+  <P, O, E = {}>(
     args: {
-      type: string;
-      name?: string;
-      paramsSchema?: z.Schema<P>;
-      skipParse?: boolean;
-      parseResponse?: boolean;
-      skipLog?: boolean;
-      skipPlaceholders?: boolean;
-      envSchema?: z.Schema<E>;
-      container?: (parmas: P) => T;
-      meta?: object;
+      type: string
+      name?: string
+      paramsSchema?: z.Schema<P>
+      skipParse?: boolean
+      skipPlaceholders?: boolean
+      envSchema?: z.Schema<E>
     },
-
     fn: ({
       ctx,
-      parseParams,
       env
     }: {
-      ctx: DaunusCtx;
-
-      parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
-      env: E;
-    }) => (params: P) => Promise<O> | O,
-    container: (
-      // Deprecated
-      r: ({
-        ctx,
-        parseParams,
-        env
-      }: {
-        ctx: DaunusCtx;
-        parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
-        env: E;
-      }) => (params: P) => Promise<O> | O,
-      options: {
-        ctx: DaunusCtx;
-        parseParams: <X>(ctx: Map<string, any>, params: X) => Promise<X>;
-        env: E;
-      },
-      params: P
-    ) => Promise<T> | T = (r, options, params) =>
-      r(options)(params) as T | Promise<T>
+      ctx: DaunusCtx
+      env: E
+    }) => (params: P) => Promise<O> | O
   ) =>
   (
-    params: DaunusParams<P>,
+    params: P,
     actionCtx?: {
-      name?: string;
-      skipLog?: boolean;
+      name?: string
     }
   ) => {
-    const name: string = actionCtx?.name || args.name || v4();
-    const skipLog = actionCtx?.skipLog || args.skipLog || false;
-
-    const actionInfo: DaunusActionInfo<T, ExceptionParams<T, P>> = {
-      name,
-      type: args.type,
-      params: null
-    };
+    const name: string = actionCtx?.name || args.name || v4()
 
     const makeRun =
       (init?: (ctx: DaunusCtx) => void) =>
-      async (
-        ctx: DaunusCtx = new Map(),
-        options?: DaunusActionRunOptions<T, ExceptionParams<T, P>>
-      ) => {
+      async (ctx: DaunusCtx = new Map()) => {
         try {
-          if (!ctx.has("actions")) {
-            ctx.set("useCase", actionInfo);
-            ctx.set("actions", new Map());
-          }
-
           const runFn = async () => {
-            init && init(ctx);
+            init && init(ctx)
 
             const parsedParams =
               args.skipParse || !params
@@ -96,142 +51,126 @@ export const $action =
                 : await parseParams(ctx, params, {
                     schema: args.paramsSchema,
                     skipPlaceholders: args.skipPlaceholders
-                  });
-
-            actionInfo.params = parsedParams;
+                  })
 
             if (isException(parsedParams)) {
-              return parsedParams;
+              return parsedParams
             }
 
             const env = args.envSchema
               ? args.envSchema.parse(ctx.get(".env"))
-              : (z.object({}) as E);
+              : (z.object({}) as E)
 
-            const value = await container(
-              fn,
-              { ctx, parseParams, env },
-              parsedParams!
-            );
+            const value = await fn({ ctx, env })(parsedParams!)
 
-            if (!args.parseResponse) {
-              return value;
-            }
-
-            const parseValue = await parseParams(ctx, value, {
-              skipPlaceholders: true
-            });
-
-            return parseValue;
-          };
-
-          const value = parseResult<T, ExceptionParams<T, P>>(
-            (await runFn()) as T
-          );
-
-          ctx.set(name, value);
-
-          actionInfo.data = value.data;
-          actionInfo.exception = value.exception;
-
-          if (!skipLog) {
-            ctx.get("actions").set(actionInfo.name, actionInfo);
+            return value
           }
 
-          return value;
+          const value = parseResult<O>((await runFn()) as O)
+
+          ctx.set(name, value.data)
+
+          if (value.exception) {
+            ctx.set(
+              "exceptions",
+              (ctx.get("exceptions") ?? new Map()).set(name, value.exception)
+            )
+          }
+
+          return value
         } catch (error: any) {
-          actionInfo.exception = error;
+          const exception = new DaunusException({ data: error.message })
 
-          if (!skipLog) {
-            ctx.get("actions").set(actionInfo.name, actionInfo);
-          }
+          ctx.set(
+            "exceptions",
+            (ctx.get("exceptions") ?? new Map()).set(name, exception)
+          )
 
-          throw error;
-        } finally {
-          if (options?.onComplete) {
-            options.onComplete(actionInfo, ctx);
+          return {
+            data: undefined,
+            exception
+          } as {
+            data: ExtractData<O>
+            exception: ExtractDaunusExceptions<O>
           }
         }
-      };
+      }
 
-    const action: DaunusAction<T, ExceptionParams<T, P>, E> = {
+    const action: DaunusAction<O, E> = {
       ...actionCtx,
       name,
-      envSchema: args.envSchema,
-      run: makeRun(),
-      actionMeta: args.meta
-    };
+      env: args.envSchema?._type ?? ({} as E),
+      run: makeRun()
+    }
 
-    const actionWithOptions: DaunusActionWithOptions<
-      T,
-      ExceptionParams<T, P>,
-      E
-    > = {
-      ...action,
-      createRoute: (iSchema?: any) => ({
-        ...(!iSchema && action),
-        ...(iSchema && {
-          meta: {
-            iSchema,
-            openapi: {
-              method:
-                iSchema instanceof z.ZodObject && iSchema.shape.method
-                  ? `<% method %>`
-                  : "post",
-              contentType:
-                iSchema instanceof z.ZodObject && iSchema.shape.contentType
-                  ? `<% contentType %>`
-                  : "application/json",
-              path:
-                iSchema instanceof z.ZodObject && iSchema.shape.path
-                  ? `<% path %>`
-                  : undefined,
-              body:
-                iSchema instanceof z.ZodObject && iSchema.shape.body
-                  ? `<% body %>`
-                  : undefined,
-              query:
-                iSchema instanceof z.ZodObject && iSchema.shape.query
-                  ? `<% query %>`
-                  : undefined
-            }
-          },
-          input: (value: any): DaunusAction<T, ExceptionParams<T, P>, E> => ({
-            ...action,
-            run: makeRun((ctx) => {
-              ctx.set("input", iSchema?.parse(value));
-            })
-          }),
-          rawInput: (
-            value: unknown
-          ): DaunusAction<T, ExceptionParams<T, P>, E> => ({
-            ...action,
-            run: makeRun((ctx) => {
-              ctx.set("input", iSchema?.parse(value));
-            })
-          })
-        })
-      })
-    };
+    // const actionWithOptions: DaunusActionWithOptions<
+    //   O,
+    //   ExceptionParams<O, P>,
+    //   E
+    // > = {
+    //   ...action,
+    //   createRoute: (iSchema?: any) => ({
+    //     ...(!iSchema && action),
+    //     ...(iSchema && {
+    //       meta: {
+    //         iSchema,
+    //         openapi: {
+    //           method:
+    //             iSchema instanceof z.ZodObject && iSchema.shape.method
+    //               ? `<% method %>`
+    //               : "post",
+    //           contentType:
+    //             iSchema instanceof z.ZodObject && iSchema.shape.contentType
+    //               ? `<% contentType %>`
+    //               : "application/json",
+    //           path:
+    //             iSchema instanceof z.ZodObject && iSchema.shape.path
+    //               ? `<% path %>`
+    //               : undefined,
+    //           body:
+    //             iSchema instanceof z.ZodObject && iSchema.shape.body
+    //               ? `<% body %>`
+    //               : undefined,
+    //           query:
+    //             iSchema instanceof z.ZodObject && iSchema.shape.query
+    //               ? `<% query %>`
+    //               : undefined
+    //         }
+    //       },
+    //       input: (value: any): DaunusAction<O, E> => ({
+    //         ...action,
+    //         run: makeRun((ctx) => {
+    //           ctx.set("input", iSchema?.parse(value))
+    //         })
+    //       }),
+    //       rawInput: (value: unknown): DaunusAction<O, E> => ({
+    //         ...action,
+    //         run: makeRun((ctx) => {
+    //           ctx.set("input", iSchema?.parse(value))
+    //         })
+    //       })
+    //     })
+    //   })
+    // }
 
-    return actionWithOptions;
-  };
+    return action
+  }
 
 export const parseParams = async <T>(
   ctx: Map<string, any>,
-  params: DaunusParams<T>,
+  params: T,
   options?: {
-    schema?: z.Schema<T>;
-    skipPlaceholders?: boolean;
+    schema?: z.Schema<T>
+    skipPlaceholders?: boolean
   }
 ) => {
   const resolvedParams = await resolveParams(ctx, params, {
     skipPlaceholders: options?.skipPlaceholders
-  });
+  })
 
   if (!options?.schema) {
-    return resolvedParams as T;
+    return resolvedParams as T
   }
 
-  return options?.schema.parse(resolvedParams) as T;
-};
+  return options?.schema.parse(resolvedParams) as T
+}

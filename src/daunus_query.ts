@@ -1,20 +1,96 @@
-import { DaunusCtx, DaunusVar } from "./types";
-import { get } from "./get";
+import { DaunusCtx, DaunusException, DaunusQuery } from "./types"
 
-export function $query<R>(selector: ($: any) => R | Promise<R>): DaunusVar<R> {
-  const $query = async (ctx: DaunusCtx) => {
-    const $ = new Proxy(ctx, {
-      get(target, name) {
-        return get(target, name as string);
+type NestedMap = Map<string, any> | Record<string, any>
+
+function createNestedProxy<T extends NestedMap>(target: T): any {
+  return new Proxy(target, {
+    get(target, prop, receiver) {
+      if (
+        typeof prop === "string" &&
+        target instanceof DaunusException &&
+        target.paths
+      ) {
+        const value = target.paths[prop]
+
+        if (
+          value instanceof Map ||
+          (typeof value === "object" && value !== null)
+        ) {
+          return createNestedProxy(value)
+        }
+
+        return value
       }
-    });
 
-    return await selector($);
-  };
+      if (typeof prop === "string" && target instanceof Map) {
+        const value = target.get(prop)
+        if (
+          value instanceof Map ||
+          (typeof value === "object" && value !== null)
+        ) {
+          return createNestedProxy(value)
+        }
 
-  $query.toString = () => `<% ${selector.toString()} %>`;
-  $query.toJSON = () => `<% ${selector.toString()} %>`;
-  $query.__type = "daunus_var";
+        return value
+      }
 
-  return $query as any;
+      if (typeof prop === "string" && prop in target) {
+        const value = Reflect.get(target, prop, receiver)
+
+        if (
+          value instanceof Map ||
+          (typeof value === "object" && value !== null)
+        ) {
+          return createNestedProxy(value)
+        }
+
+        return value
+      }
+
+      return Reflect.get(target, prop, receiver)
+    },
+
+    set(target, prop, value, receiver) {
+      if (typeof prop === "string" && target instanceof Map) {
+        target.set(prop, value)
+
+        return true
+      }
+
+      return Reflect.set(target, prop, value, receiver)
+    },
+
+    has(target, prop) {
+      if (typeof prop === "string" && target instanceof Map) {
+        return target.has(prop)
+      }
+
+      return Reflect.has(target, prop)
+    },
+
+    deleteProperty(target, prop) {
+      if (typeof prop === "string" && target instanceof Map) {
+        return target.delete(prop)
+      }
+
+      return Reflect.deleteProperty(target, prop)
+    }
+  })
+}
+
+export function $query<R>(
+  selector: ($: any) => R | Promise<R>
+): DaunusQuery<R> {
+  const $query = async (ctx: DaunusCtx) => {
+    const $ = createNestedProxy(ctx)
+
+    return await selector($)
+  }
+
+  $query.toString = () => `{{ ${selector.toString()} }}`
+  $query.toJSON = () => `{{ ${selector.toString()} }}`
+
+  $query.__type = "daunus_query"
+
+  return $query as any
 }

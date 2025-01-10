@@ -1,4 +1,4 @@
-import { $action } from "../../daunus_action";
+import { $action } from "../../daunus_action"
 
 const struct = $action(
   {
@@ -7,6 +7,6 @@ const struct = $action(
   () =>
     <T>(params: T) =>
       params!
-);
+)
 
-export default struct;
+export default struct

@@ -1,6 +1,6 @@
-import { isAction } from "./helpers";
-import { runAction } from "./run_action";
-import { DaunusCtx } from "./types";
+import { isAction } from "./helpers"
+import { runAction } from "./run_action"
+import { DaunusCtx } from "./types"
 
 export const resolveAction = async <T>(
   ctx: DaunusCtx,
@@ -11,10 +11,10 @@ export const resolveAction = async <T>(
     const { data, exception } = await runAction(
       ctx,
       name ? { ...action, name } : action
-    );
+    )
 
-    return data || exception;
+    return data || exception
   }
 
-  return action;
-};
+  return action
+}

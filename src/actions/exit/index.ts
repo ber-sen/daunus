@@ -1,18 +1,17 @@
-import { $action } from "../../daunus_action";
-import { DaunusException } from "../../types";
-
-export interface ExitParams<S extends number, D = undefined> {
-  status: S;
-  data?: D;
-}
+import { $action } from "../../daunus_action"
+import { DaunusException } from "../../types"
 
 const exit = $action(
   {
     type: "exit"
   },
   () =>
-    <S extends number, D>(params: ExitParams<S, D>) =>
-      new DaunusException<S, D>(params.status, params.data)
-);
+    <S extends number = 500, D = undefined, P = undefined>(params: {
+      status?: S
+      data?: D
+      paths?: P
+    }) =>
+      new DaunusException(params)
+)
 
-export default exit;
+export default exit

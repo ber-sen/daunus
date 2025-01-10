@@ -1,24 +1,23 @@
-import { ReadableStream } from "isomorphic-web-streams";
-import { $ctx } from "../..";
-import csv from ".";
+import { $ctx, $delay, $stream } from "../.."
+import csv from "."
 
 describe("encode", () => {
   it("should with simple encode", async () => {
-    const rows = new ReadableStream({
-      start(controller) {
-        controller.enqueue({ name: "Alice", age: 30 });
-        controller.enqueue({ name: "Bob", age: 25 });
-        controller.enqueue({ name: "Charlie", age: 35 });
-        controller.close();
-      }
-    });
+    const rows = $stream(async function* () {
+      yield { name: "Alice", age: 30 }
+
+      await $delay(500)
+
+      yield { name: "Bob", age: 25 }
+      yield { name: "Charlie", age: 35 }
+    })
 
     const action = await csv({
       rows
-    }).run($ctx());
+    }).run($ctx())
 
     expect(await new Response(action.data).text()).toStrictEqual(
       "name,age\r\nAlice,30\r\nBob,25\r\nCharlie,35"
-    );
-  });
-});
+    )
+  })
+})
