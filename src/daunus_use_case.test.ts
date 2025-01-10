@@ -21,9 +21,10 @@ describe("$usecase", () => {
   it("should work for single step", async () => {
     const input = $input({ name: z.string() })
 
-    const useCase = $useCase("name", { input }).handle(
-      ({ $ }) => $.input.name === "lorem"
-    )
+    const useCase = $useCase("name")
+      .withInput(input)
+
+      .handle(({ $ }) => $.input.name === "lorem")
 
     const { data } = await useCase.run({ name: "lorem" })
 
@@ -37,7 +38,9 @@ describe("$usecase", () => {
   it("should provide expected types for return", async () => {
     const input = $input({ name: z.string() })
 
-    const route = $useCase("My use case", { input })
+    const route = $useCase("My use case")
+      .withInput(input)
+
       .steps()
 
       .add("first step", ({ $ }) => $.input)
@@ -56,7 +59,9 @@ describe("$usecase", () => {
   it("should work with parallel steps", async () => {
     const input = $input({ city: z.string() })
 
-    const route = $useCase("Example", { input })
+    const route = $useCase("Example")
+      .withInput(input)
+
       .steps({ stepsType: "parallel" })
 
       .add("first step", ({ $ }) => $.input)
@@ -90,7 +95,9 @@ describe("$usecase", () => {
   it("should work with loop and condition", async () => {
     const input = $input({ array: z.array(z.number()) })
 
-    const useCase = $useCase("Loop and condition", { input }) //
+    const useCase = $useCase("Loop and condition")
+      .withInput(input)
+
       .handle(({ $loop, $ }) =>
         $loop({ list: $.input.array })
           .forEachItem()
@@ -119,7 +126,9 @@ describe("$usecase", () => {
   xit("should return error inside loop ", async () => {
     const input = $input({ array: z.array(z.number()) })
 
-    const useCase = $useCase("Loop with error", { input }) //
+    const useCase = $useCase("Loop with error")
+      .withInput(input)
+
       .handle(({ $loop, $ }) =>
         $loop({ list: $.input.array })
           .forEachItem()
@@ -141,7 +150,9 @@ describe("$usecase", () => {
   xit("should return error inside condition", async () => {
     const input = $input({ array: z.array(z.number()) })
 
-    const useCase = $useCase("condition with error", { input }) //
+    const useCase = $useCase("condition with error")
+      .withInput(input)
+      
       .handle(({ $if, $ }) =>
         $if({ condition: $.input.array.length > 1 }) //
           .add("exit", () => exit({ status: 500 }))
@@ -161,9 +172,12 @@ describe("$usecase", () => {
   it("should allow script version", async () => {
     const input = $input({ names: z.array(z.number()) })
 
-    const useCase = $useCase("Script", { input }).handle(({ $ }) =>
-      $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
-    )
+    const useCase = $useCase("Script")
+      .withInput(input)
+      
+      .handle(({ $ }) =>
+        $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
+      )
 
     const { data } = await useCase.run({ names: [1, 2, 3] })
 
