@@ -15,8 +15,8 @@ import {
   StepOptions,
   resultKey
 } from "./new_types"
-import { createRun } from "./run_helpers"
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
+import { $actionWithInput } from "./daunus_action_with_input"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},
@@ -143,31 +143,26 @@ function $loopSteps<
     })
   }
 
-  const run: any = createRun<Global["input"]>(async (ctx) => {
-    const promises = list.map(async (value, index) => {
-      const rowScope = scope.addGlobal(itemVariable ?? "item", {
-        value,
-        index
-      })
+  const action = $actionWithInput<Global["input"], any, any>(
+    { type: "loop" },
+    ({ ctx }) =>
+      async () => {
+        const promises = list.map(async (value, index) => {
+          const rowScope = scope.addGlobal(itemVariable ?? "item", {
+            value,
+            index
+          })
 
-      const { data } = await $steps({ $: rowScope, stepsType }).run(ctx)
+          const { data } = await $steps({ $: rowScope, stepsType }).run(ctx)
 
-      return data
-    })
+          return data
+        })
 
-    return await Promise.all(promises)
-  })
+        return await Promise.all(promises)
+      }
+  )({})
 
-  // TODO
-  const env = {}
-
-  const name = params?.name as string
-
-  const input: any = () => {
-    return {} as any
-  }
-
-  return { get, scope, add, run, name, env, input }
+  return { ...action, get, scope, add }
 }
 
 export type LoopFactory<

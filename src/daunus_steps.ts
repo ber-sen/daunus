@@ -15,8 +15,8 @@ import {
   StepOptions,
   resultKey
 } from "./new_types"
-import { createRun } from "./run_helpers"
 import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
+import { $actionWithInput } from "./daunus_action_with_input"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
@@ -138,55 +138,55 @@ export function $steps<
     })
   }
 
-  const run = createRun<Global["input"]>(async (ctx) => {
-    if (!Object.keys(scope.steps)?.at(-1)) {
-      return undefined
-    }
-
-    if (stepsType === "parallel") {
-      const promises = Object.values(scope.steps).map(async (fn) => {
-        const res = await fn(scope.getStepsProps(ctx))
-
-        if (isAction(res)) {
-          return (await res.run(ctx)).data
+  const action = $actionWithInput<Global["input"], any, any>(
+    { type: "steps" },
+    ({ ctx }) =>
+      async () => {
+        if (!Object.keys(scope.steps)?.at(-1)) {
+          return undefined
         }
 
-        return res
-      })
+        if (stepsType === "parallel") {
+          const promises = Object.values(scope.steps).map(async (fn) => {
+            const res = await fn(scope.getStepsProps(ctx))
 
-      const res = await Promise.all(promises)
+            if (isAction(res)) {
+              return (await res.run(ctx)).data
+            }
 
-      return Object.fromEntries(
-        Object.keys(scope.steps).map((key, index) => [key, res[index]])
-      )
-    }
+            return res
+          })
 
-    const res: any[] = []
+          const res = await Promise.all(promises)
 
-    for (const [name, fn] of Object.entries(scope.steps)) {
-      let value = await fn(scope.getStepsProps(ctx))
+          return Object.fromEntries(
+            Object.keys(scope.steps).map((key, index) => [key, res[index]])
+          )
+        }
 
-      if (isAction(value)) {
-        value = (await value.run(ctx)).data
+        const res: unknown[] = []
+
+        for (const [name, fn] of Object.entries(scope.steps)) {
+          let value = await fn(scope.getStepsProps(ctx))
+
+          if (isAction(value)) {
+            value = (await value.run(ctx)).data
+          }
+
+          scope.global = { ...scope.global, [name]: value }
+          scope.local = { ...scope.local, [name]: value }
+
+          res.push(value)
+        }
+
+        return res.at(-1)
       }
+  )({})
 
-      scope.global = { ...scope.global, [name]: value }
-      scope.local = { ...scope.local, [name]: value }
-
-      res.push(value)
-    }
-
-    return res.at(-1)
-  })
-
-  // TODO
-  const env = {}
-
-  const name = params?.name as string
-
-  const input: any = () => {
-    return {} as any
+  return {
+    ...action,
+    get,
+    scope,
+    add
   }
-
-  return { get, scope, add, run, name, env, input }
 }

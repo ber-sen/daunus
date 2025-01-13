@@ -1,3 +1,4 @@
+import { $actionWithInput } from "./daunus_action_with_input"
 import { $steps } from "./daunus_steps"
 import {
   AbstractStepFactory,
@@ -7,7 +8,6 @@ import {
   StepProps,
   resultKey
 } from "./new_types"
-import { createRun } from "./run_helpers"
 import { ValidateName } from "./type_helpers"
 import {
   DataResponse,
@@ -258,39 +258,42 @@ export function $if<
     })
   }
 
-  const run = createRun<Global["input"]>(async (ctx) => {
-    const noSteps =
-      Object.values(scope.local).filter(
-        (item: any) => Object.values(item.scope.steps).length === 0
-      ).length === 0
+  const action = $actionWithInput<Global["input"], any, any>(
+    { type: "condition" },
+    ({ ctx }) =>
+      async () => {
+        const noSteps =
+          Object.values(scope.local).filter(
+            (item: any) => Object.values(item.scope.steps).length === 0
+          ).length === 0
 
-    if (!noSteps) {
-      return condition
-    }
+        if (!noSteps) {
+          return condition
+        }
 
-    if (condition) {
-      const { data } = await $steps({
-        $: scope.get("true").scope.addGlobal("condition", condition)
-      }).run(ctx)
+        if (condition) {
+          const trueScope = scope
+            .get("true")
+            .scope.addGlobal("condition", condition)
 
-      return data
-    }
+          const { data } = await $steps({
+            $: trueScope
+          }).run(ctx)
 
-    const { data } = await $steps({
-      $: scope.get("false").scope.addGlobal("condition", condition)
-    }).run(ctx)
+          return data
+        }
 
-    return data
-  })
+        const falseScope = scope
+          .get("false")
+          .scope.addGlobal("condition", condition)
 
-  // TODO
-  const env = {}
+        const { data } = await $steps({
+          $: falseScope
+        }).run(ctx)
 
-  const name = actionName as string
+        return data
+      }
+  )({})
 
-  const input: any = () => {
-    return {} as any
-  }
-
-  return { run, get, add, isTrue, isFalse, scope, env, name, input }
+  return { ...action, get, add, isTrue, isFalse, scope }
 }

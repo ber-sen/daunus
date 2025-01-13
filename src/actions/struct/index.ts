@@ -6,7 +6,7 @@ const struct = $action(
   },
   () =>
     <T>(params: T) =>
-      params!
+      params
 )
 
 export default struct
