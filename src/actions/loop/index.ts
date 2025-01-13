@@ -1,7 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
 import {
-  type DaunusActionWithOptions,
   type DaunusWorkflowAction
 } from "../../types"
 

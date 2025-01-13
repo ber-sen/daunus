@@ -35,7 +35,7 @@ export const $action =
     actionCtx?: {
       name?: string
     }
-  ) => {
+  ): DaunusAction<O, E> => {
     const name: string = actionCtx?.name || args.name || v4()
 
     const makeRun =
@@ -96,7 +96,7 @@ export const $action =
         }
       }
 
-    const action: DaunusAction<O, E> = {
+    const action = {
       ...actionCtx,
       name,
       env: args.envSchema?._type ?? ({} as E),

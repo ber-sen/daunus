@@ -59,7 +59,7 @@ export type DaunusActionOrActionWithInput<Input, Return, Env = {}> = {
     : DaunusAction<Return, Env>["run"]
   input: Input extends object
     ? (input: Input) => DaunusAction<Return, Env>
-    : undefined
+    : never
 }
 
 export type DaunusWorkflowAction<T> = {
