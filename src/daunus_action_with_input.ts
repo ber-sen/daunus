@@ -1,7 +1,11 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import { z } from "zod"
 
-import { DaunusActionOrActionWithInput, DaunusCtx } from "./types"
+import {  z } from "zod"
+import {
+  DaunusAction,
+  DaunusActionOrActionWithInput,
+  DaunusActionWithInput,
+  DaunusCtx
+} from "./types"
 import { $action } from "./daunus_action"
 import { $ctx } from "./daunus_helpers"
 
@@ -34,17 +38,19 @@ export const $actionWithInput =
 
     const action = factory(params, actionCtx)
 
-    const run = (async (
+    const run = ((
       ...args: [ctx?: Map<string, any>] | [input: I, ctx?: Map<string, any>]
     ) => {
       const ctx = getContext(...args)
 
-      return await action.run(ctx)
-    }) as any
+      return action.run(ctx)
+    }) as I extends object
+      ? DaunusActionWithInput<I, O, E>["run"]
+      : DaunusAction<O, E>["run"]
 
     const input = ((input: I) => {
       return action
-    }) as any
+    }) as I extends object ? typeof input : never
 
     return { ...action, input, run }
   }
