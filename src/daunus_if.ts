@@ -272,15 +272,23 @@ export function $if<
         }
 
         if (condition) {
+          const trueScope = scope
+            .get("true")
+            .scope.addGlobal("condition", condition)
+
           const { data } = await $steps({
-            $: scope.get("true").scope.addGlobal("condition", condition)
+            $: trueScope
           }).run(ctx)
 
           return data
         }
 
+        const falseScope = scope
+          .get("false")
+          .scope.addGlobal("condition", condition)
+
         const { data } = await $steps({
-          $: scope.get("false").scope.addGlobal("condition", condition)
+          $: falseScope
         }).run(ctx)
 
         return data

@@ -164,7 +164,7 @@ export function $steps<
           )
         }
 
-        const res: any[] = []
+        const res: unknown[] = []
 
         for (const [name, fn] of Object.entries(scope.steps)) {
           let value = await fn(scope.getStepsProps(ctx))

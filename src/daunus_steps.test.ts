@@ -216,6 +216,7 @@ describe("$steps", () => {
         .add("another level", ({ $steps }) =>
           $steps()
             .add("deep2", () => exit({ status: 502, data: "lorem" }))
+            
             .add("deep1", ({ $ }) => $)
         )
 
