@@ -10,7 +10,7 @@ export type ExtractDaunusExceptions<T> =
   T extends DaunusException<any, any>
     ? T
     : T extends Array<infer A>
-      ? never
+      ? ExtractDaunusExceptions<A>
       : T extends object
         ? {
             [K in keyof T]: T[K] extends DaunusException<any, any>

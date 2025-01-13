@@ -134,78 +134,6 @@ describe("$steps", () => {
     expect(data).toEqual({ firstStep: { foo: "bar" } })
   })
 
-  it("should provide an easy way to extend", () => {
-    const nested = $steps() //
-      .add("sub", ({ $steps }) =>
-        $steps()
-          .add("first step", () => ({ foo: "bar" }))
-
-          .add("second step", ({ $ }) => $.firstStep.foo.toString())
-      )
-
-    function toJson(factory: StepFactory<any, any>) {
-      const steps = Object.values(factory.scope.steps).map((value) => {
-        const functionValue = value.meta.fn.toString()
-
-        const body = functionValue?.split("=>")?.[1]?.trim()
-
-        const formatJson = body
-          .replace(/(["'])?(\w+)(["'])?:/g, '"$2": ')
-          .replace(`({`, `{`)
-          .replace(/}\)(?=[^}]*$)/, "}")
-          .replace(
-            /("[\dA-Za-z-]+"):\s+([\d$().A-Za-z-]+)/gm,
-            (match: any, key: string, value: string) => {
-              if (value === "true" || value === "false") {
-                return `${key}:${value}`
-              }
-
-              return Number.isNaN(Number.parseInt(value, 10))
-                ? `${key}:"{{ ${value} }}"`
-                : `${key}:${value}`
-            }
-          )
-
-        let parsed
-
-        try {
-          parsed = JSON.parse(formatJson)
-        } catch {
-          parsed = `{{ ${body} }}`
-        }
-
-        return {
-          type: ["struct"],
-          name: value.meta.name,
-          params: parsed
-        }
-      })
-
-      return {
-        type: ["steps"],
-        params: {
-          steps: [steps]
-        }
-      }
-    }
-
-    expect(toJson(nested.get("sub"))).toEqual({
-      type: ["steps"],
-      params: {
-        steps: [
-          [
-            { type: ["struct"], name: "first step", params: { foo: "bar" } },
-            {
-              type: ["struct"],
-              name: "second step",
-              params: "{{ $.firstStep.foo.toString() }}"
-            }
-          ]
-        ]
-      }
-    })
-  })
-
   xit("should return exceptions", async () => {
     const steps = $steps().add("nested", () =>
       exit({ status: 600, data: { foo: "bar" } })
@@ -491,6 +419,78 @@ describe("$steps", () => {
     expect(data).toEqual({
       firstStep: { foo: "bar" },
       secondStep: [1, 2, 3]
+    })
+  })
+
+  it("should provide an easy way to extend", () => {
+    const nested = $steps() //
+      .add("sub", ({ $steps }) =>
+        $steps()
+          .add("first step", () => ({ foo: "bar" }))
+
+          .add("second step", ({ $ }) => $.firstStep.foo.toString())
+      )
+
+    function toJson(factory: StepFactory<any, any>) {
+      const steps = Object.values(factory.scope.steps).map((value) => {
+        const functionValue = value.meta.fn.toString()
+
+        const body = functionValue?.split("=>")?.[1]?.trim()
+
+        const formatJson = body
+          .replace(/(["'])?(\w+)(["'])?:/g, '"$2": ')
+          .replace(`({`, `{`)
+          .replace(/}\)(?=[^}]*$)/, "}")
+          .replace(
+            /("[\dA-Za-z-]+"):\s+([\d$().A-Za-z-]+)/gm,
+            (match: any, key: string, value: string) => {
+              if (value === "true" || value === "false") {
+                return `${key}:${value}`
+              }
+
+              return Number.isNaN(Number.parseInt(value, 10))
+                ? `${key}:"{{ ${value} }}"`
+                : `${key}:${value}`
+            }
+          )
+
+        let parsed
+
+        try {
+          parsed = JSON.parse(formatJson)
+        } catch {
+          parsed = `{{ ${body} }}`
+        }
+
+        return {
+          type: ["struct"],
+          name: value.meta.name,
+          params: parsed
+        }
+      })
+
+      return {
+        type: ["steps"],
+        params: {
+          steps: [steps]
+        }
+      }
+    }
+
+    expect(toJson(nested.get("sub"))).toEqual({
+      type: ["steps"],
+      params: {
+        steps: [
+          [
+            { type: ["struct"], name: "first step", params: { foo: "bar" } },
+            {
+              type: ["struct"],
+              name: "second step",
+              params: "{{ $.firstStep.foo.toString() }}"
+            }
+          ]
+        ]
+      }
     })
   })
 })

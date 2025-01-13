@@ -1,5 +1,4 @@
-
-import {  z } from "zod"
+import { z } from "zod"
 import {
   DaunusAction,
   DaunusActionOrActionWithInput,
@@ -49,7 +48,14 @@ export const $actionWithInput =
       : DaunusAction<O, E>["run"]
 
     const input = ((input: I) => {
-      return action
+      return {
+        ...action,
+        run: (ctx: DaunusCtx = $ctx()) => {
+          ctx.set("input", input)
+
+          return action.run(ctx)
+        }
+      }
     }) as I extends object ? typeof input : never
 
     return { ...action, input, run }
@@ -68,11 +74,7 @@ export const getContext = <I>(
         return args[0]
       }
 
-      if (args[0] instanceof Object) {
-        return $ctx().set("input", args[0])
-      }
-
-      return $ctx()
+      return $ctx().set("input", args[0])
     }
 
     case 2: {
