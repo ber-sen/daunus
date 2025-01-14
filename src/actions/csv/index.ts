@@ -9,7 +9,7 @@ const csv = $action(
     <T extends {}>({ columns, rows }: CSVParams<T>) => {
       const { writable, readable } = new TransformStream()
 
-      ;void (async () => {
+      void (async () => {
         const writer = writable.getWriter()
         const reader = rows.getReader()
 

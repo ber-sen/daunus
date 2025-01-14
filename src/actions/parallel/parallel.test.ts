@@ -1,4 +1,5 @@
-import { $query, DaunusException } from "../.."
+import { $query } from "../.."
+import { Exception } from "../../daunus_exception"
 import { $ctx } from "../../daunus_helpers"
 
 import parallel from "./index"
@@ -52,10 +53,10 @@ describe("parallel", () => {
 
     expect(res.data).toStrictEqual({ lorem: undefined, test: undefined })
     expect(res.exception).toEqual(
-      new DaunusException({
+      new Exception({
         paths: {
-          test: new DaunusException(),
-          lorem: new DaunusException({ status: 400, data: "test" })
+          test: new Exception(),
+          lorem: new Exception({ status: 400, data: "test" })
         }
       })
     )
@@ -89,9 +90,9 @@ describe("parallel", () => {
       lorem: undefined
     })
     expect(res.exception).toEqual(
-      new DaunusException({
+      new Exception({
         paths: {
-          lorem: new DaunusException({ status: 400, data: "test" })
+          lorem: new Exception({ status: 400, data: "test" })
         }
       })
     )
@@ -148,14 +149,14 @@ describe("parallel", () => {
       main3: undefined
     })
     expect(res.exception).toEqual(
-      new DaunusException({
+      new Exception({
         paths: {
-          main2: new DaunusException({
+          main2: new Exception({
             paths: {
-              sub2: new DaunusException()
+              sub2: new Exception()
             }
           }),
-          main3: new DaunusException({
+          main3: new Exception({
             data: "test",
             status: 400
           })

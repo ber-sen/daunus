@@ -1,8 +1,8 @@
 import { $ctx } from "../../daunus_helpers"
-import { DaunusException } from "../../types"
 
 import { $query } from "../.."
 import steps from "."
+import { Exception } from "../../daunus_exception"
 
 describe("steps", () => {
   it("should work for basic example", async () => {
@@ -73,7 +73,7 @@ describe("steps", () => {
 
     const res = await action.run($ctx())
 
-    expect(res.exception).toStrictEqual(new DaunusException({ status: 404 }))
+    expect(res.exception).toStrictEqual(new Exception({ status: 404 }))
   })
 
   it("should work with nested steps", async () => {

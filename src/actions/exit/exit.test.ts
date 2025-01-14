@@ -1,4 +1,5 @@
-import { type Equal, type Expect, DaunusException } from "../../types"
+import { Exception } from "../../daunus_exception"
+import { type Equal, type Expect } from "../../types"
 
 import exit from "./index"
 
@@ -10,12 +11,12 @@ describe("wait", () => {
 
     const res = await action.run()
 
-    expect(res.exception).toBeInstanceOf(DaunusException)
+    expect(res.exception).toBeInstanceOf(Exception)
     expect(res.exception).toHaveProperty("status", 500)
 
     type A = typeof res.exception
 
-    type res = Expect<Equal<A, DaunusException<500, undefined>>>
+    type res = Expect<Equal<A, Exception<500, undefined>>>
   })
 
   it("should exit with message and status", async () => {
@@ -28,11 +29,11 @@ describe("wait", () => {
 
     const res = await action.run()
 
-    expect(res.exception).toBeInstanceOf(DaunusException)
+    expect(res.exception).toBeInstanceOf(Exception)
     expect(res.exception).toHaveProperty("status", 200)
 
     type A = typeof res.exception
 
-    type res = Expect<Equal<A, DaunusException<200, { success: boolean }>>>
+    type res = Expect<Equal<A, Exception<200, { success: boolean }>>>
   })
 })

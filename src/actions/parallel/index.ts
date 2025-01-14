@@ -1,6 +1,7 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { DaunusException, type DaunusWorkflowAction } from "../../types"
+import { type DaunusWorkflowAction } from "../../types"
+import { Exception } from "../../daunus_exception"
 
 const parallel = $action(
   { type: "parallel", skipParse: true },
@@ -41,7 +42,7 @@ const parallel = $action(
 
       return [
         Object.fromEntries(successResults),
-        new DaunusException({ paths: Object.fromEntries(errorResults) })
+        new Exception({ paths: Object.fromEntries(errorResults) })
       ]
     }
 )

@@ -1,4 +1,5 @@
-import { type DaunusCtx, DaunusException, type DaunusQuery } from "./types"
+import { Exception } from "./daunus_exception"
+import { type DaunusCtx, type DaunusQuery } from "./types"
 
 type NestedMap = Map<string, any> | Record<string, any>
 
@@ -7,7 +8,7 @@ function createNestedProxy<T extends NestedMap>(target: T): any {
     get(target, prop, receiver) {
       if (
         typeof prop === "string" &&
-        target instanceof DaunusException &&
+        target instanceof Exception &&
         target.paths
       ) {
         const value = target.paths[prop]

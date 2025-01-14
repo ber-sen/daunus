@@ -1,4 +1,4 @@
-import { DaunusException } from "../.."
+import { Exception } from "../../daunus_exception"
 import { $ctx, $delay, $stream } from "../../daunus_helpers"
 import { $query } from "../../daunus_query"
 
@@ -67,7 +67,7 @@ describe("workflow", () => {
     const res = await action.run($ctx())
 
     expect(res.data).toStrictEqual(undefined)
-    expect(res.exception).toStrictEqual(new DaunusException({ status: 403 }))
+    expect(res.exception).toStrictEqual(new Exception({ status: 403 }))
   })
 
   it("should work with streams", async () => {

@@ -1,7 +1,8 @@
 import { z } from "zod"
 import { $useCase } from "./daunus_use_case"
 import { type Expect, type Equal } from "./types_helpers"
-import { $input, DaunusException, exit } from "."
+import { $input, exit } from "."
+import { Exception } from "./daunus_exception"
 
 describe("$usecase", () => {
   it("should work without input", async () => {
@@ -140,11 +141,9 @@ describe("$usecase", () => {
 
     type A = typeof exception
 
-    type exception = Expect<
-      Equal<A, DaunusException<500, undefined, undefined>>
-    >
+    type exception = Expect<Equal<A, Exception<500, undefined, undefined>>>
 
-    expect(exception).toEqual(new DaunusException({ status: 500 }))
+    expect(exception).toEqual(new Exception({ status: 500 }))
   })
 
   xit("should return error inside condition", async () => {
@@ -152,7 +151,7 @@ describe("$usecase", () => {
 
     const useCase = $useCase("condition with error")
       .withInput(input)
-      
+
       .handle(({ $if, $ }) =>
         $if({ condition: $.input.array.length > 1 }) //
           .add("exit", () => exit({ status: 500 }))
@@ -162,11 +161,9 @@ describe("$usecase", () => {
 
     type A = typeof exception
 
-    type exception = Expect<
-      Equal<A, DaunusException<500, undefined, undefined>>
-    >
+    type exception = Expect<Equal<A, Exception<500, undefined, undefined>>>
 
-    expect(exception).toEqual(new DaunusException({ status: 500 }))
+    expect(exception).toEqual(new Exception({ status: 500 }))
   })
 
   it("should allow script version", async () => {
@@ -174,7 +171,7 @@ describe("$usecase", () => {
 
     const useCase = $useCase("Script")
       .withInput(input)
-      
+
       .handle(({ $ }) =>
         $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
       )

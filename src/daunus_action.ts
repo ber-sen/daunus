@@ -4,11 +4,11 @@ import { resolveParams } from "./resolve_params"
 import {
   type DaunusAction,
   type DaunusCtx,
-  DaunusException,
   type ExtractData,
   type ExtractDaunusExceptions
 } from "./types"
 import { isException, parseResult } from "./helpers"
+import { Exception } from "./daunus_exception"
 
 export const $action =
   <P, O, E = {}>(
@@ -73,7 +73,7 @@ export const $action =
 
         return value
       } catch (error: any) {
-        const exception = new DaunusException({ data: error.message })
+        const exception = new Exception({ data: error.message })
 
         ctx.set(
           "exceptions",

@@ -1,5 +1,5 @@
+import { Wait } from "../.."
 import { $ctx } from "../../daunus_helpers"
-import { Wait } from "../../types"
 
 import wait from "./index"
 

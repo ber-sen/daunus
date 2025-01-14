@@ -1,7 +1,7 @@
 import { $actionWithInput } from "./daunus_action_with_input"
-import { DaunusException, type DaunusInferReturn } from "./types"
+import { Exception } from "./daunus_exception"
+import { type DaunusInferReturn } from "./types"
 import { z } from "./zod"
-
 
 type Expect<T extends true> = T
 
@@ -15,7 +15,7 @@ describe("$actionWithInput", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const test = $actionWithInput({ type: "test" }, () => (payload: string) => {
       if (Math.random() > 0.5) {
-        return new DaunusException({ data: "Server Error" })
+        return new Exception({ data: "Server Error" })
       }
 
       return [{ name: payload }]
@@ -30,7 +30,7 @@ describe("$actionWithInput", () => {
           data: {
             name: string
           }[]
-          exception: DaunusException<500, string>
+          exception: Exception<500, string>
         }
       >
     >

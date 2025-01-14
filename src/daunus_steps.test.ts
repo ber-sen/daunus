@@ -1,8 +1,9 @@
 import { $steps } from "./daunus_steps"
 import { type StepFactory } from "./new_types"
 
-import { DaunusException, type Equal, type Expect } from "./types"
+import { type Equal, type Expect } from "./types"
 import { exit, struct } from "."
+import { Exception } from "./daunus_exception"
 
 describe("$steps", () => {
   it("should convert keys to cammel case", () => {
@@ -147,7 +148,7 @@ describe("$steps", () => {
     type steps = Expect<
       Equal<
         A,
-        DaunusException<
+        Exception<
           600,
           {
             foo: string
@@ -159,7 +160,7 @@ describe("$steps", () => {
 
     expect(data).toEqual(undefined)
     expect(exception).toEqual(
-      new DaunusException({ status: 600, data: { foo: "bar" } })
+      new Exception({ status: 600, data: { foo: "bar" } })
     )
   })
 
@@ -180,14 +181,14 @@ describe("$steps", () => {
     type steps = Expect<
       Equal<
         A,
-        | DaunusException<
+        | Exception<
             501,
             {
               lorem: string
             },
             undefined
           >
-        | DaunusException<
+        | Exception<
             600,
             {
               foo: string
@@ -199,7 +200,7 @@ describe("$steps", () => {
 
     expect(data).toEqual(undefined)
     expect(exception).toEqual(
-      new DaunusException({ status: 600, data: { foo: "bar" } })
+      new Exception({ status: 600, data: { foo: "bar" } })
     )
   })
 
@@ -217,7 +218,7 @@ describe("$steps", () => {
         .add("another level", ({ $steps }) =>
           $steps()
             .add("deep2", () => exit({ status: 502, data: "lorem" }))
-            
+
             .add("deep1", ({ $ }) => $)
         )
 
@@ -232,8 +233,7 @@ describe("$steps", () => {
     type steps = Expect<
       Equal<
         A,
-        | DaunusException<600, undefined, undefined>
-        | DaunusException<502, string, undefined>
+        Exception<600, undefined, undefined> | Exception<502, string, undefined>
       >
     >
   })

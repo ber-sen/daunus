@@ -96,7 +96,7 @@ describe("$if", () => {
       .add("second step", ({ $ }) => $.condition)
 
       .isFalse()
-      
+
       .add("false step", ({ $ }) => $.condition)
 
       .add("false resukts", ({ $ }) => $)

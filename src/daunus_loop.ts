@@ -15,7 +15,11 @@ import {
   type StepOptions,
   type resultKey
 } from "./new_types"
-import { type ValidateName, type FormatScope, type Overwrite } from "./types_helpers"
+import {
+  type ValidateName,
+  type FormatScope,
+  type Overwrite
+} from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
 
 export interface DefaultLoopStepFactory<

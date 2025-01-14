@@ -2,12 +2,12 @@ import { get } from "./get"
 import { type NonUndefined, type ToCamelCase } from "./types_helpers"
 import {
   type ExtractDaunusExceptions,
-  DaunusException,
   type DaunusCtx,
   type DaunusRoute,
   type DaunusQuery,
   type DaunusAction
 } from "./types"
+import { Exception } from "./daunus_exception"
 
 export function toCamelCase<T extends string>(
   input: T
@@ -35,8 +35,8 @@ export const isDaunusPlaceholder = (value: any) =>
 
 export const isArray = (value: any): value is any[] => Array.isArray(value)
 
-export const isException = (value: any): value is DaunusException<any> =>
-  value instanceof DaunusException || value instanceof Error
+export const isException = (value: any): value is Exception<any> =>
+  value instanceof Exception || value instanceof Error
 
 export const isMapLike = (value: any): value is Map<any, any> => {
   return (
@@ -104,8 +104,8 @@ export const resolveDaunusPlaceholder = (
   return interpolated
 }
 
-function extractDaunusExceptions<T>(obj: T): DaunusException<any>[] {
-  const daunusExceptions: DaunusException<any>[] = []
+function extractDaunusExceptions<T>(obj: T): Exception<any>[] {
+  const daunusExceptions: Exception<any>[] = []
 
   if (obj instanceof ReadableStream) {
     return daunusExceptions
@@ -115,7 +115,7 @@ function extractDaunusExceptions<T>(obj: T): DaunusException<any>[] {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const value = obj[key]
-        if (value instanceof DaunusException) {
+        if (value instanceof Exception) {
           daunusExceptions.push(value)
         } else if (typeof value === "object" && value !== null) {
           traverseObject(value)

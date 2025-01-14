@@ -1,3 +1,4 @@
+import { type Exception } from "./daunus_exception"
 import { type z } from "./zod"
 
 export type DaunusQuery<T> = T & ((ctx: DaunusCtx) => Promise<T>)
@@ -7,19 +8,19 @@ export type DaunusInput<T> = z.ZodType<T>
 export type DaunusCtx = Map<any, any>
 
 export type ExtractDaunusExceptions<T> =
-  T extends DaunusException<any, any>
+  T extends Exception<any, any>
     ? T
     : T extends Array<infer A>
       ? ExtractDaunusExceptions<A>
       : T extends object
         ? {
-            [K in keyof T]: T[K] extends DaunusException<any, any>
+            [K in keyof T]: T[K] extends Exception<any, any>
               ? T[K]
               : ExtractDaunusExceptions<T[K]>
           }[keyof T]
         : never
 
-export type ExtractData<Return> = Exclude<Return, DaunusException<any, any>>
+export type ExtractData<Return> = Exclude<Return, Exception<any, any>>
 
 export type DataResponse<D> = { data: D }
 
@@ -87,7 +88,7 @@ export type DaunusOpenApi = z.ZodObject<{
 export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
   meta: {
     iSchema: I
-    payload: P,
+    payload: P
     openapi: {
       method: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["method"]>["_output"]
@@ -116,10 +117,9 @@ export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, E> & {
 }
 
 export type DaunusExcludeException<T> =
-  T extends DaunusException<any, any> ? never : T
+  T extends Exception<any, any> ? never : T
 
-export type DaunusGetExceptions<T> =
-  T extends DaunusException<any, any> ? T : never
+export type DaunusGetExceptions<T> = T extends Exception<any, any> ? T : never
 
 export type DaunusInferReturn<
   T extends DaunusAction<any, any> | DaunusRoute<any, any, any, any>
@@ -133,42 +133,6 @@ export type DaunusInferReturn<
 export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
   T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never
 
-export class DaunusException<
-  S extends number = 500,
-  D = undefined,
-  P = undefined
-> {
-  public status: S
-  public data: D
-  public paths: P
-
-  constructor(options?: { status?: S; data?: D; paths?: P }) {
-    this.status = options?.status ?? (500 as S)
-    this.data = options?.data as D
-    this.paths = options?.paths as P
-  }
-}
-
-type WaitParams =
-  | {
-      delay: string
-    }
-  | {
-      until: Date
-    }
-
-export class Wait extends DaunusException<102, WaitParams> {
-  constructor(params: WaitParams) {
-    super({ status: 102, data: params })
-  }
-}
-
-export class Return extends DaunusException<200, WaitParams> {
-  constructor(params: WaitParams) {
-    super({ status: 200, data: params })
-  }
-}
-
 export type Expect<T extends true> = T
 
 export type Equal<X, Y> =
@@ -178,8 +142,3 @@ export type Equal<X, Y> =
 
 export type ExceptionParams<T, P> =
   ExtractDaunusExceptions<T> extends never ? P : ExtractDaunusExceptions<T>
-
-export type DaunusSchema<T> =
-  | z.Schema<T>
-  | { schema: z.Schema<T>; jsonSchema: string }
-  | { jsonSchema: string }

@@ -1,8 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import {
-  type DaunusWorkflowAction
-} from "../../types"
+import { type DaunusWorkflowAction } from "../../types"
 
 const loop = $action(
   { type: "loop", skipParse: true },
