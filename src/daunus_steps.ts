@@ -1,22 +1,23 @@
 import {
-  DaunusAction,
-  DaunusActionOrActionWithInput,
-  DaunusActionWithInput,
-  ExtractDaunusExceptions,
-  DataResponse,
-  ExceptionReponse
+  type DaunusAction,
+  type DaunusActionOrActionWithInput,
+  type DaunusActionWithInput,
+  type ExtractDaunusExceptions,
+  type DataResponse,
+  type ExceptionReponse
 } from "./types"
-import { isAction } from "./new_helpers"
+
 import {
   Scope,
-  StepConfig,
-  StepFactory,
-  StepProps,
-  StepOptions,
-  resultKey
+  type StepConfig,
+  type StepFactory,
+  type StepProps,
+  type StepOptions,
+  type resultKey
 } from "./new_types"
-import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
+import { type ValidateName, type FormatScope, type Overwrite } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
+import { isAction } from "./helpers"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},

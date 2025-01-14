@@ -1,5 +1,5 @@
 import { $if } from "./daunus_if"
-import { Expect, Equal } from "./type_helpers"
+import { type Expect, type Equal } from "./types_helpers"
 
 describe("$if", () => {
   it("should work without steps", async () => {
@@ -70,6 +70,7 @@ describe("$if", () => {
 
       .add("false step", () => ({ foo: "bar" }))
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const localScope = condition.get("true").scope.local
 
     type A = typeof localScope
@@ -100,6 +101,7 @@ describe("$if", () => {
 
       .add("false resukts", ({ $ }) => $)
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data } = await condition.run()
 
     type A = typeof data
@@ -128,6 +130,7 @@ describe("$if", () => {
 
       .add("false step", () => ({ foo: "bar" }))
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const localScope = condition.get("false").scope.local
 
     type A = typeof localScope

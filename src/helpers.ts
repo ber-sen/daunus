@@ -1,12 +1,21 @@
 import { get } from "./get"
+import { type NonUndefined, type ToCamelCase } from "./types_helpers"
 import {
-  ExtractDaunusExceptions,
+  type ExtractDaunusExceptions,
   DaunusException,
-  DaunusCtx,
-  NonUndefined,
-  DaunusRoute,
-  DaunusQuery
+  type DaunusCtx,
+  type DaunusRoute,
+  type DaunusQuery,
+  type DaunusAction
 } from "./types"
+
+export function toCamelCase<T extends string>(
+  input: T
+): Uncapitalize<ToCamelCase<T>> {
+  return input
+    .replace(/[\s!,._-]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
+    .replace(/^[A-Z]/, (match) => match.toLowerCase()) as any
+}
 
 export const isObject = (value: any): value is object =>
   value === null ||
@@ -38,13 +47,17 @@ export const isMapLike = (value: any): value is Map<any, any> => {
   )
 }
 
+export function isAction(obj: any): obj is DaunusAction<any, any> {
+  return obj && typeof obj.run === "function"
+}
+
 export function isDaunusRoute(
   route: any
 ): route is DaunusRoute<any, any, any, any> {
-  return route && route.meta && route.meta.iSchema
+  return route?.meta?.iSchema
 }
 
-export const isAction = <T>(obj: T): obj is T & { type: [string] } => {
+export const isWorkflowAction = <T>(obj: T): obj is T & { type: [string] } => {
   return (
     isObject(obj) &&
     "type" in obj &&

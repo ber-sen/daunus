@@ -1,5 +1,5 @@
 import { $loop } from "./daunus_loop"
-import { Expect, Equal } from "./type_helpers"
+import { type Expect, type Equal } from "./types_helpers"
 
 describe("$loop", () => {
   it("should provide expected types for return", async () => {

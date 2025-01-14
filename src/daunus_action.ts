@@ -2,11 +2,11 @@ import { z } from "zod"
 import { v4 } from "@lukeed/uuid"
 import { resolveParams } from "./resolve_params"
 import {
-  DaunusAction,
-  DaunusCtx,
+  type DaunusAction,
+  type DaunusCtx,
   DaunusException,
-  ExtractData,
-  ExtractDaunusExceptions
+  type ExtractData,
+  type ExtractDaunusExceptions
 } from "./types"
 import { isException, parseResult } from "./helpers"
 
@@ -34,7 +34,7 @@ export const $action =
       name?: string
     }
   ): DaunusAction<O, E> => {
-    const name: string = actionCtx?.name || args.name || v4()
+    const name: string = actionCtx?.name ?? args.name ?? v4()
 
     const run = async (ctx: DaunusCtx = new Map()) => {
       try {
@@ -55,7 +55,7 @@ export const $action =
             ? args.envSchema.parse(ctx.get(".env"))
             : (z.object({}) as E)
 
-          const value = await fn({ ctx, env })(parsedParams!)
+          const value = await fn({ ctx, env })(parsedParams)
 
           return value
         }
@@ -114,5 +114,5 @@ export const parseParams = async <T>(
     return resolvedParams as T
   }
 
-  return options?.schema.parse(resolvedParams) as T
+  return options?.schema.parse(resolvedParams)
 }

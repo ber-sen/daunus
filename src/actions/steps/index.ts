@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { DaunusWorkflowAction } from "../../types"
+import { type DaunusWorkflowAction } from "../../types"
 
 const steps = $action(
   { type: "steps", skipParse: true },
@@ -11,7 +11,7 @@ const steps = $action(
     }: {
       /**
        * Actions
-       * @ref https://taskwish.vercel.app/schema/actions.json
+       * @ref https://taskwish.ai/schema/actions.json
        */
       actions: DaunusWorkflowAction<any>[]
       continueOnError?: boolean

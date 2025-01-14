@@ -1,5 +1,5 @@
 import { ReadableStream } from "isomorphic-web-streams"
-import { ZodRawShape } from "zod"
+import { type ZodRawShape } from "zod"
 import { z } from "./zod"
 
 import { DEFAULT_ACTIONS } from "./default_actions"
@@ -36,7 +36,7 @@ export const $stream = <T>(
             return
           }
 
-          const resolvedValue = await Promise.resolve(result.value as T)
+          const resolvedValue = await Promise.resolve(result.value)
           controller.enqueue(resolvedValue)
 
           await push()
@@ -45,7 +45,7 @@ export const $stream = <T>(
         }
       }
 
-      push()
+      void push()
     }
   })
 }

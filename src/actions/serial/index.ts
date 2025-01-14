@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { DaunusException, DaunusWorkflowAction } from "../../types"
+import { DaunusException, type DaunusWorkflowAction } from "../../types"
 
 const serial = $action(
   { type: "serial", skipParse: true },

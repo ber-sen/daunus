@@ -1,7 +1,7 @@
 import { TransformStream } from "isomorphic-web-streams"
 import { $action } from "../../daunus_action"
 import { writeRows } from "./lib"
-import { CSVParams } from "./types"
+import { type CSVParams } from "./types"
 
 const csv = $action(
   { type: "csv" },
@@ -9,7 +9,7 @@ const csv = $action(
     <T extends {}>({ columns, rows }: CSVParams<T>) => {
       const { writable, readable } = new TransformStream()
 
-      ;(async () => {
+      ;void (async () => {
         const writer = writable.getWriter()
         const reader = rows.getReader()
 

@@ -1,5 +1,5 @@
 import { $actionWithInput } from "./daunus_action_with_input"
-import { DaunusException, DaunusInferReturn } from "./types"
+import { DaunusException, type DaunusInferReturn } from "./types"
 import { z } from "./zod"
 
 
@@ -12,6 +12,7 @@ type Equal<X, Y> =
 
 describe("$actionWithInput", () => {
   it("Should work with array", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const test = $actionWithInput({ type: "test" }, () => (payload: string) => {
       if (Math.random() > 0.5) {
         return new DaunusException({ data: "Server Error" })
@@ -36,6 +37,7 @@ describe("$actionWithInput", () => {
   })
 
   it("Should work with env", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const test = $actionWithInput(
       {
         type: "test",
@@ -63,6 +65,7 @@ describe("$actionWithInput", () => {
   })
 
   it("Should work without env return", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const test = $actionWithInput(
       {
         type: "test"
@@ -78,6 +81,7 @@ describe("$actionWithInput", () => {
   })
 
   it("Should work without env return", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const test = $actionWithInput(
       {
         type: "user.app.snake_method",

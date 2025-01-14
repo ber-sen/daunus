@@ -1,4 +1,4 @@
-import { Equal, Expect, DaunusException } from "../../types"
+import { type Equal, type Expect, DaunusException } from "../../types"
 
 import exit from "./index"
 

@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { DaunusException, DaunusWorkflowAction } from "../../types"
+import { DaunusException, type DaunusWorkflowAction } from "../../types"
 
 const parallel = $action(
   { type: "parallel", skipParse: true },
@@ -10,7 +10,7 @@ const parallel = $action(
     }: {
       /**
        * Actions
-       * @ref https://taskwish.vercel.app/schema/actions.json
+       * @ref https://taskwish.ai/schema/actions.json
        */
       actions: DaunusWorkflowAction<any>[]
     }) => {

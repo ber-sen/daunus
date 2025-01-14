@@ -1,9 +1,9 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi"
 import {
-  ZodOpenAPIMetadata,
-  ZodOpenApiFullMetadata
+  type ZodOpenAPIMetadata,
+  type ZodOpenApiFullMetadata
 } from "@asteasolutions/zod-to-openapi/dist/zod-extensions"
-import { ZodTypeAny, z } from "zod"
+import { type ZodTypeAny, z } from "zod"
 
 extendZodWithOpenApi(z)
 
@@ -14,7 +14,9 @@ declare module "zod" {
 
   interface ZodType<
     Output = any,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Def extends ZodTypeDef = ZodTypeDef,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Input = Output
   > {
     openapi<T extends ZodTypeAny>(
@@ -30,5 +32,4 @@ declare module "zod" {
   }
 }
 
-// eslint-disable-next-line unicorn/prefer-export-from
 export { z }

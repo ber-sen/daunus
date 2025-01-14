@@ -1,4 +1,4 @@
-import { z } from "./zod"
+import { type z } from "./zod"
 
 export type DaunusQuery<T> = T & ((ctx: DaunusCtx) => Promise<T>)
 
@@ -18,8 +18,6 @@ export type ExtractDaunusExceptions<T> =
               : ExtractDaunusExceptions<T[K]>
           }[keyof T]
         : never
-
-export type NonUndefined<T> = T extends undefined ? never : T
 
 export type ExtractData<Return> = Exclude<Return, DaunusException<any, any>>
 
@@ -89,6 +87,7 @@ export type DaunusOpenApi = z.ZodObject<{
 export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
   meta: {
     iSchema: I
+    payload: P,
     openapi: {
       method: I extends DaunusOpenApi
         ? NonNullable<I["shape"]["method"]>["_output"]

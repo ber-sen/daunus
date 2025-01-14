@@ -1,9 +1,9 @@
-import { z } from "zod"
+import { type z } from "zod"
 import {
-  DaunusAction,
-  DaunusActionOrActionWithInput,
-  DaunusActionWithInput,
-  DaunusCtx
+  type DaunusAction,
+  type DaunusActionOrActionWithInput,
+  type DaunusActionWithInput,
+  type DaunusCtx
 } from "./types"
 import { $action } from "./daunus_action"
 import { $ctx } from "./daunus_helpers"

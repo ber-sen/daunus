@@ -1,20 +1,20 @@
 import { $actionWithInput } from "./daunus_action_with_input"
 import { $steps } from "./daunus_steps"
 import {
-  AbstractStepFactory,
+  type AbstractStepFactory,
   Scope,
-  StepConfig,
-  StepFactory,
-  StepProps,
-  resultKey
+  type StepConfig,
+  type StepFactory,
+  type StepProps,
+  type resultKey
 } from "./new_types"
-import { ValidateName } from "./type_helpers"
+import { type ValidateName } from "./types_helpers"
 import {
-  DataResponse,
-  DaunusAction,
-  DaunusActionOrActionWithInput,
-  DaunusActionWithInput,
-  ExceptionReponse
+  type DataResponse,
+  type DaunusAction,
+  type DaunusActionOrActionWithInput,
+  type DaunusActionWithInput,
+  type ExceptionReponse
 } from "./types"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
@@ -161,6 +161,7 @@ interface ConditionDefaultCaseStepFactory<
     scope?: Record<any, any>
   ): StepFactory<Global, Local[N]>
 }
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents, @typescript-eslint/no-redundant-type-constituents
 type Falsy = false | 0 | -0 | 0n | "" | null | undefined | typeof Number.NaN
 
 type Truthy<T> = Exclude<T, Falsy>
@@ -203,8 +204,7 @@ export function $if<
   condition,
   key,
   $,
-  scope: prevScope,
-  name: actionName
+  scope: prevScope
 }: {
   condition: Condition
   $?: Global

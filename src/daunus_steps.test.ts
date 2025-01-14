@@ -1,11 +1,12 @@
 import { $steps } from "./daunus_steps"
-import { StepFactory } from "./new_types"
+import { type StepFactory } from "./new_types"
 
-import { DaunusException, Equal, Expect } from "./types"
+import { DaunusException, type Equal, type Expect } from "./types"
 import { exit, struct } from "."
 
 describe("$steps", () => {
   it("should convert keys to cammel case", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const steps = $steps()
       .add("first step", () => ({
         foo: "bar"
@@ -31,7 +32,7 @@ describe("$steps", () => {
   it("should allow actions", async () => {
     const steps = $steps().add("first step", () => struct({ success: true }))
 
-    const { data, exception } = await steps.run()
+    const { data } = await steps.run()
 
     type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
 
@@ -223,6 +224,7 @@ describe("$steps", () => {
         .add("second step", ({ $ }) => $)
     )
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const res = await steps.run()
 
     type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
@@ -255,6 +257,7 @@ describe("$steps", () => {
   })
 
   it("should display proper types for parallel ", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const steps = $steps()
       .add("data", () => [1, 2, 3] as const)
 
@@ -287,6 +290,7 @@ describe("$steps", () => {
 
   it("should work for empty steps", async () => {
     const steps = $steps()
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       .add("data", () => {})
 
       .add("return", () => true)

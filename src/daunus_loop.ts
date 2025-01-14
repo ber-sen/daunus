@@ -1,21 +1,21 @@
 import {
-  DataResponse,
-  DaunusAction,
-  DaunusActionOrActionWithInput,
-  DaunusActionWithInput,
-  ExceptionReponse,
-  ExtractDaunusExceptions
+  type DataResponse,
+  type DaunusAction,
+  type DaunusActionOrActionWithInput,
+  type DaunusActionWithInput,
+  type ExceptionReponse,
+  type ExtractDaunusExceptions
 } from "./types"
 import { $steps } from "./daunus_steps"
 import {
   Scope,
-  StepConfig,
-  StepFactory,
-  StepProps,
-  StepOptions,
-  resultKey
+  type StepConfig,
+  type StepFactory,
+  type StepProps,
+  type StepOptions,
+  type resultKey
 } from "./new_types"
-import { ValidateName, FormatScope, Overwrite } from "./type_helpers"
+import { type ValidateName, type FormatScope, type Overwrite } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
 
 export interface DefaultLoopStepFactory<

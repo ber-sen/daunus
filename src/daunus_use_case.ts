@@ -1,8 +1,8 @@
-import { z } from "zod"
+import { type z } from "zod"
 import { $steps } from "./daunus_steps"
-import { Scope, StepProps, StepOptions } from "./new_types"
-import { toCamelCase } from "./new_helpers"
-import { DaunusCtx } from "."
+import { Scope, type StepProps, type StepOptions } from "./new_types"
+import { toCamelCase } from "./helpers"
+import { type DaunusCtx } from "./types"
 
 export function $useCase<Name extends string, Input>(
   originalName: Name,
@@ -32,9 +32,7 @@ export function $useCase<Name extends string, Input>(
     }).add("handle", fn)
   }
 
-  function withInput<Input>(
-    input: z.ZodType<Input>
-  ) {
+  function withInput<Input>(input: z.ZodType<Input>) {
     return $useCase(originalName, {
       input
     })

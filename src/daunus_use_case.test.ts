@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { $useCase } from "./daunus_use_case"
-import { Expect, Equal } from "./type_helpers"
+import { type Expect, type Equal } from "./types_helpers"
 import { $input, DaunusException, exit } from "."
 
 describe("$usecase", () => {

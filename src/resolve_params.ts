@@ -33,13 +33,13 @@ export const resolveParams = async <T>(
   if (isArray(params)) {
     const result: any = []
 
-    for (const key in params) {
-      const value = await resolveParams(ctx, params[key], options)
+    for (const rawValue of params) {
+      const value = await resolveParams(ctx, rawValue, options)
 
-      result[key] = value
+      result.push(value)
     }
 
-    return result as any
+    return result
   }
 
   if (isObject(params)) {
@@ -51,7 +51,7 @@ export const resolveParams = async <T>(
       result[key] = value
     }
 
-    return result as any
+    return result
   }
 
   return params

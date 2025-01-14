@@ -1,6 +1,4 @@
-type AnyObject<Key extends PropertyKey = PropertyKey, Value = any> = {
-  readonly [key in Key]: Value
-}
+type AnyObject<Key extends PropertyKey = PropertyKey, Value = any> = Readonly<Record<Key, Value>>
 
 type Paths<P extends string, T> = P | `${P}${NextPath<T>}`
 
@@ -78,7 +76,7 @@ export function get(data: any, path: string, defaultValue?: any): any {
       if (value instanceof Map && typeof value.get === "function") {
         return value.get(key)
       }
-      return (value as any)?.[key]
+      return (value)?.[key]
     }, data)
 
   return value ?? defaultValue

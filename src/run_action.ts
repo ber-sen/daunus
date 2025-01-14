@@ -1,5 +1,5 @@
 import { get } from "./get"
-import { DaunusCtx } from "./types"
+import { type DaunusCtx } from "./types"
 
 const isNested = (path: string) => {
   const dotRegex = /\./g
@@ -27,7 +27,7 @@ export const runAction = async (
   }
 
   if (!ctx.has(".daunus-workflow-actions-resolver") && isNested(type[0])) {
-    action = (action as any).bind(
+    action = action.bind(
       get(ctx.get(".daunus-workflow-actions"), getParent(type[0]))
     )
   }
