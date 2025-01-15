@@ -1,8 +1,9 @@
 import { type z } from "zod"
 import { $steps } from "./daunus_steps"
-import { Scope, type StepProps, type StepOptions } from "./new_types"
+import { type StepProps, type StepOptions } from "./new_types"
 import { toCamelCase } from "./helpers"
 import { type DaunusCtx } from "./types"
+import { Scope } from "./daunus_scope"
 
 export function $useCase<Name extends string, Input>(
   originalName: Name,

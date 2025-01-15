@@ -2,7 +2,6 @@ import { $actionWithInput } from "./daunus_action_with_input"
 import { $steps } from "./daunus_steps"
 import {
   type AbstractStepFactory,
-  Scope,
   type StepConfig,
   type StepFactory,
   type StepProps,
@@ -16,6 +15,7 @@ import {
   type DaunusActionWithInput,
   type ExceptionReponse
 } from "./types"
+import { Scope } from "./daunus_scope"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>

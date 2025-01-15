@@ -8,7 +8,6 @@ import {
 } from "./types"
 import { $steps } from "./daunus_steps"
 import {
-  Scope,
   type StepConfig,
   type StepFactory,
   type StepProps,
@@ -21,6 +20,7 @@ import {
   type Overwrite
 } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
+import { Scope } from "./daunus_scope"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},

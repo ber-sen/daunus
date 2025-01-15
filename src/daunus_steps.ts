@@ -8,7 +8,6 @@ import {
 } from "./types"
 
 import {
-  Scope,
   type StepConfig,
   type StepFactory,
   type StepProps,
@@ -22,6 +21,7 @@ import {
 } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
 import { isAction } from "./helpers"
+import { Scope } from "./daunus_scope"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
