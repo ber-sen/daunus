@@ -37,6 +37,11 @@ export type DaunusAction<Return, Env = {}> = {
   }>
 }
 
+export type Event<Type, Params> = {
+  type: Type
+  params: Params
+}
+
 export type DaunusActionWithInput<Input, Return, Env = {}> = {
   name: string
   env: Env
