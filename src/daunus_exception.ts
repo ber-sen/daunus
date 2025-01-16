@@ -39,7 +39,10 @@ type WaitParams<Type, Params> =
   | {
       until: Date
     }
-  | Event<Type, Params>
+  | {
+      event: Event<Type, Params>
+      timeout: string
+    }
 
 export class Wait<Type, Params> extends ShutdownException<
   102,
