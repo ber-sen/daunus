@@ -44,20 +44,21 @@ export interface DefaultLoopStepFactory<
             ? T
             : never
           : Value
-      > &
-      (Value extends Action<any, any> | ActionWithInput<any, any, any>
-        ? Record<
-            "exceptions",
-            Record<
-              Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-                infer T
-              >
-                ? T
-                : never
-            >
-          >
-        : {}),
+      >,
+    // &
+    // (Value extends Action<any, any> | ActionWithInput<any, any, any>
+    //   ? Record<
+    //       "exceptions",
+    //       Record<
+    //         Name,
+    //         Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+    //           infer T
+    //         >
+    //           ? T
+    //           : never
+    //       >
+    //     >
+    //   : {}),
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<

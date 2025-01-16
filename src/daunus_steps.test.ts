@@ -135,41 +135,17 @@ describe("$steps", () => {
     expect(data).toEqual({ firstStep: { foo: "bar" } })
   })
 
-  xit("should return exceptions", async () => {
-    const steps = $steps().add("nested", () =>
-      exit({ status: 600, data: { foo: "bar" } })
-    )
-
-    const { data, exception } = await steps.run()
-
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
-
-    type steps = Expect<
-      Equal<
-        A,
-        Exception<
-          600,
-          {
-            foo: string
-          },
-          undefined
-        >
-      >
-    >
-
-    expect(data).toEqual(undefined)
-    expect(exception).toEqual(
-      new Exception({ status: 600, data: { foo: "bar" } })
-    )
-  })
-
-  xit("should return exceptions from previous steps", async () => {
+  it("should return all exceptions", async () => {
     const steps = $steps()
-      .add("first error", () => exit({ status: 501, data: { lorem: "bar" } }))
-
       .add("no expetion", () => struct({ success: true }))
 
-      .add("error step", () => exit({ status: 600, data: { foo: "bar" } }))
+      .add("nested", ({ $steps }) =>
+        $steps().add("error step", () =>
+          exit({ status: 600, data: { foo: "bar" } })
+        )
+      )
+
+      .add("first error", () => exit({ status: 501, data: { lorem: "bar" } }))
 
       .add("final", ({ $ }) => $.noExpetion)
 

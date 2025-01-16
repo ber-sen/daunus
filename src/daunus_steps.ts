@@ -42,20 +42,22 @@ export interface DefaultStepFactory<
             ? T
             : never
           : Value
-      > &
-      (Value extends Action<any, any> | ActionWithInput<any, any, any>
-        ? Record<
-            "exceptions",
-            Record<
-              Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-                infer T
-              >
-                ? T
-                : never
-            >
-          >
-        : {}),
+      >,
+    // TODO: add continue on error option
+    // &
+    // (Value extends Action<any, any> | ActionWithInput<any, any, any>
+    //   ? Record<
+    //       "exceptions",
+    //       Record<
+    //         Name,
+    //         Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+    //           infer T
+    //         >
+    //           ? T
+    //           : never
+    //       >
+    //     >
+    //   : {})
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<
@@ -164,7 +166,13 @@ export function $steps<
           let value = await fn(scope.getStepsProps(ctx))
 
           if (isAction(value)) {
-            value = (await value.run(ctx)).data
+            const { data, exception } = await value.run(ctx)
+
+            if (exception) {
+              return exception
+            }
+
+            value = data
           }
 
           scope.global = { ...scope.global, [name]: value }

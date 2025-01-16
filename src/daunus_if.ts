@@ -101,20 +101,23 @@ interface ConditionDefaultCaseStepFactory<
               ? T
               : never
             : Value
-        > &
-          (Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Record<
-                "exceptions",
-                Record<
-                  Name,
-                  Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-                    infer T
-                  >
-                    ? T
-                    : never
-                >
-              >
-            : {})
+        >
+        // TODO: add continue on error option
+        //   &
+        //     (Value extends Action<any, any> | ActionWithInput<any, any, any>
+        //       ? Record<
+        //           "exceptions",
+        //           Record<
+        //             Name,
+        //             Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+        //               infer T
+        //             >
+        //               ? T
+        //               : never
+        //           >
+        //         >
+        //       : {})
+        //
       >,
     OmitNestedByPath<Local, [CurrentKey, typeof resultKey]> &
       Record<CurrentKey, Record<Name, Value>> &
