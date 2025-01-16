@@ -13,7 +13,7 @@ const loop = $action(
       list: Array<any>
       /**
        * Action
-       * @ref https://taskwish.vercel.app/schema/action.json
+       * @ref https://taskwish.ai/schema/actions.json
        */
       action: WorkflowAction<T>
       itemName?: string

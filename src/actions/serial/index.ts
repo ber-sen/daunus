@@ -11,7 +11,7 @@ const serial = $action(
     }: {
       /**
        * Actions
-       * @ref https://taskwish.vercel.app/schema/actions.json
+       * @ref https://taskwish.ai/schema/actions.json
        */
       actions: WorkflowAction<any>[]
     }) => {
