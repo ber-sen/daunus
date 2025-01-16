@@ -19,6 +19,7 @@ import {
 } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
 import { Scope, type StepProps } from "./daunus_scope"
+import { isException } from "./helpers"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},
@@ -69,7 +70,7 @@ export interface DefaultLoopStepFactory<
             : never
           : Value
       > &
-      (Value extends Action<any, any>
+      (Value extends Action<any, any> | ActionWithInput<any, any, any>
         ? Record<
             "exceptions",
             Record<
@@ -150,12 +151,27 @@ function $loopSteps<
             index
           })
 
-          const { data } = await $steps({ $: rowScope, stepsType }).run(ctx)
+          const { data, exception } = await $steps({
+            $: rowScope,
+            stepsType
+          }).run(ctx)
+
+          if (exception) {
+            return exception
+          }
 
           return data
         })
 
-        return await Promise.all(promises)
+        const result = await Promise.all(promises)
+
+        const exception = result.find((item) => isException(item))
+
+        if (exception) {
+          return exception
+        }
+
+        return result
       }
   )({})
 

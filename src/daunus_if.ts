@@ -165,21 +165,31 @@ type ExcludeTruthy<Condition> = Exclude<Condition, Truthy<Condition>>
 
 type Key = "true" | "false" | ""
 
-export type ConditionFactory<
+export interface ConditionFactory<
   Condition,
   Global extends Record<string, any> = {},
-  ScopeGlobal extends Record<string, any> = {},
   Local extends Record<string, any> = {}
-> = ConditionDefaultCaseStepFactory<
-  Condition,
-  Global,
-  ScopeGlobal,
-  Local,
-  "",
-  "add"
->
+> extends ActionOrActionWithInput<Global["input"], Condition> {
+  isTrue(): ConditionDefaultCaseStepFactoryWithout<
+    Condition,
+    Global,
+    Record<"true", Record<"condition", ExcludeFalsy<Condition>>>,
+    Local,
+    "true",
+    "isTrue"
+  >
 
-export function $if<
+  isFalse(): ConditionDefaultCaseStepFactoryWithout<
+    Condition,
+    Global,
+    Record<"false", Record<"condition", ExcludeTruthy<Condition>>>,
+    Local,
+    "false",
+    "isFalse"
+  >
+}
+
+function $ifBranch<
   Condition,
   Global extends Record<string, any> = {},
   ScopeGlobal extends Record<string, any> = {},
@@ -192,29 +202,26 @@ export function $if<
       "false",
       Record<"condition", ExcludeTruthy<Condition>> &
         Record<typeof resultKey, ExcludeTruthy<Condition>>
-    >
+    >,
+  CurrentKey extends Key = "",
+  Without extends string = ""
 >({
   condition,
   key,
-  $,
-  scope: prevScope
+  scope
 }: {
   condition: Condition
-  $?: Global
   key?: Key
-  scope?: Scope<any, any>
+  scope: Scope<any, any>
   name?: string
-}): ConditionFactory<Condition, Global, ScopeGlobal, Local> {
-  const scope =
-    prevScope ??
-    new Scope({})
-      .addLocal("true", {
-        scope: new Scope({ global: $ })
-      })
-      .addLocal("false", {
-        scope: new Scope({ global: $ })
-      })
-
+}): ConditionDefaultCaseStepFactory<
+  Condition,
+  Global,
+  ScopeGlobal,
+  Local,
+  CurrentKey,
+  Without
+> {
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
     global?: Record<any, any>
@@ -223,7 +230,7 @@ export function $if<
   }
 
   function isTrue(): any {
-    return $if({
+    return $ifBranch({
       condition,
       key: "true",
       scope
@@ -231,7 +238,7 @@ export function $if<
   }
 
   function isFalse(): any {
-    return $if({
+    return $ifBranch({
       condition,
       key: "false",
       scope
@@ -244,7 +251,7 @@ export function $if<
   ): any {
     scope.get(key ?? "").scope.addStep(nameOrConfig, fn)
 
-    return $if({
+    return $ifBranch({
       key,
       condition,
       scope
@@ -255,23 +262,18 @@ export function $if<
     { type: "condition" },
     ({ ctx }) =>
       async () => {
-        const noSteps =
-          Object.values(scope.local).filter(
-            (item: any) => Object.values(item.scope.steps).length === 0
-          ).length === 0
-
-        if (!noSteps) {
-          return condition
-        }
-
         if (condition) {
           const trueScope = scope
             .get("true")
             .scope.addGlobal("condition", condition)
 
-          const { data } = await $steps({
+          const { data, exception } = await $steps({
             $: trueScope
           }).run(ctx)
+
+          if (exception) {
+            return exception
+          }
 
           return data
         }
@@ -280,13 +282,72 @@ export function $if<
           .get("false")
           .scope.addGlobal("condition", condition)
 
-        const { data } = await $steps({
+        const { data, exception } = await $steps({
           $: falseScope
         }).run(ctx)
+
+        if (exception) {
+          return exception
+        }
 
         return data
       }
   )({})
 
   return { ...action, get, add, isTrue, isFalse, scope }
+}
+
+export function $if<
+  Condition,
+  Global extends Record<string, any> = {},
+  Local extends Record<any, any> = Record<
+    "true",
+    Record<"condition", Exclude<Condition, Falsy>> &
+      Record<typeof resultKey, ExcludeFalsy<Condition>>
+  > &
+    Record<
+      "false",
+      Record<"condition", ExcludeTruthy<Condition>> &
+        Record<typeof resultKey, ExcludeTruthy<Condition>>
+    >
+>({
+  condition,
+  $
+}: {
+  condition: Condition
+  $?: Global
+  name?: string
+}): ConditionFactory<Condition, Global, Local> {
+  const scope = new Scope({})
+    .addLocal("true", {
+      scope: new Scope({ global: $ })
+    })
+    .addLocal("false", {
+      scope: new Scope({ global: $ })
+    })
+
+  const action = $actionWithInput<Global["input"], any, any>(
+    { type: "condition" },
+    () => async () => {
+      return condition
+    }
+  )({})
+
+  function isTrue(): any {
+    return $ifBranch({
+      condition,
+      key: "true",
+      scope
+    })
+  }
+
+  function isFalse(): any {
+    return $ifBranch({
+      condition,
+      key: "false",
+      scope
+    })
+  }
+
+  return { ...action, isTrue, isFalse }
 }

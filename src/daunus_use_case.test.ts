@@ -124,7 +124,7 @@ describe("$usecase", () => {
     expect(data).toEqual([1, "2 is even", 3])
   })
 
-  xit("should return error inside loop ", async () => {
+  it("should return error inside loop ", async () => {
     const input = $input({ array: z.array(z.number()) })
 
     const useCase = $useCase("Loop with error")
@@ -146,7 +146,7 @@ describe("$usecase", () => {
     expect(exception).toEqual(new Exception({ status: 500 }))
   })
 
-  xit("should return error inside condition", async () => {
+  it("should return error inside condition", async () => {
     const input = $input({ array: z.array(z.number()) })
 
     const useCase = $useCase("condition with error")
@@ -154,6 +154,7 @@ describe("$usecase", () => {
 
       .handle(({ $if, $ }) =>
         $if({ condition: $.input.array.length > 1 }) //
+          .isTrue()
           .add("exit", () => exit({ status: 500 }))
       )
 
