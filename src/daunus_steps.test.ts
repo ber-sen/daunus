@@ -1,9 +1,8 @@
 import { $steps } from "./daunus_steps"
-import { type StepFactory } from "./new_types"
 
-import { type Equal, type Expect } from "./types"
-import { exit, struct } from "."
+import { type StepFactory, exit, struct } from "."
 import { Exception } from "./daunus_exception"
+import { type Equal, type Expect } from "./types_helpers"
 
 describe("$steps", () => {
   it("should convert keys to cammel case", () => {

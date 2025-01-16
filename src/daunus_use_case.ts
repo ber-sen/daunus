@@ -1,9 +1,8 @@
 import { type z } from "zod"
 import { $steps } from "./daunus_steps"
-import { type StepProps, type StepOptions } from "./new_types"
 import { toCamelCase } from "./helpers"
-import { type DaunusCtx } from "./types"
-import { Scope } from "./daunus_scope"
+import { type StepOptions, type Ctx } from "./types"
+import { Scope, type StepProps } from "./daunus_scope"
 
 export function $useCase<Name extends string, Input>(
   originalName: Name,
@@ -15,7 +14,7 @@ export function $useCase<Name extends string, Input>(
     .addGlobal("useCase", { name, originalName })
     .addLazyGlobal(
       "input",
-      (ctx: DaunusCtx) => options?.input?.parse(ctx.get("input")) as Input
+      (ctx: Ctx) => options?.input?.parse(ctx.get("input")) as Input
     )
 
   function steps<Options extends StepOptions>(options?: Options) {

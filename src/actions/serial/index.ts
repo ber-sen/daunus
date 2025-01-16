@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { type DaunusWorkflowAction } from "../../types"
+import { type WorkflowAction } from "../../types"
 import { Exception } from "../../daunus_exception"
 
 const serial = $action(
@@ -13,7 +13,7 @@ const serial = $action(
        * Actions
        * @ref https://taskwish.vercel.app/schema/actions.json
        */
-      actions: DaunusWorkflowAction<any>[]
+      actions: WorkflowAction<any>[]
     }) => {
       const successResuts: Array<any> = []
       const errorResults: Array<any> = []

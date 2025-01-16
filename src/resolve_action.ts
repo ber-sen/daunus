@@ -1,12 +1,8 @@
 import { isWorkflowAction } from "./helpers"
 import { runAction } from "./run_action"
-import { type DaunusCtx } from "./types"
+import { type Ctx } from "./types"
 
-export const resolveAction = async <T>(
-  ctx: DaunusCtx,
-  action: T,
-  name?: string
-) => {
+export const resolveAction = async <T>(ctx: Ctx, action: T, name?: string) => {
   if (isWorkflowAction(action)) {
     const { data, exception } = await runAction(
       ctx,

@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { type DaunusWorkflowAction } from "../../types"
+import { type WorkflowAction } from "../../types"
 import { Exception } from "../../daunus_exception"
 
 const parallel = $action(
@@ -13,7 +13,7 @@ const parallel = $action(
        * Actions
        * @ref https://taskwish.ai/schema/actions.json
        */
-      actions: DaunusWorkflowAction<any>[]
+      actions: WorkflowAction<any>[]
     }) => {
       const promises = actions.map((item) =>
         runAction(ctx, item).then((item) => {

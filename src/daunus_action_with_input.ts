@@ -1,12 +1,13 @@
 import { type z } from "zod"
-import {
-  type DaunusAction,
-  type DaunusActionOrActionWithInput,
-  type DaunusActionWithInput,
-  type DaunusCtx
-} from "./types"
+
 import { $action } from "./daunus_action"
 import { $ctx } from "./daunus_helpers"
+import {
+  type Action,
+  type ActionOrActionWithInput,
+  type ActionWithInput,
+  type Ctx
+} from "./types"
 
 export const $actionWithInput =
   <I, P, O, E = {}>(
@@ -19,20 +20,14 @@ export const $actionWithInput =
       envSchema?: z.Schema<E>
       inputSchema?: z.Schema<I>
     },
-    fn: ({
-      ctx,
-      env
-    }: {
-      ctx: DaunusCtx
-      env: E
-    }) => (params: P) => Promise<O> | O
+    fn: ({ ctx, env }: { ctx: Ctx; env: E }) => (params: P) => Promise<O> | O
   ) =>
   (
     params: P,
     actionCtx?: {
       name?: string
     }
-  ): DaunusActionOrActionWithInput<I, O, E> => {
+  ): ActionOrActionWithInput<I, O, E> => {
     const factory = $action<P, O, E>(args, (options) => fn(options))
 
     const action = factory(params, actionCtx)
@@ -44,13 +39,13 @@ export const $actionWithInput =
 
       return action.run(ctx)
     }) as I extends object
-      ? DaunusActionWithInput<I, O, E>["run"]
-      : DaunusAction<O, E>["run"]
+      ? ActionWithInput<I, O, E>["run"]
+      : Action<O, E>["run"]
 
     const input = ((input: I) => {
       return {
         ...action,
-        run: (ctx: DaunusCtx = $ctx()) => {
+        run: (ctx: Ctx = $ctx()) => {
           ctx.set("input", input)
 
           return action.run(ctx)

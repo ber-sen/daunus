@@ -1,5 +1,5 @@
 import { get } from "./get"
-import { type DaunusCtx } from "./types"
+import { type Ctx } from "./types"
 
 const isNested = (path: string) => {
   const dotRegex = /\./g
@@ -11,7 +11,7 @@ const isNested = (path: string) => {
 const getParent = (path: string) => path.split(".").slice(0, -1).join(".")
 
 export const runAction = async (
-  ctx: DaunusCtx,
+  ctx: Ctx,
   { type, params, name }: { type: string[]; name?: string; params?: any }
 ) => {
   const defaultActions = ctx.get(".defaultActions")

@@ -1,6 +1,6 @@
 import { runAction } from "../../run_action"
 import { $action } from "../../daunus_action"
-import { type DaunusWorkflowAction } from "../../types"
+import { type WorkflowAction } from "../../types"
 
 const loop = $action(
   { type: "loop", skipParse: true },
@@ -15,7 +15,7 @@ const loop = $action(
        * Action
        * @ref https://taskwish.vercel.app/schema/action.json
        */
-      action: DaunusWorkflowAction<T>
+      action: WorkflowAction<T>
       itemName?: string
     }) => {
       const res = list.map(async (value, index) => {

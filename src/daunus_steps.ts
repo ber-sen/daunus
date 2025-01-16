@@ -1,19 +1,16 @@
 import {
-  type DaunusAction,
-  type DaunusActionOrActionWithInput,
-  type DaunusActionWithInput,
-  type ExtractDaunusExceptions,
   type DataResponse,
-  type ExceptionReponse
+  type ExceptionReponse,
+  type ExtractExceptions,
+  type Action,
+  type ActionWithInput,
+  type StepFactory,
+  type resultKey,
+  type StepConfig,
+  type ActionOrActionWithInput,
+  type StepOptions
 } from "./types"
 
-import {
-  type StepConfig,
-  type StepFactory,
-  type StepProps,
-  type StepOptions,
-  type resultKey
-} from "./new_types"
 import {
   type ValidateName,
   type FormatScope,
@@ -21,17 +18,17 @@ import {
 } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
 import { isAction } from "./helpers"
-import { Scope } from "./daunus_scope"
+import { Scope, type StepProps } from "./daunus_scope"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<typeof resultKey, undefined>
 > extends StepFactory<Global, Local>,
-    DaunusActionOrActionWithInput<
+    ActionOrActionWithInput<
       Global["input"],
-      ExtractDaunusExceptions<Local["exceptions"]> extends undefined
+      ExtractExceptions<Local["exceptions"]> extends undefined
         ? Local[typeof resultKey]
-        : Local[typeof resultKey] | ExtractDaunusExceptions<Local["exceptions"]>
+        : Local[typeof resultKey] | ExtractExceptions<Local["exceptions"]>
     > {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
@@ -40,17 +37,13 @@ export interface DefaultStepFactory<
     Overwrite<Global, Name> &
       Record<
         Name,
-        Value extends
-          | DaunusAction<any, any>
-          | DaunusActionWithInput<any, any, any>
+        Value extends Action<any, any> | ActionWithInput<any, any, any>
           ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
       > &
-      (Value extends
-        | DaunusAction<any, any>
-        | DaunusActionWithInput<any, any, any>
+      (Value extends Action<any, any> | ActionWithInput<any, any, any>
         ? Record<
             "exceptions",
             Record<
@@ -67,17 +60,13 @@ export interface DefaultStepFactory<
       Record<Name, Value> &
       Record<
         typeof resultKey,
-        Value extends
-          | DaunusAction<any, any>
-          | DaunusActionWithInput<any, any, any>
+        Value extends Action<any, any> | ActionWithInput<any, any, any>
           ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
       > &
-      (Value extends
-        | DaunusAction<any, any>
-        | DaunusActionWithInput<any, any, any>
+      (Value extends Action<any, any> | ActionWithInput<any, any, any>
         ? Record<
             "exceptions",
             Record<
@@ -97,7 +86,7 @@ export interface ParallelStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
 > extends StepFactory<Global, Local>,
-    DaunusActionOrActionWithInput<Global["input"], FormatScope<Local>> {
+    ActionOrActionWithInput<Global["input"], FormatScope<Local>> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value

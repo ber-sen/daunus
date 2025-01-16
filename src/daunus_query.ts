@@ -1,5 +1,5 @@
 import { Exception } from "./daunus_exception"
-import { type DaunusCtx, type DaunusQuery } from "./types"
+import { type Ctx, type Query } from "./types"
 
 type NestedMap = Map<string, any> | Record<string, any>
 
@@ -79,10 +79,8 @@ function createNestedProxy<T extends NestedMap>(target: T): any {
   })
 }
 
-export function $query<R>(
-  selector: ($: any) => R | Promise<R>
-): DaunusQuery<R> {
-  const $query = async (ctx: DaunusCtx) => {
+export function $query<R>(selector: ($: any) => R | Promise<R>): Query<R> {
+  const $query = async (ctx: Ctx) => {
     const $ = createNestedProxy(ctx)
 
     return await selector($)

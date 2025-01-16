@@ -1,13 +1,13 @@
 import { get } from "./get"
 import { type NonUndefined, type ToCamelCase } from "./types_helpers"
-import {
-  type ExtractDaunusExceptions,
-  type DaunusCtx,
-  type DaunusRoute,
-  type DaunusQuery,
-  type DaunusAction
-} from "./types"
+
 import { Exception } from "./daunus_exception"
+import {
+  type Action,
+  type Ctx,
+  type ExtractExceptions,
+  type Query
+} from "./types"
 
 export function toCamelCase<T extends string>(
   input: T
@@ -47,14 +47,8 @@ export const isMapLike = (value: any): value is Map<any, any> => {
   )
 }
 
-export function isAction(obj: any): obj is DaunusAction<any, any> {
+export function isAction(obj: any): obj is Action<any, any> {
   return obj && typeof obj.run === "function"
-}
-
-export function isDaunusRoute(
-  route: any
-): route is DaunusRoute<any, any, any, any> {
-  return route?.meta?.iSchema
 }
 
 export const isWorkflowAction = <T>(obj: T): obj is T & { type: [string] } => {
@@ -67,13 +61,9 @@ export const isWorkflowAction = <T>(obj: T): obj is T & { type: [string] } => {
   )
 }
 
-export const resolveDaunusVar = (ctx: DaunusCtx, $query: DaunusQuery<any>) =>
-  $query(ctx)
+export const resolveDaunusVar = (ctx: Ctx, $query: Query<any>) => $query(ctx)
 
-export const resolveDaunusPlaceholder = (
-  ctx: DaunusCtx,
-  str: DaunusQuery<any>
-) => {
+export const resolveDaunusPlaceholder = (ctx: Ctx, str: Query<any>) => {
   const $ = new Proxy(ctx, {
     get(target, name) {
       return get(target, name as any)
@@ -132,7 +122,7 @@ export const parseResult = <Return>(
   data: Return
 ): {
   data: any
-  exception: NonUndefined<ExtractDaunusExceptions<Return>>
+  exception: NonUndefined<ExtractExceptions<Return>>
 } => {
   if (Array.isArray(data) && data.length === 2 && isException(data[1])) {
     return {

@@ -1,21 +1,19 @@
 import { $actionWithInput } from "./daunus_action_with_input"
 import { $steps } from "./daunus_steps"
-import {
-  type AbstractStepFactory,
-  type StepConfig,
-  type StepFactory,
-  type StepProps,
-  type resultKey
-} from "./new_types"
+
 import { type ValidateName } from "./types_helpers"
 import {
+  type AbstractStepFactory,
+  type resultKey,
   type DataResponse,
-  type DaunusAction,
-  type DaunusActionOrActionWithInput,
-  type DaunusActionWithInput,
-  type ExceptionReponse
+  type ActionOrActionWithInput,
+  type ExceptionReponse,
+  type StepConfig,
+  type ActionWithInput,
+  type Action,
+  type StepFactory
 } from "./types"
-import { Scope } from "./daunus_scope"
+import { Scope, type StepProps } from "./daunus_scope"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
@@ -62,7 +60,7 @@ interface ConditionDefaultCaseStepFactory<
   CurrentKey extends Key = "",
   Without extends string = ""
 > extends AbstractStepFactory<Global, Local>,
-    DaunusActionOrActionWithInput<
+    ActionOrActionWithInput<
       Global["input"],
       ExtractValuesByKey<Local, typeof resultKey>
     > {
@@ -98,17 +96,13 @@ interface ConditionDefaultCaseStepFactory<
         CurrentKey,
         Record<
           Name,
-          Value extends
-            | DaunusAction<any, any>
-            | DaunusActionWithInput<any, any, any>
+          Value extends Action<any, any> | ActionWithInput<any, any, any>
             ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
               ? T
               : never
             : Value
         > &
-          (Value extends
-            | DaunusAction<any, any>
-            | DaunusActionWithInput<any, any, any>
+          (Value extends Action<any, any> | ActionWithInput<any, any, any>
             ? Record<
                 "exceptions",
                 Record<
@@ -128,17 +122,13 @@ interface ConditionDefaultCaseStepFactory<
         CurrentKey,
         Record<
           typeof resultKey,
-          Value extends
-            | DaunusAction<any, any>
-            | DaunusActionWithInput<any, any, any>
+          Value extends Action<any, any> | ActionWithInput<any, any, any>
             ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
               ? T
               : never
             : Value
         > &
-          (Value extends
-            | DaunusAction<any, any>
-            | DaunusActionWithInput<any, any, any>
+          (Value extends Action<any, any> | ActionWithInput<any, any, any>
             ? Record<
                 "exceptions",
                 Record<

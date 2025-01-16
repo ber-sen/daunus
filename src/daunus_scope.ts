@@ -1,17 +1,33 @@
-import { $steps } from "./daunus_steps"
-import { $if } from "./daunus_if"
-import { $loop } from "./daunus_loop"
+import { $steps, type StepsFactory } from "./daunus_steps"
+import { $if, type ConditionFactory } from "./daunus_if"
+import { $loop, type LoopFactory } from "./daunus_loop"
 import { toCamelCase } from "./helpers"
-import { type StepConfig } from "./new_types"
-import { type DaunusCtx } from "./types"
-import { type ValidateName } from "./types_helpers"
+import { type StepOptions, type Ctx, type StepConfig } from "./types"
+import { type FormatScope, type ValidateName } from "./types_helpers"
 
 class LazyGlobal<Value> {
-  public run: (ctx: DaunusCtx) => Value
+  public run: (ctx: Ctx) => Value
 
-  constructor(fn: (ctx: DaunusCtx) => Value) {
+  constructor(fn: (ctx: Ctx) => Value) {
     this.run = fn
   }
+}
+
+export interface StepProps<Global extends Record<string, any> = {}> {
+  $: FormatScope<Global>
+  $if: <Condition>(options: {
+    condition: Condition
+  }) => ConditionFactory<Condition, Global>
+  $steps: <Options extends StepOptions>(
+    options?: Options
+  ) => StepsFactory<Options, Global>
+  $loop: <
+    List extends Array<any> | readonly any[],
+    ItemVariable extends string = "item"
+  >(options: {
+    list: List
+    itemVariable?: ItemVariable
+  }) => LoopFactory<List, ItemVariable, Global>
 }
 
 type Steps<R extends Record<string, any>> = {
@@ -51,14 +67,14 @@ export class Scope<
 
   addLazyGlobal<Name extends string, Value>(
     name: Name,
-    fn: (ctx: DaunusCtx) => Value
+    fn: (ctx: Ctx) => Value
   ) {
     this.global = { ...this.global, [name]: new LazyGlobal(fn) }
 
     return this as Scope<Global & Record<Name, Value>, Local>
   }
 
-  getGlobal(ctx: DaunusCtx): Global {
+  getGlobal(ctx: Ctx): Global {
     return Object.fromEntries(
       Object.entries(this.global).map(([key, value]) => {
         if (value instanceof LazyGlobal) {
@@ -70,7 +86,7 @@ export class Scope<
     ) as any
   }
 
-  getStepsProps(ctx: DaunusCtx) {
+  getStepsProps(ctx: Ctx) {
     const global = this.getGlobal(ctx)
 
     return this.getProps(global)

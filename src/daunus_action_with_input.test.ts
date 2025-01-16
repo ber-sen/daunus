@@ -1,6 +1,6 @@
 import { $actionWithInput } from "./daunus_action_with_input"
 import { Exception } from "./daunus_exception"
-import { type DaunusInferReturn } from "./types"
+import { type InferReturn } from "./types"
 import { z } from "./zod"
 
 type Expect<T extends true> = T
@@ -21,7 +21,7 @@ describe("$actionWithInput", () => {
       return [{ name: payload }]
     })("test")
 
-    type A = DaunusInferReturn<typeof test>
+    type A = InferReturn<typeof test>
 
     type test = Expect<
       Equal<
@@ -51,7 +51,7 @@ describe("$actionWithInput", () => {
         }
     )("test")
 
-    type A = DaunusInferReturn<typeof test>
+    type A = InferReturn<typeof test>
 
     type test = Expect<
       Equal<

@@ -1,22 +1,24 @@
 import { type Exception } from "./daunus_exception"
+import { type Scope } from "./daunus_scope"
+import { type FormatScope, type ValidateName } from "./types_helpers"
 import { type z } from "./zod"
 
-export type DaunusQuery<T> = T & ((ctx: DaunusCtx) => Promise<T>)
+export type Ctx = Map<any, any>
 
-export type DaunusInput<T> = z.ZodType<T>
+export type Query<T> = T & ((ctx: Ctx) => Promise<T>)
 
-export type DaunusCtx = Map<any, any>
+export type Input<T> = z.ZodType<T>
 
-export type ExtractDaunusExceptions<T> =
+export type ExtractExceptions<T> =
   T extends Exception<any, any>
     ? T
     : T extends Array<infer A>
-      ? ExtractDaunusExceptions<A>
+      ? ExtractExceptions<A>
       : T extends object
         ? {
             [K in keyof T]: T[K] extends Exception<any, any>
               ? T[K]
-              : ExtractDaunusExceptions<T[K]>
+              : ExtractExceptions<T[K]>
           }[keyof T]
         : never
 
@@ -28,13 +30,35 @@ export type ExceptionReponse<E> = { exception: E }
 
 export type ActionReponse<D, E> = DataResponse<D> & ExceptionReponse<E>
 
-export type DaunusAction<Return, Env = {}> = {
+export type Action<Return, Env = {}> = {
   name: string
   env: Env
-  run: (ctx?: DaunusCtx) => Promise<{
+  run: (ctx?: Ctx) => Promise<{
     data: ExtractData<Return>
-    exception: ExtractDaunusExceptions<Return>
+    exception: ExtractExceptions<Return>
   }>
+}
+
+export type ActionWithInput<Input, Return, Env = {}> = {
+  name: string
+  env: Env
+  run: (
+    input: Input,
+    ctx?: Ctx
+  ) => Promise<{
+    data: ExtractData<Return>
+    exception: ExtractExceptions<Return>
+  }>
+  input: (input: Input) => Action<Return, Env>
+}
+
+export type ActionOrActionWithInput<Input, Return, Env = {}> = {
+  name: string
+  env: Env
+  run: Input extends object
+    ? ActionWithInput<Input, Return, Env>["run"]
+    : Action<Return, Env>["run"]
+  input: Input extends object ? (input: Input) => Action<Return, Env> : never
 }
 
 export type Event<Type, Params> = {
@@ -42,108 +66,59 @@ export type Event<Type, Params> = {
   params: Params
 }
 
-export type DaunusActionWithInput<Input, Return, Env = {}> = {
-  name: string
-  env: Env
-  run: (
-    input: Input,
-    ctx?: DaunusCtx
-  ) => Promise<{
-    data: ExtractData<Return>
-    exception: ExtractDaunusExceptions<Return>
-  }>
-  input: (input: Input) => DaunusAction<Return, Env>
-}
-
-export type DaunusActionOrActionWithInput<Input, Return, Env = {}> = {
-  name: string
-  env: Env
-  run: Input extends object
-    ? DaunusActionWithInput<Input, Return, Env>["run"]
-    : DaunusAction<Return, Env>["run"]
-  input: Input extends object
-    ? (input: Input) => DaunusAction<Return, Env>
-    : never
-}
-
-export type DaunusWorkflowAction<T> = {
+export type WorkflowAction<T> = {
   type: string[]
   params?: T
   name: string
 }
 
-export type DaunusOpenApiMethod =
-  | "get"
-  | "post"
-  | "put"
-  | "delete"
-  | "patch"
-  | "head"
-  | "options"
-  | "trace"
+export type ExcludeException<T> = T extends Exception<any, any> ? never : T
 
-export type DaunusOpenApi = z.ZodObject<{
-  method?: z.ZodType<any>
-  contentType?: z.ZodType<any>
-  path?: any
-  body?: any
-  query?: any
-}>
+export type InferReturn<
+  T extends Action<any, any> | ActionWithInput<any, any, any>
+> = T extends Action<any, any> ? Awaited<ReturnType<T["run"]>> : never
 
-export type DaunusRoute<D, P, E, I extends z.ZodType<any>> = {
-  meta: {
-    iSchema: I
-    payload: P
-    openapi: {
-      method: I extends DaunusOpenApi
-        ? NonNullable<I["shape"]["method"]>["_output"]
-        : "post"
-      contentType: I extends DaunusOpenApi
-        ? NonNullable<I["shape"]["contentType"]>["_output"]
-        : never
-      path: I extends DaunusOpenApi
-        ? NonNullable<I["shape"]["path"]>["_output"]
-        : never
-      body: I extends DaunusOpenApi
-        ? NonNullable<I["shape"]["body"]>["_output"]
-        : never
-      query: I extends DaunusOpenApi
-        ? NonNullable<I["shape"]["query"]>["_output"]
-        : never
-    }
+export type InferInput<
+  T extends
+    | ActionWithInput<any, any, any>
+    | ActionOrActionWithInput<any, any, any>
+> = T extends
+  | ActionWithInput<any, any, any>
+  | ActionOrActionWithInput<any, any, any>
+  ? Parameters<T["input"]>[0]
+  : never
+
+type WorkflowBackoff = "constant" | "linear" | "exponential"
+
+export interface StepConfig<N, L> {
+  name: ValidateName<N, L>
+  timeout?: string | number
+  retries?: {
+    limit: number
+    delay: string | number
+    backoff?: WorkflowBackoff
   }
-  input: (value: I["_type"]) => DaunusAction<D, E>
-  rawInput: (value: unknown) => DaunusAction<D, E>
+}
+export interface AbstractStepFactory<
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> {
+  scope: Scope<FormatScope<Global>, FormatScope<Local>>
+
+  get(name: string, scope?: Record<any, any>): any
+
+  add(...params: any): any
 }
 
-export type DaunusActionWithOptions<D, P, E> = DaunusAction<D, E> & {
-  createRoute<I extends z.ZodType<any>>(iSchema: I): DaunusRoute<D, P, E, I>
-  createRoute(): DaunusAction<D, E>
+export interface StepFactory<
+  Global extends Record<string, any> = {},
+  Local extends Record<string, any> = {}
+> extends AbstractStepFactory<Global, Local> {
+  get<N extends keyof Local>(name: N, scope?: Record<any, any>): Local[N]
 }
 
-export type DaunusExcludeException<T> =
-  T extends Exception<any, any> ? never : T
+export const resultKey: unique symbol = Symbol("resultKey")
 
-export type DaunusGetExceptions<T> = T extends Exception<any, any> ? T : never
-
-export type DaunusInferReturn<
-  T extends DaunusAction<any, any> | DaunusRoute<any, any, any, any>
-> =
-  T extends DaunusRoute<any, any, any, any>
-    ? Awaited<ReturnType<ReturnType<T["input"]>["run"]>>
-    : T extends DaunusAction<any, any>
-      ? Awaited<ReturnType<T["run"]>>
-      : never
-
-export type DaunusInferInput<T extends DaunusRoute<any, any, any, any>> =
-  T extends DaunusRoute<any, any, any, any> ? Parameters<T["input"]>[0] : never
-
-export type Expect<T extends true> = T
-
-export type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-    ? true
-    : false
-
-export type ExceptionParams<T, P> =
-  ExtractDaunusExceptions<T> extends never ? P : ExtractDaunusExceptions<T>
+export interface StepOptions {
+  stepsType?: "default" | "parallel" | "serial"
+}

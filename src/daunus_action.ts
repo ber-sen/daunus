@@ -2,10 +2,10 @@ import { z } from "zod"
 import { v4 } from "@lukeed/uuid"
 import { resolveParams } from "./resolve_params"
 import {
-  type DaunusAction,
-  type DaunusCtx,
+  type Action,
+  type Ctx,
   type ExtractData,
-  type ExtractDaunusExceptions
+  type ExtractExceptions
 } from "./types"
 import { isException, parseResult } from "./helpers"
 import { Exception } from "./daunus_exception"
@@ -20,23 +20,17 @@ export const $action =
       skipPlaceholders?: boolean
       envSchema?: z.Schema<E>
     },
-    fn: ({
-      ctx,
-      env
-    }: {
-      ctx: DaunusCtx
-      env: E
-    }) => (params: P) => Promise<O> | O
+    fn: ({ ctx, env }: { ctx: Ctx; env: E }) => (params: P) => Promise<O> | O
   ) =>
   (
     params: P,
     actionCtx?: {
       name?: string
     }
-  ): DaunusAction<O, E> => {
+  ): Action<O, E> => {
     const name: string = actionCtx?.name ?? args.name ?? v4()
 
-    const run = async (ctx: DaunusCtx = new Map()) => {
+    const run = async (ctx: Ctx = new Map()) => {
       try {
         const runFn = async () => {
           const parsedParams =
@@ -85,7 +79,7 @@ export const $action =
           exception
         } as {
           data: ExtractData<O>
-          exception: ExtractDaunusExceptions<O>
+          exception: ExtractExceptions<O>
         }
       }
     }
