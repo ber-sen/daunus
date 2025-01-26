@@ -23,7 +23,7 @@ describe("$usecase", () => {
     const input = $input({ name: z.string() })
 
     const useCase = $useCase("name")
-      .withInput(input)
+      .input(input)
 
       .handle(({ $ }) => $.input.name === "lorem")
 
@@ -40,7 +40,7 @@ describe("$usecase", () => {
     const input = $input({ name: z.string() })
 
     const route = $useCase("My use case")
-      .withInput(input)
+      .input(input)
 
       .steps()
 
@@ -61,7 +61,7 @@ describe("$usecase", () => {
     const input = $input({ city: z.string() })
 
     const route = $useCase("Example")
-      .withInput(input)
+      .input(input)
 
       .steps({ stepsType: "parallel" })
 
@@ -97,7 +97,7 @@ describe("$usecase", () => {
     const input = $input({ array: z.array(z.number()) })
 
     const useCase = $useCase("Loop and condition")
-      .withInput(input)
+      .input(input)
 
       .handle(({ $loop, $ }) =>
         $loop({ list: $.input.array })
@@ -128,7 +128,7 @@ describe("$usecase", () => {
     const input = $input({ array: z.array(z.number()) })
 
     const useCase = $useCase("Loop with error")
-      .withInput(input)
+      .input(input)
 
       .handle(({ $loop, $ }) =>
         $loop({ list: $.input.array })
@@ -150,7 +150,7 @@ describe("$usecase", () => {
     const input = $input({ array: z.array(z.number()) })
 
     const useCase = $useCase("condition with error")
-      .withInput(input)
+      .input(input)
 
       .handle(({ $if, $ }) =>
         $if({ condition: $.input.array.length > 1 }) //
@@ -171,7 +171,7 @@ describe("$usecase", () => {
     const input = $input({ names: z.array(z.number()) })
 
     const useCase = $useCase("Script")
-      .withInput(input)
+      .input(input)
 
       .handle(({ $ }) =>
         $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))

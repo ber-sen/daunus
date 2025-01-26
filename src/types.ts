@@ -39,6 +39,13 @@ export type Action<Return, Env = {}> = {
   }>
 }
 
+export type ActionFactory<Params, Return, Env = {}> = (
+  params: Params,
+  actionMeta?: {
+    name?: string
+  }
+) => Action<Return, Env>
+
 export type ActionWithInput<Input, Return, Env = {}> = {
   name: string
   env: Env

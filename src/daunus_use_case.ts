@@ -32,11 +32,11 @@ export function $useCase<Name extends string, Input>(
     }).add("handle", fn)
   }
 
-  function withInput<Input>(input: z.ZodType<Input>) {
+  function input<Input>(input: z.ZodType<Input>) {
     return $useCase(originalName, {
       input
     })
   }
 
-  return { steps, handle, originalName, name, withInput }
+  return { steps, handle, originalName, name, input }
 }

@@ -2,6 +2,7 @@ import { z } from "zod"
 import { v4 } from "@lukeed/uuid"
 import { resolveParams } from "./resolve_params"
 import {
+  type ActionFactory,
   type Action,
   type Ctx,
   type ExtractData,
@@ -21,14 +22,14 @@ export const $action =
       envSchema?: z.Schema<E>
     },
     fn: ({ ctx, env }: { ctx: Ctx; env: E }) => (params: P) => Promise<O> | O
-  ) =>
+  ): ActionFactory<P, O, E> =>
   (
     params: P,
-    actionCtx?: {
+    actionMeta?: {
       name?: string
     }
   ): Action<O, E> => {
-    const name: string = actionCtx?.name ?? args.name ?? v4()
+    const name: string = actionMeta?.name ?? args.name ?? v4()
 
     const run = async (ctx: Ctx = new Map()) => {
       try {
@@ -85,7 +86,7 @@ export const $action =
     }
 
     return {
-      ...actionCtx,
+      ...actionMeta,
       name,
       env: args.envSchema?._type ?? ({} as E),
       run

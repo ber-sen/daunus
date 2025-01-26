@@ -1,6 +1,6 @@
 {
   "name": "daunus",
-  "version": "0.1.98",
+  "version": "0.1.99",
   "description": "Yet another typescript framework",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --no-cache",
