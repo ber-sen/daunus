@@ -11,7 +11,7 @@ import {
 
 export function toCamelCase<T extends string>(
   input: T
-): Uncapitalize<ToCamelCase<T>> {
+): ToCamelCase<T> {
   return input
     .replace(/[\s!,._-]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
     .replace(/^[A-Z]/, (match) => match.toLowerCase()) as any

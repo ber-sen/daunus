@@ -44,7 +44,7 @@ describe("$usecase", () => {
 
       .steps()
 
-      .add("first step", ({ $ }) => $.input)
+      .add("First step", ({ $ }) => $.input)
 
       .add("second step", ({ $ }) => $.firstStep.name)
 

@@ -1,9 +1,14 @@
-export type ToCamelCase<T extends string> =
+export type CamelCase<T extends string> =
   T extends `${infer Left}${infer Delimiter}${infer Right}`
     ? Delimiter extends " " | "_" | "-" | "." | "," | "!"
       ? `${Left}${Capitalize<ToCamelCase<Right>>}`
-      : `${Left}${ToCamelCase<`${Delimiter}${Right}`>}`
+      : `${Left}${CamelCase<`${Delimiter}${Right}`>}`
     : T
+
+export type LowercaseFirst<T extends string> =
+  T extends `${infer First}${infer Rest}` ? `${Lowercase<First>}${Rest}` : T
+
+export type ToCamelCase<T extends string> = LowercaseFirst<CamelCase<T>>
 
 export type FormatException<T> = {
   [K in keyof T as ToCamelCase<Extract<K, string>>]: T[K]
