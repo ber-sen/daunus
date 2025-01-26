@@ -1,10 +1,11 @@
 import { struct } from "."
-import { $actions } from "./daunus_actions"
+import { $registry } from "./daunus_registry"
+
 import { type Expect, type Equal } from "./types_helpers"
 
-describe("$actions", () => {
+describe("$registry", () => {
   it("should be able to add factories and create actions", async () => {
-    const actions = $actions().add("struct", struct)
+    const actions = $registry().add("struct", struct)
 
     const action = actions("struct")({ name: "Foo" })
 

@@ -31,7 +31,7 @@ export const isDaunusQuery = (value: any) =>
   typeof value === "function" && value.__type === "daunus_query"
 
 export const isDaunusPlaceholder = (value: any) =>
-  typeof value === "string" && /<%\s*([\S\s]*?)\s*%>/g.test(value)
+  typeof value === "string" && /{{\s*([\S\s]*?)\s*}}/g.test(value)
 
 export const isArray = (value: any): value is any[] => Array.isArray(value)
 
@@ -70,8 +70,8 @@ export const resolveDaunusPlaceholder = (ctx: Ctx, str: Query<any>) => {
     }
   })
 
-  if (/^<%\s*([\S\s]*?)\s*%>$/g.test(str)) {
-    const match = /^<%\s*([\S\s]*?)\s*%>$/g.exec(str)
+  if (/^{{\s*([\S\s]*?)\s*}}$/g.test(str)) {
+    const match = /^{{\s*([\S\s]*?)\s*}}$/g.exec(str)
 
     if (match && ctx.has(".daunus-placeholder-resolver")) {
       return ctx.get(".daunus-placeholder-resolver")($, match[1])
@@ -81,7 +81,7 @@ export const resolveDaunusPlaceholder = (ctx: Ctx, str: Query<any>) => {
   }
 
   const interpolated = str.replace(
-    /<%\s*([\S\s]*?)\s*%>/g,
+    /{{\s*([\S\s]*?)\s*}}/g,
     (_: any, key: string) => {
       if (ctx.has(".daunus-placeholder-resolver")) {
         return ctx.get(".daunus-placeholder-resolver")($, key)

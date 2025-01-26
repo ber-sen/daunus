@@ -24,11 +24,12 @@ export type ExtractExceptions<T> =
 
 export type ExtractData<Return> = Exclude<Return, Exception<any, any>>
 
-export type DataResponse<D> = { data: D }
+export type DataResponse<Data> = { data: Data }
 
-export type ExceptionReponse<E> = { exception: E }
+export type ExceptionReponse<Exception> = { exception: Exception }
 
-export type ActionReponse<D, E> = DataResponse<D> & ExceptionReponse<E>
+export type ActionResponse<Data, Exception> = DataResponse<Data> &
+  ExceptionReponse<Exception>
 
 export type Action<Return, Env = {}> = {
   name: string

@@ -174,7 +174,7 @@ describe("workflow", () => {
                 itemName: "item",
                 action: {
                   type: ["struct"],
-                  params: "<% $.item.value %>"
+                  params: "{{ $.item.value }}"
                 }
               }
             }
