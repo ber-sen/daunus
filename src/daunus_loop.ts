@@ -18,8 +18,9 @@ import {
   type Overwrite
 } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
-import { Scope, type StepProps } from "./daunus_scope"
 import { isException } from "./helpers"
+import { $stepProps, type StepProps } from "./daunus_step_props"
+import { Scope } from "./daunus_scope"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},
@@ -126,7 +127,7 @@ function $loopSteps<
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scope.get(name, global)
+    return scope.get(name, $stepProps(global))
   }
 
   function add(

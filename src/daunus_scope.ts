@@ -1,9 +1,7 @@
-import { $steps, type StepsFactory } from "./daunus_steps"
-import { $if, type ConditionFactory } from "./daunus_if"
-import { $loop, type LoopFactory } from "./daunus_loop"
+import { type StepProps } from "./daunus_step_props"
 import { toCamelCase } from "./helpers"
-import { type StepOptions, type Ctx, type StepConfig } from "./types"
-import { type FormatScope, type ValidateName } from "./types_helpers"
+import { type Ctx, type StepConfig } from "./types"
+import { type ValidateName } from "./types_helpers"
 
 class LazyGlobal<Value> {
   public run: (ctx: Ctx) => Value
@@ -11,23 +9,6 @@ class LazyGlobal<Value> {
   constructor(fn: (ctx: Ctx) => Value) {
     this.run = fn
   }
-}
-
-export interface StepProps<Global extends Record<string, any> = {}> {
-  $: FormatScope<Global>
-  $if: <Condition>(options: {
-    condition: Condition
-  }) => ConditionFactory<Condition, Global>
-  $steps: <Options extends StepOptions>(
-    options?: Options
-  ) => StepsFactory<Options, Global>
-  $loop: <
-    List extends Array<any> | readonly any[],
-    ItemVariable extends string = "item"
-  >(options: {
-    list: List
-    itemVariable?: ItemVariable
-  }) => LoopFactory<List, ItemVariable, Global>
 }
 
 type Steps<R extends Record<string, any>> = {
@@ -86,30 +67,15 @@ export class Scope<
     ) as any
   }
 
-  getStepsProps(ctx: Ctx) {
-    const global = this.getGlobal(ctx)
-
-    return this.getProps(global)
-  }
-
   addLocal<Name extends string, Value>(name: Name, value: Value) {
     this.local = { ...this.local, [name]: value }
 
     return this as Scope<Global, Local & Record<Name, Value>>
   }
 
-  getProps(global: Global) {
-    return {
-      $: global,
-      $if: (options: any) => $if({ $: global, ...options }),
-      $loop: (options: any) => $loop({ $: global, ...options }),
-      $steps: (options: any) => $steps({ $: global, ...options })
-    }
-  }
-
   addStep<Name extends string, Value>(
     nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: any) => Value | Promise<Value>
+    fn: (props: StepProps) => Value | Promise<Value>
   ) {
     const name =
       typeof nameOrConfig === "string" ? nameOrConfig : nameOrConfig.name
@@ -130,10 +96,10 @@ export class Scope<
 
   get<Name extends keyof Local>(
     name: Extract<Name, string>,
-    global?: Record<any, any>
+    props?: StepProps
   ): Local[Name] {
     if (this.steps[toCamelCase(name)]) {
-      return this.steps[toCamelCase(name)](this.getProps(global ?? {}))
+      return this.steps[toCamelCase(name)](props)
     }
 
     return this.local[toCamelCase(name) as any]

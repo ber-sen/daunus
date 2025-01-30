@@ -13,7 +13,8 @@ import {
   type Action,
   type StepFactory
 } from "./types"
-import { Scope, type StepProps } from "./daunus_scope"
+import { Scope } from "./daunus_scope"
+import { $stepProps, type StepProps } from "./daunus_step_props"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
@@ -226,7 +227,7 @@ function $ifBranch<
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scope.get(name, global)
+    return scope.get(name, $stepProps(global))
   }
 
   function isTrue(): any {

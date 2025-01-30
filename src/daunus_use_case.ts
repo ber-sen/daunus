@@ -2,7 +2,8 @@ import { type z } from "zod"
 import { $steps } from "./daunus_steps"
 import { toCamelCase } from "./helpers"
 import { type StepOptions, type Ctx } from "./types"
-import { Scope, type StepProps } from "./daunus_scope"
+import { Scope } from "./daunus_scope"
+import { type StepProps } from "./daunus_step_props"
 
 export function $useCase<Name extends string, Input>(
   originalName: Name,

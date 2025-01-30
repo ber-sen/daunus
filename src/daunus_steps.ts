@@ -18,7 +18,8 @@ import {
 } from "./types_helpers"
 import { $actionWithInput } from "./daunus_action_with_input"
 import { isAction } from "./helpers"
-import { Scope, type StepProps } from "./daunus_scope"
+import { Scope } from "./daunus_scope"
+import { $stepProps, type StepProps } from "./daunus_step_props"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
@@ -121,7 +122,7 @@ export function $steps<
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scope.get(name, global)
+    return scope.get(name, $stepProps(global ?? {}))
   }
 
   function add(
@@ -144,7 +145,7 @@ export function $steps<
 
         if (stepsType === "parallel") {
           const promises = Object.values(scope.steps).map(async (fn) => {
-            const res = await fn(scope.getStepsProps(ctx))
+            const res = await fn($stepProps(scope.getGlobal(ctx)))
 
             if (isAction(res)) {
               return (await res.run(ctx)).data
@@ -163,7 +164,7 @@ export function $steps<
         const res: unknown[] = []
 
         for (const [name, fn] of Object.entries(scope.steps)) {
-          let value = await fn(scope.getStepsProps(ctx))
+          let value = await fn($stepProps(scope.getGlobal(ctx)))
 
           if (isAction(value)) {
             const { data, exception } = await value.run(ctx)
