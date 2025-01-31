@@ -22,10 +22,11 @@ export interface StepProps<Global extends Record<string, any> = {}> {
 }
 
 export const $stepProps = <Global extends Record<string, any> = {}>(
-  global: Global = {} as Global
+  $: Global = {} as Global
 ): StepProps<Global> => ({
-  $: global,
-  $if: (options: any) => $if({ $: global, ...options }),
-  $loop: (options: any) => $loop({ $: global, ...options }),
-  $steps: (options: any) => $steps({ $: global, ...options }) as any
+  $,
+  $if: (options: any) => $if({ $, ...options }),
+  $loop: (options: any) => $loop({ $, ...options }),
+  $steps: <Options extends StepOptions = {}>(options?: Options) =>
+    $steps({ $, ...(options ?? ({} as Options)) })
 })

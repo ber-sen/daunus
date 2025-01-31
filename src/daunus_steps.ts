@@ -122,7 +122,7 @@ export function $steps<
     name: Extract<Name, string>,
     global?: Record<any, any>
   ): Local[Name] {
-    return scope.get(name, $stepProps(global ?? {}))
+    return scope.get(name, $stepProps(global))
   }
 
   function add(

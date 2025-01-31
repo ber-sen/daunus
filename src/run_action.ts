@@ -1,4 +1,5 @@
 import { get } from "./get"
+import { isWorkflowAction } from "./helpers"
 import { type Ctx } from "./types"
 
 const isNested = (path: string) => {
@@ -9,6 +10,19 @@ const isNested = (path: string) => {
 }
 
 const getParent = (path: string) => path.split(".").slice(0, -1).join(".")
+
+export const resolveAction = async <T>(ctx: Ctx, action: T, name?: string) => {
+  if (isWorkflowAction(action)) {
+    const { data, exception } = await runAction(
+      ctx,
+      name ? { ...action, name } : action
+    )
+
+    return data || exception
+  }
+
+  return action
+}
 
 export const runAction = async (
   ctx: Ctx,
