@@ -32,12 +32,14 @@
   },
   "homepage": "https://www.daunus.com",
   "dependencies": {
+    "@ai-sdk/provider": "^1.0.7",
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "@lukeed/uuid": "^2.0.1",
     "isomorphic-web-streams": "^0.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "^1.1.9",
     "@types/jest": "^29.5.1",
     "eslint": "^9.18.0",
     "eslint-config-unjs": "^0.4.2",
