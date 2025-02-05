@@ -8,7 +8,8 @@ import {
   type resultKey,
   type StepConfig,
   type ActionOrActionWithInput,
-  type StepOptions
+  type StepOptions,
+  type Ctx
 } from "./types"
 
 import {
@@ -120,9 +121,9 @@ export function $steps<
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
-    global?: Record<any, any>
+    params: { $?: Record<any, any>; ctx?: Ctx }
   ): Local[Name] {
-    return scope.get(name, $stepProps(global))
+    return scope.get(name, $stepProps(params))
   }
 
   function add(
@@ -145,7 +146,7 @@ export function $steps<
 
         if (stepsType === "parallel") {
           const promises = Object.values(scope.steps).map(async (fn) => {
-            const res = await fn($stepProps(scope.getGlobal(ctx)))
+            const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
             if (isAction(res)) {
               return (await res.run(ctx)).data
@@ -164,7 +165,7 @@ export function $steps<
         const res: unknown[] = []
 
         for (const [name, fn] of Object.entries(scope.steps)) {
-          let value = await fn($stepProps(scope.getGlobal(ctx)))
+          let value = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
           if (isAction(value)) {
             const { data, exception } = await value.run(ctx)

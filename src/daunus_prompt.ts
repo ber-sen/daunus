@@ -1,6 +1,12 @@
 import { type LanguageModelV1 } from "@ai-sdk/provider"
+import { type Ctx } from "./types"
 
-export function $prompt(defaultParams?: { model: LanguageModelV1 }) {
+export type PromptFactory<> = ReturnType<typeof $prompt>
+
+export function $prompt(defaultParams?: {
+  model?: LanguageModelV1
+  ctx?: Ctx
+}) {
   return function template(params?: { model?: LanguageModelV1 }) {
     return async function (
       strings: TemplateStringsArray,

@@ -4,7 +4,7 @@ import { type Expect, type Equal } from "./types_helpers"
 import { $input, exit } from "."
 import { Exception } from "./daunus_exception"
 
-describe("$usecase", () => {
+describe("$useCase", () => {
   it("should work without input", async () => {
     const useCase = $useCase("Hello world").handle(
       ({ $ }) => $.useCase.originalName
@@ -34,6 +34,52 @@ describe("$usecase", () => {
     type data = Expect<Equal<A, boolean>>
 
     expect(data).toEqual(true)
+  })
+
+  xit("should work with prompts", async () => {
+    const input = $input({ language: z.string() })
+
+    const useCase = $useCase("Say hello in language")
+      .input(input)
+
+      .handle(
+        ({ $, $prompt }) => $prompt()`
+          Say hello in ${ $.input.language }
+        `
+      )
+
+    const { data } = await useCase.run({ language: "Spanish" })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
+  xit("should work with prompts inside objects", async () => {
+    const input = $input({ name: z.string() })
+
+    const route = $useCase("My use case")
+      .input(input)
+
+      .steps()
+
+      .add("First step", async ({ $, $prompt }) => ({
+        greeting: await $prompt()`
+          Say hello to ${$.input.name}
+        `
+      }))
+
+      .add("second step", ({ $ }) => $.firstStep.greeting)
+
+    const { data } = await route.run({ name: "Luna" })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual("Luna")
   })
 
   it("should provide expected types for return", async () => {
@@ -100,17 +146,23 @@ describe("$usecase", () => {
       .input(input)
 
       .handle(({ $loop, $ }) =>
+        // create loop
         $loop({ list: $.input.array })
+          // loop through items
           .forEachItem()
 
           .add("module", ({ $ }) => $.item.value % 2)
 
           .add("check", ({ $if, $ }) =>
+            // add condition
             $if({ condition: $.module === 0 })
+              // define true branch
               .isTrue()
-              .add("even", ({ $ }) => `${$.item.value} is even`)
+              // add step on true branch
+              .add("even", ({ $ }) => `${ $.item.value } is even`)
 
               .isFalse()
+              // add step in false branch
               .add("odd", ({ $ }) => $.item.value)
           )
       )
@@ -131,7 +183,9 @@ describe("$usecase", () => {
       .input(input)
 
       .handle(({ $loop, $ }) =>
+        //
         $loop({ list: $.input.array })
+          //
           .forEachItem()
 
           .add("exit", () => exit({ status: 500 }))
@@ -153,8 +207,11 @@ describe("$usecase", () => {
       .input(input)
 
       .handle(({ $if, $ }) =>
-        $if({ condition: $.input.array.length > 1 }) //
+        // add condition
+        $if({ condition: $.input.array.length > 1 })
+          // add true branch
           .isTrue()
+
           .add("exit", () => exit({ status: 500 }))
       )
 

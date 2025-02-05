@@ -8,7 +8,8 @@ import {
   type Action,
   type ExceptionReponse,
   type StepConfig,
-  type StepOptions
+  type StepOptions,
+  type Ctx
 } from "./types"
 import { $steps } from "./daunus_steps"
 
@@ -125,9 +126,9 @@ function $loopSteps<
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
-    global?: Record<any, any>
+    params: { $?: Record<any, any>; ctx?: Ctx }
   ): Local[Name] {
-    return scope.get(name, $stepProps(global))
+    return scope.get(name, $stepProps(params))
   }
 
   function add(

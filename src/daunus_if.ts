@@ -11,7 +11,8 @@ import {
   type StepConfig,
   type ActionWithInput,
   type Action,
-  type StepFactory
+  type StepFactory,
+  type Ctx
 } from "./types"
 import { Scope } from "./daunus_scope"
 import { $stepProps, type StepProps } from "./daunus_step_props"
@@ -225,9 +226,9 @@ function $ifBranch<
 > {
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
-    global?: Record<any, any>
+    params: { $?: Record<any, any>; ctx?: Ctx }
   ): Local[Name] {
-    return scope.get(name, $stepProps(global))
+    return scope.get(name, $stepProps(params))
   }
 
   function isTrue(): any {
