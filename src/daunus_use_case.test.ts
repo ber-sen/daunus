@@ -7,7 +7,7 @@ import { Exception } from "./daunus_exception"
 describe("$useCase", () => {
   it("should work without input", async () => {
     const useCase = $useCase("Hello world").handle(
-      ({ $ }) => $.useCase.originalName
+      ({ scope }) => scope.useCase.originalName
     )
 
     const { data } = await useCase.run()
@@ -25,7 +25,7 @@ describe("$useCase", () => {
     const useCase = $useCase("name")
       .input(input)
 
-      .handle(({ $ }) => $.input.name === "lorem")
+      .handle(({ scope }) => scope.input.name === "lorem")
 
     const { data } = await useCase.run({ name: "lorem" })
 
@@ -43,8 +43,8 @@ describe("$useCase", () => {
       .input(input)
 
       .handle(
-        ({ $, $prompt }) => $prompt()`
-          Say hello in ${ $.input.language }
+        ({ scope, prompt }) => prompt()`
+          Say hello in ${scope.input.language}
         `
       )
 
@@ -65,13 +65,13 @@ describe("$useCase", () => {
 
       .steps()
 
-      .add("First step", async ({ $, $prompt }) => ({
-        greeting: await $prompt()`
-          Say hello to ${$.input.name}
+      .add("First step", async ({ scope, prompt }) => ({
+        greeting: await prompt()`
+          Say hello to ${scope.input.name}
         `
       }))
 
-      .add("second step", ({ $ }) => $.firstStep.greeting)
+      .add("second step", ({ scope }) => scope.firstStep.greeting)
 
     const { data } = await route.run({ name: "Luna" })
 
@@ -90,9 +90,9 @@ describe("$useCase", () => {
 
       .steps()
 
-      .add("First step", ({ $ }) => $.input)
+      .add("First step", ({ scope }) => scope.input)
 
-      .add("second step", ({ $ }) => $.firstStep.name)
+      .add("second step", ({ scope }) => scope.firstStep.name)
 
     const { data } = await route.run({ name: "Luna" })
 
@@ -111,7 +111,7 @@ describe("$useCase", () => {
 
       .steps({ stepsType: "parallel" })
 
-      .add("first step", ({ $ }) => $.input)
+      .add("first step", ({ scope }) => scope.input)
 
       .add("second step", () => 42)
 
@@ -145,25 +145,22 @@ describe("$useCase", () => {
     const useCase = $useCase("Loop and condition")
       .input(input)
 
-      .handle(({ $loop, $ }) =>
+      .handle(({ loop, scope }) =>
         // create loop
-        $loop({ list: $.input.array })
-          // loop through items
+        loop({ list: scope.input.array })
           .forEachItem()
 
-          .add("module", ({ $ }) => $.item.value % 2)
+          .add("module", ({ scope }) => scope.item.value % 2)
 
-          .add("check", ({ $if, $ }) =>
-            // add condition
-            $if({ condition: $.module === 0 })
-              // define true branch
+          .add("check", ({ when, scope }) =>
+            when({ condition: scope.module === 0 })
               .isTrue()
-              // add step on true branch
-              .add("even", ({ $ }) => `${ $.item.value } is even`)
+
+              .add("even", ({ scope }) => `${scope.item.value} is even`)
 
               .isFalse()
-              // add step in false branch
-              .add("odd", ({ $ }) => $.item.value)
+
+              .add("odd", ({ scope }) => scope.item.value)
           )
       )
 
@@ -182,9 +179,9 @@ describe("$useCase", () => {
     const useCase = $useCase("Loop with error")
       .input(input)
 
-      .handle(({ $loop, $ }) =>
+      .handle(({ loop, scope }) =>
         //
-        $loop({ list: $.input.array })
+        loop({ list: scope.input.array })
           //
           .forEachItem()
 
@@ -206,9 +203,9 @@ describe("$useCase", () => {
     const useCase = $useCase("condition with error")
       .input(input)
 
-      .handle(({ $if, $ }) =>
+      .handle(({ when, $ }) =>
         // add condition
-        $if({ condition: $.input.array.length > 1 })
+        when({ condition: $.input.array.length > 1 })
           // add true branch
           .isTrue()
 

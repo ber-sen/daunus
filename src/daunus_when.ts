@@ -191,7 +191,7 @@ export interface ConditionFactory<
   >
 }
 
-function $ifBranch<
+function $whenBranch<
   Condition,
   Global extends Record<string, any> = {},
   ScopeGlobal extends Record<string, any> = {},
@@ -232,7 +232,7 @@ function $ifBranch<
   }
 
   function isTrue(): any {
-    return $ifBranch({
+    return $whenBranch({
       condition,
       key: "true",
       scope
@@ -240,7 +240,7 @@ function $ifBranch<
   }
 
   function isFalse(): any {
-    return $ifBranch({
+    return $whenBranch({
       condition,
       key: "false",
       scope
@@ -253,7 +253,7 @@ function $ifBranch<
   ): any {
     scope.get(key ?? "").scope.addStep(nameOrConfig, fn)
 
-    return $ifBranch({
+    return $whenBranch({
       key,
       condition,
       scope
@@ -299,7 +299,7 @@ function $ifBranch<
   return { ...action, get, add, isTrue, isFalse, scope }
 }
 
-export function $if<
+export function $when<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<
@@ -336,7 +336,7 @@ export function $if<
   )({})
 
   function isTrue(): any {
-    return $ifBranch({
+    return $whenBranch({
       condition,
       key: "true",
       scope
@@ -344,7 +344,7 @@ export function $if<
   }
 
   function isFalse(): any {
-    return $ifBranch({
+    return $whenBranch({
       condition,
       key: "false",
       scope

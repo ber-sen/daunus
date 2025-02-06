@@ -139,10 +139,9 @@ describe("$steps", () => {
     const steps = $steps()
       .add("no expetion", () => struct({ success: true }))
 
-      .add("nested", ({ $steps }) =>
-        $steps().add("error step", () =>
-          exit({ status: 600, data: { foo: "bar" } })
-        )
+      .add("nested", ({ steps }) =>
+        steps() //
+          .add("error step", () => exit({ status: 600, data: { foo: "bar" } }))
       )
 
       .add("first error", () => exit({ status: 501, data: { lorem: "bar" } }))
@@ -180,8 +179,8 @@ describe("$steps", () => {
   })
 
   xit("should join exceptions", async () => {
-    const steps = $steps().add("sub", ({ $steps }) =>
-      $steps()
+    const steps = $steps().add("sub", ({ steps }) =>
+      steps()
         .add("no exception", () => struct({ success: true }))
 
         .add("nested", () =>
@@ -190,8 +189,8 @@ describe("$steps", () => {
             : exit({ status: 600 })
         )
 
-        .add("another level", ({ $steps }) =>
-          $steps()
+        .add("another level", ({ steps }) =>
+          steps()
             .add("deep2", () => exit({ status: 502, data: "lorem" }))
 
             .add("deep1", ({ $ }) => $)
@@ -215,8 +214,8 @@ describe("$steps", () => {
 
   it("should return the return value of last key by default in nested", async () => {
     const steps = $steps()
-      .add("nested", ({ $steps }) =>
-        $steps()
+      .add("nested", ({ steps }) =>
+        steps()
           .add("nested", () => ({
             foo: "bar"
           }))
@@ -236,8 +235,8 @@ describe("$steps", () => {
     const steps = $steps()
       .add("data", () => [1, 2, 3] as const)
 
-      .add("parallel", ({ $steps }) =>
-        $steps({ stepsType: "parallel" })
+      .add("parallel", ({ steps }) =>
+        steps({ stepsType: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -279,8 +278,8 @@ describe("$steps", () => {
     const steps = $steps()
       .add("data", () => [1, 2, 3])
 
-      .add("parallel", ({ $steps }) =>
-        $steps({ stepsType: "parallel" })
+      .add("parallel", ({ steps }) =>
+        steps({ stepsType: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
@@ -302,14 +301,14 @@ describe("$steps", () => {
     const steps = $steps()
       .add("data", () => [1, 2, 3])
 
-      .add("parallel", ({ $steps }) =>
-        $steps({ stepsType: "parallel" })
+      .add("parallel", ({ steps }) =>
+        steps({ stepsType: "parallel" })
           .add("first step", () => ({
             foo: "bar"
           }))
 
-          .add("second step", ({ $steps }) =>
-            $steps()
+          .add("second step", ({ steps }) =>
+            steps()
               .add("nested", ({ $ }) => ({
                 foo: $.data
               }))
@@ -330,8 +329,8 @@ describe("$steps", () => {
 
   it("should resolve promises", async () => {
     const steps = $steps()
-      .add("nested", ({ $steps }) =>
-        $steps()
+      .add("nested", ({ steps }) =>
+        steps()
           .add("nested", () =>
             Promise.resolve({
               foo: "bar"
@@ -350,10 +349,10 @@ describe("$steps", () => {
 
   it("should resolve nested values inside promise", async () => {
     const steps = $steps()
-      .add("nested", ({ $steps }) =>
-        $steps()
-          .add("sub", ({ $steps }) =>
-            Promise.resolve($steps().add("sub", () => [1, 2, 3]))
+      .add("nested", ({ steps }) =>
+        steps()
+          .add("sub", ({ steps }) =>
+            Promise.resolve(steps().add("sub", () => [1, 2, 3]))
           )
 
           .add("second step", ({ $ }) => $.sub)
@@ -370,17 +369,17 @@ describe("$steps", () => {
     const steps = $steps()
       .add("data", () => Promise.resolve([1, 2, 3]))
 
-      .add("parallel", ({ $steps }) =>
-        $steps({ stepsType: "parallel" })
+      .add("parallel", ({ steps }) =>
+        steps({ stepsType: "parallel" })
           .add("first step", () =>
             Promise.resolve({
               foo: "bar"
             })
           )
 
-          .add("second step", ({ $steps }) =>
+          .add("second step", ({ steps }) =>
             Promise.resolve(
-              $steps()
+              steps()
                 .add("nested", ({ $ }) =>
                   Promise.resolve({
                     foo: $.data
@@ -404,8 +403,8 @@ describe("$steps", () => {
 
   it("should provide an easy way to extend", () => {
     const nested = $steps() //
-      .add("sub", ({ $steps }) =>
-        $steps()
+      .add("sub", ({ steps }) =>
+        steps()
           .add("first step", () => ({ foo: "bar" }))
 
           .add("second step", ({ $ }) => $.firstStep.foo.toString())

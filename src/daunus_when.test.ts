@@ -1,9 +1,9 @@
-import { $if } from "./daunus_if"
+import { $when } from "./daunus_when"
 import { type Expect, type Equal } from "./types_helpers"
 
-describe("$if", () => {
+describe("when", () => {
   it("should work without steps", async () => {
-    const condition = $if({ condition: true })
+    const condition = $when({ condition: true })
 
     const { data } = await condition.run()
 
@@ -15,7 +15,7 @@ describe("$if", () => {
   })
 
   it("should return value of condition", async () => {
-    const condition = $if({ condition: true })
+    const condition = $when({ condition: true })
       .isTrue()
 
       .add("first step", ({ $ }) => $.condition)
@@ -30,7 +30,7 @@ describe("$if", () => {
   })
 
   it("should provide expected types for return", async () => {
-    const condition = $if({ condition: false })
+    const condition = $when({ condition: false })
       .isTrue()
 
       .add("first step", ({ $ }) => $.condition)
@@ -59,7 +59,7 @@ describe("$if", () => {
   })
 
   it("should return the scope of true case", () => {
-    const condition = $if({ condition: Math.random() > 0.5 })
+    const condition = $when({ condition: Math.random() > 0.5 })
       .isTrue()
 
       .add("first step", () => Promise.resolve([1, 2, 3]))
@@ -88,7 +88,7 @@ describe("$if", () => {
   })
 
   it("should return the scope of false case", async () => {
-    const condition = $if({ condition: Math.random() > 0.5 })
+    const condition = $when({ condition: Math.random() > 0.5 })
       .isTrue()
 
       .add("first step", () => Promise.resolve([1, 2, 3]))
@@ -119,7 +119,7 @@ describe("$if", () => {
   })
 
   it("should return the scope of false case", () => {
-    const condition = $if({ condition: Math.random() > 0.5 })
+    const condition = $when({ condition: Math.random() > 0.5 })
       .isTrue()
 
       .add("first step", () => Promise.resolve([1, 2, 3]))
