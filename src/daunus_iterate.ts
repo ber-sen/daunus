@@ -180,13 +180,13 @@ function $loopSteps<
   return { ...action, get, scope, add }
 }
 
-export type LoopFactory<
+export type IterateFactory<
   List extends Array<any> | readonly any[],
   ItemVariable extends string = "item",
   Global extends Record<string, any> = {}
-> = ReturnType<typeof $loop<List, ItemVariable, Global>>
+> = ReturnType<typeof $iterate<List, ItemVariable, Global>>
 
-export function $loop<
+export function $iterate<
   List extends Array<any> | readonly any[],
   ItemVariable extends string = "item",
   Global extends Record<string, any> = {}

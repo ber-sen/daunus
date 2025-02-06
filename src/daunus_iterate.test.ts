@@ -1,9 +1,9 @@
-import { $loop } from "./daunus_loop"
+import { $iterate } from "./daunus_iterate"
 import { type Expect, type Equal } from "./types_helpers"
 
-describe("$loop", () => {
+describe("$iterate", () => {
   it("should provide expected types for return", async () => {
-    const loop = $loop({ list: [1, 2, 3] })
+    const loop = $iterate({ list: [1, 2, 3] })
       .forEachItem()
 
       .add("first step", ({ $ }) => $.item)
@@ -20,7 +20,7 @@ describe("$loop", () => {
   })
 
   it("should work with different item variable", async () => {
-    const loop = $loop({ list: [1, 2], itemVariable: "i" })
+    const loop = $iterate({ list: [1, 2], itemVariable: "i" })
       .forEachItem()
 
       .add("first step", ({ $ }) => $.i.value)
@@ -35,7 +35,7 @@ describe("$loop", () => {
   })
 
   it("should work with parallel", async () => {
-    const loop = $loop({ list: [1, 2, 3] })
+    const loop = $iterate({ list: [1, 2, 3] })
       .forEachItem({ stepsType: "parallel" })
 
       .add("first step", ({ $ }) => $.item)

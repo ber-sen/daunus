@@ -145,14 +145,14 @@ describe("$useCase", () => {
     const useCase = $useCase("Loop and condition")
       .input(input)
 
-      .handle(({ loop, scope }) =>
+      .handle(({ iterate, scope }) =>
         // create loop
-        loop({ list: scope.input.array })
+        iterate({ list: scope.input.array })
           .forEachItem()
 
           .add("module", ({ scope }) => scope.item.value % 2)
 
-          .add("check", ({ when, scope }) =>
+          .add("branch", ({ when, scope }) =>
             when({ condition: scope.module === 0 })
               .isTrue()
 
@@ -179,9 +179,9 @@ describe("$useCase", () => {
     const useCase = $useCase("Loop with error")
       .input(input)
 
-      .handle(({ loop, scope }) =>
+      .handle(({ iterate, scope }) =>
         //
-        loop({ list: scope.input.array })
+        iterate({ list: scope.input.array })
           //
           .forEachItem()
 
