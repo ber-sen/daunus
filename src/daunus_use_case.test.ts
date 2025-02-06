@@ -61,7 +61,9 @@ describe("$useCase", () => {
     const input = $input({ dish: z.string() })
 
     const recipeOutput = z.object({
-      ingredients: z.array(z.object({ name: z.string(), amount: z.string() }))
+      name: z.string(),
+      ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
+      steps: z.array(z.string()),
     })
 
     const useCase = $useCase("Generate a recipe")
@@ -83,10 +85,12 @@ describe("$useCase", () => {
       Equal<
         A,
         {
+          name: string,
           ingredients: {
             name: string
             amount: string
           }[]
+          steps: string[]
         }
       >
     >

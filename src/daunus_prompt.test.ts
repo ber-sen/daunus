@@ -22,7 +22,9 @@ describe("$prompt", () => {
     const prompt = $prompt({ model: openai("o3-mini") })
 
     const output = z.object({
-      ingredients: z.array(z.object({ name: z.string(), amount: z.string() }))
+      name: z.string(),
+      ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
+      steps: z.array(z.string()),
     })
 
     const recipe = await prompt`
@@ -37,10 +39,12 @@ describe("$prompt", () => {
       Equal<
         A,
         {
+          name: string,
           ingredients: {
             name: string
             amount: string
           }[]
+          steps: string[]
         }
       >
     >
