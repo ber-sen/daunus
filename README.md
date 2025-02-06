@@ -1,14 +1,19 @@
-## daunus
-Powering Your Edge with Cutting-Edge Framework.
-
+## Daunus
+Opinionated edge-first framework for TypeScript
 
 # example: 
 
-use_cases/helthz/index.ts
 ```typescript
-import { struct } from 'daunus';
+const input = $input({ language: z.string() })
 
-const healthz = struct({ success: true });
+const useCase = $useCase("Say hello in language")
+  .input(input)
 
-export default healthz.noParams();
+  .handle(
+    ({ scope, prompt }) => prompt`
+      Say hello in ${scope.input.language}
+    `
+  )
+
+const { data } = await useCase.run({ language: "Spanish" })
 ```

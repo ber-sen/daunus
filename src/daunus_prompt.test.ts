@@ -24,7 +24,7 @@ describe("$prompt", () => {
     const output = z.object({
       name: z.string(),
       ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
-      steps: z.array(z.string()),
+      steps: z.array(z.string())
     })
 
     const recipe = await prompt`
@@ -39,7 +39,7 @@ describe("$prompt", () => {
       Equal<
         A,
         {
-          name: string,
+          name: string
           ingredients: {
             name: string
             amount: string

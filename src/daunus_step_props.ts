@@ -1,9 +1,9 @@
 import { $steps, type StepsFactory } from "./daunus_steps"
 import { $when, type ConditionFactory } from "./daunus_when"
 import { $iterate, type IterateFactory } from "./daunus_iterate"
-import { type StepOptions } from "./types"
+import { type Ctx, type StepOptions } from "./types"
 import { type FormatScope } from "./types_helpers"
-import { type Ctx } from "../dist"
+
 import { $prompt, type PromptFactory } from "./daunus_prompt"
 
 export interface StepProps<Global extends Record<string, any> = {}> {
@@ -40,6 +40,5 @@ export const $stepProps = <Global extends Record<string, any> = {}>({
   iterate: (options: any) => $iterate({ $, ...options }),
   steps: <Options extends StepOptions = {}>(options?: Options) =>
     $steps({ $, ...(options ?? ({} as Options)) }),
-  prompt: (options: any) =>
-    $prompt({ ctx, model: ctx.get(".defaultModel") })(options)
+  prompt: $prompt({ ctx, model: ctx.get(".defaultModel") })
 })

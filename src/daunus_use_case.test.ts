@@ -36,7 +36,7 @@ describe("$useCase", () => {
     expect(data).toEqual(true)
   })
 
-  xit("should work with prompts", async () => {
+  it("should work with prompts", async () => {
     const input = $input({ language: z.string() })
 
     const useCase = $useCase("Say hello in language")
@@ -54,7 +54,7 @@ describe("$useCase", () => {
 
     type data = Expect<Equal<A, string>>
 
-    expect(data).toEqual(true)
+    expect(data).toEqual("Hola")
   })
 
   xit("should work with a structured output prompt", async () => {
@@ -63,12 +63,12 @@ describe("$useCase", () => {
     const recipeOutput = z.object({
       name: z.string(),
       ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
-      steps: z.array(z.string()),
+      steps: z.array(z.string())
     })
 
     const useCase = $useCase("Generate a recipe")
       .input(input)
-      
+
       .handle(
         ({ scope, prompt }) => prompt`
           Generate a recipe for ${scope.input.dish}.
@@ -85,7 +85,7 @@ describe("$useCase", () => {
       Equal<
         A,
         {
-          name: string,
+          name: string
           ingredients: {
             name: string
             amount: string
