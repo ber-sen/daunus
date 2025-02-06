@@ -43,7 +43,7 @@ describe("$useCase", () => {
       .input(input)
 
       .handle(
-        ({ scope, prompt }) => prompt()`
+        ({ scope, prompt }) => prompt`
           Say hello in ${scope.input.language}
         `
       )
@@ -57,6 +57,43 @@ describe("$useCase", () => {
     expect(data).toEqual(true)
   })
 
+  xit("should work with a structured output prompt", async () => {
+    const input = $input({ dish: z.string() })
+
+    const recipeOutput = z.object({
+      ingredients: z.array(z.object({ name: z.string(), amount: z.string() }))
+    })
+
+    const useCase = $useCase("Generate a recipe")
+      .input(input)
+      
+      .handle(
+        ({ scope, prompt }) => prompt`
+          Generate a recipe for ${scope.input.dish}.
+  
+          # Output format: ${recipeOutput}
+        `
+      )
+
+    const { data } = await useCase.run({ dish: "Lasagna" })
+
+    type A = typeof data
+
+    type data = Expect<
+      Equal<
+        A,
+        {
+          ingredients: {
+            name: string
+            amount: string
+          }[]
+        }
+      >
+    >
+
+    expect(data).toEqual(true)
+  })
+
   xit("should work with prompts inside objects", async () => {
     const input = $input({ name: z.string() })
 
@@ -66,7 +103,7 @@ describe("$useCase", () => {
       .steps()
 
       .add("First step", async ({ scope, prompt }) => ({
-        greeting: await prompt()`
+        greeting: await prompt`
           Say hello to ${scope.input.name}
         `
       }))

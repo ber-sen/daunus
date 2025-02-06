@@ -7,38 +7,43 @@ export function $prompt(defaultParams?: {
   model?: LanguageModelV1
   ctx?: Ctx
 }) {
-  return function template(params?: { model?: LanguageModelV1 }) {
-    return async function <T>(
-      strings: TemplateStringsArray,
-      ...values: T[]
-    ): Promise<
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      T extends Zod.ZodType<infer U, any, any> ? U : string
-    > {
-      const prompt = strings.reduce(
-        (result, str, i) =>
-          result + str + (values[i]),
-        ""
-      )
+  return async function <T extends unknown[]>(
+    strings: TemplateStringsArray,
+    ...values: T
+  ): Promise<
+    [Extract<T[number], Zod.ZodType<any, any, any>>] extends [never]
+      ? string
+      : Extract<T[number], Zod.ZodType<any, any, any>> extends Zod.ZodType<
+            infer U,
+            any,
+            any
+          >
+        ? U
+        : string
+  > {
+    const prompt = strings.reduce(
+      (result, str, i) =>
+        result + str + (typeof values[i] === "string" ? values[i] : ""),
+      ""
+    )
 
-      const mode = {
-        type: "regular" as const,
-        tools: undefined,
-        toolChoice: undefined
-      }
-
-      const model = params?.model ?? defaultParams?.model
-      if (!model) {
-        throw new Error("No language model provided.")
-      }
-
-      const { text } = await model.doGenerate({
-        mode,
-        prompt: [{ role: "user", content: [{ type: "text", text: prompt }] }],
-        inputFormat: "prompt"
-      })
-
-      return text as any
+    const mode = {
+      type: "regular" as const,
+      tools: undefined,
+      toolChoice: undefined
     }
+
+    const model = defaultParams?.model
+    if (!model) {
+      throw new Error("No language model provided.")
+    }
+
+    const { text } = await model.doGenerate({
+      mode,
+      prompt: [{ role: "user", content: [{ type: "text", text: prompt }] }],
+      inputFormat: "prompt"
+    })
+
+    return text as any
   }
 }
