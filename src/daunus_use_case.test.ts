@@ -71,9 +71,10 @@ describe("$useCase", () => {
 
       .handle(
         ({ scope, prompt }) => prompt`
+          ---
+          schema: "${recipeOutput}"
+          ---
           Generate a recipe for ${scope.input.dish}.
-  
-          # Output format: ${recipeOutput}
         `
       )
 
