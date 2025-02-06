@@ -8,13 +8,16 @@ export function $prompt(defaultParams?: {
   ctx?: Ctx
 }) {
   return function template(params?: { model?: LanguageModelV1 }) {
-    return async function (
+    return async function <T>(
       strings: TemplateStringsArray,
-      ...values: any[]
-    ): Promise<string> {
+      ...values: T[]
+    ): Promise<
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      T extends Zod.ZodType<infer U, any, any> ? U : string
+    > {
       const prompt = strings.reduce(
         (result, str, i) =>
-          result + str + (values[i] !== undefined ? values[i] : ""),
+          result + str + (values[i]),
         ""
       )
 
@@ -35,7 +38,7 @@ export function $prompt(defaultParams?: {
         inputFormat: "prompt"
       })
 
-      return text ?? ""
+      return text as any
     }
   }
 }
