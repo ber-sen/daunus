@@ -1,5 +1,5 @@
 # Daunus
-Opinionated edge-first framework for TypeScript
+Opinionated edge-first library for TypeScript
 
 ## example: 
 
