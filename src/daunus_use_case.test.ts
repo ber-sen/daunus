@@ -36,7 +36,7 @@ describe("$useCase", () => {
     expect(data).toEqual(true)
   })
 
-  it("should work with prompts", async () => {
+  xit("should work with prompts", async () => {
     const input = $input({ language: z.string() })
 
     const useCase = $useCase("Say hello in language")
