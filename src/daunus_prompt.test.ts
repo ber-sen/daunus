@@ -28,9 +28,10 @@ describe("$prompt", () => {
     })
 
     const recipe = await prompt`
+      ---
+      schema: "${output}"
+      ---
       Generate a lasagna recipe.
-    
-      # Output: ${output}
     `
 
     type A = typeof recipe
