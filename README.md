@@ -1,7 +1,7 @@
-## Daunus
+# Daunus
 Opinionated edge-first framework for TypeScript
 
-# example: 
+## example: 
 
 ```typescript
 const input = $input({ language: z.string() })
