@@ -104,6 +104,17 @@ type Item<List extends Array<any> | readonly any[]> = {
   index: number
 }
 
+function rangeToList<T extends Array<number> | readonly number[]>(
+  range: [number, number] | number
+): T {
+  const [start, end] = typeof range === "number" ? [0, range - 1] : range
+
+  return Array.from(
+    { length: end - start + 1 },
+    (_, index) => start + index
+  ) as T
+}
+
 function $loopSteps<
   List extends Array<any> | readonly any[],
   ItemVariable extends string = "item",
@@ -187,13 +198,22 @@ export type IterateFactory<
 > = ReturnType<typeof $iterate<List, ItemVariable, Global>>
 
 export function $iterate<
-  List extends Array<any> | readonly any[],
+  List extends Array<any> | readonly any[] = number[],
   ItemVariable extends string = "item",
   Global extends Record<string, any> = {}
->(params: { list: List; itemVariable?: ItemVariable; $?: Global }) {
+>(
+  params: { itemVariable?: ItemVariable; $?: Global } & (
+    | { list: List }
+    | { range: [number, number] | number }
+  )
+) {
   function forEachItem<Options extends StepOptions>(options?: Options) {
+    const list: List =
+      "range" in params ? rangeToList(params.range) : params.list
+
     return $loopSteps({
       ...params,
+      list,
       stepsType: options?.stepsType as Options["stepsType"]
     })
   }

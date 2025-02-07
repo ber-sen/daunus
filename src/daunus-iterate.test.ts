@@ -3,7 +3,24 @@ import { type Expect, type Equal } from "./types-helpers"
 
 describe("$iterate", () => {
   it("should provide expected types for return", async () => {
-    const loop = $iterate({ list: [1, 2, 3] })
+    const loop = $iterate({ list: ["A", 2, 3] })
+      .forEachItem()
+
+      .add("first step", ({ $ }) => $.item)
+
+      .add("second step", ({ $ }) => $.firstStep.value)
+
+    const { data } = await loop.run()
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, (string | number)[]>>
+
+    expect(data).toEqual(["A", 2, 3])
+  })
+
+  it("should work with range", async () => {
+    const loop = $iterate({ range: 7 })
       .forEachItem()
 
       .add("first step", ({ $ }) => $.item)
@@ -16,7 +33,41 @@ describe("$iterate", () => {
 
     type data = Expect<Equal<A, number[]>>
 
-    expect(data).toEqual([1, 2, 3])
+    expect(data).toEqual([0, 1, 2, 3, 4, 5, 6])
+  })
+
+  it("should work with custom range", async () => {
+    const loop = $iterate({ range: [1, 4] })
+      .forEachItem()
+
+      .add("first step", ({ $ }) => $.item)
+
+      .add("second step", ({ $ }) => $.firstStep.value)
+
+    const { data } = await loop.run()
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, number[]>>
+
+    expect(data).toEqual([1, 2, 3, 4])
+  })
+
+  it("should work with readonly list", async () => {
+    const loop = $iterate({ list: ["A", "K"] as const })
+      .forEachItem()
+
+      .add("first step", ({ $ }) => $.item)
+
+      .add("second step", ({ $ }) => $.firstStep.value)
+
+    const { data } = await loop.run()
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, ("A" | "K")[]>>
+
+    expect(data).toEqual(["A", "K"])
   })
 
   it("should work with different item variable", async () => {
