@@ -1,4 +1,4 @@
-import { $ctx } from "../../daunus_helpers"
+import { $ctx } from "../../daunus-helpers"
 import struct from "./index"
 
 describe("struct", () => {

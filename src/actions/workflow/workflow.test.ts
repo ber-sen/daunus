@@ -1,6 +1,6 @@
-import { Exception } from "../../daunus_exception"
-import { $ctx, $delay, $stream } from "../../daunus_helpers"
-import { $query } from "../../daunus_query"
+import { Exception } from "../../daunus-exception"
+import { $ctx, $delay, $stream } from "../../daunus-helpers"
+import { $query } from "../../daunus-query"
 
 import workflow from "./index"
 

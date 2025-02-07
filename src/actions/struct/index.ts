@@ -1,4 +1,4 @@
-import { $action } from "../../daunus_action"
+import { $action } from "../../daunus-action"
 
 const struct = $action(
   {

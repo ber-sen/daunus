@@ -1,4 +1,4 @@
-import { resolveParams } from "./resolve_params"
+import { resolveParams } from "./resolve-params"
 import { $query } from "."
 
 describe("resolveParams", () => {

@@ -1,5 +1,5 @@
-import { $action } from "../../daunus_action"
-import { Exception } from "../../daunus_exception"
+import { $action } from "../../daunus-action"
+import { Exception } from "../../daunus-exception"
 
 const exit = $action(
   {

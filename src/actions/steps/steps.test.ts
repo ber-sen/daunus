@@ -1,8 +1,8 @@
-import { $ctx } from "../../daunus_helpers"
+import { $ctx } from "../../daunus-helpers"
 
 import { $query } from "../.."
 import steps from "."
-import { Exception } from "../../daunus_exception"
+import { Exception } from "../../daunus-exception"
 
 describe("steps", () => {
   it("should work for basic example", async () => {

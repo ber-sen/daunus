@@ -1,7 +1,7 @@
-import { runAction } from "../../run_action"
-import { $action } from "../../daunus_action"
+import { runAction } from "../../run-action"
+import { $action } from "../../daunus-action"
 import { type WorkflowAction } from "../../types"
-import { Exception } from "../../daunus_exception"
+import { Exception } from "../../daunus-exception"
 
 const parallel = $action(
   { type: "parallel", skipParse: true },

@@ -1,7 +1,7 @@
 import { type z } from "zod"
 
-import { $action } from "./daunus_action"
-import { $ctx } from "./daunus_helpers"
+import { $action } from "./daunus-action"
+import { $ctx } from "./daunus-helpers"
 import {
   type Action,
   type ActionOrActionWithInput,

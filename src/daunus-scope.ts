@@ -1,7 +1,7 @@
-import { type StepProps } from "./daunus_step_props"
+import { type StepProps } from "./daunus-step-props"
 import { toCamelCase } from "./helpers"
 import { type Ctx, type StepConfig } from "./types"
-import { type ValidateName } from "./types_helpers"
+import { type ValidateName } from "./types-helpers"
 
 class LazyGlobal<Value> {
   public run: (ctx: Ctx) => Value

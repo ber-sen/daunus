@@ -11,17 +11,17 @@ import {
   type StepOptions,
   type Ctx
 } from "./types"
-import { $steps } from "./daunus_steps"
+import { $steps } from "./daunus-steps"
 
 import {
   type ValidateName,
   type FormatScope,
   type Overwrite
-} from "./types_helpers"
-import { $actionWithInput } from "./daunus_action_with_input"
+} from "./types-helpers"
+import { $actionWithInput } from "./daunus-action-with-input"
 import { isException } from "./helpers"
-import { $stepProps, type StepProps } from "./daunus_step_props"
-import { Scope } from "./daunus_scope"
+import { $stepProps, type StepProps } from "./daunus-step-props"
+import { Scope } from "./daunus-scope"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},

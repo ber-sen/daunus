@@ -1,4 +1,4 @@
-import { Exception } from "./daunus_exception"
+import { Exception } from "./daunus-exception"
 import { type Ctx, type Query } from "./types"
 
 type NestedMap = Map<string, any> | Record<string, any>

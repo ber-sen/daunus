@@ -1,5 +1,5 @@
 import { TransformStream } from "isomorphic-web-streams"
-import { $action } from "../../daunus_action"
+import { $action } from "../../daunus-action"
 import { writeRows } from "./lib"
 import { type CSVParams } from "./types"
 

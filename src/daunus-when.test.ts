@@ -1,5 +1,5 @@
-import { $when } from "./daunus_when"
-import { type Expect, type Equal } from "./types_helpers"
+import { $when } from "./daunus-when"
+import { type Expect, type Equal } from "./types-helpers"
 
 describe("when", () => {
   it("should work without steps", async () => {

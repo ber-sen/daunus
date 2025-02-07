@@ -1,5 +1,5 @@
-import { $iterate } from "./daunus_iterate"
-import { type Expect, type Equal } from "./types_helpers"
+import { $iterate } from "./daunus-iterate"
+import { type Expect, type Equal } from "./types-helpers"
 
 describe("$iterate", () => {
   it("should provide expected types for return", async () => {

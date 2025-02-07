@@ -1,7 +1,7 @@
-import { z } from "./zod"
-import { $action } from "./daunus_action"
-import { Exception } from "./daunus_exception"
+import { $actionWithInput } from "./daunus-action-with-input"
+import { Exception } from "./daunus-exception"
 import { type InferReturn } from "./types"
+import { z } from "./zod"
 
 type Expect<T extends true> = T
 
@@ -10,10 +10,10 @@ type Equal<X, Y> =
     ? true
     : false
 
-describe("$action", () => {
+describe("$actionWithInput", () => {
   it("Should work with array", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const test = $action({ type: "test" }, () => (payload: string) => {
+    const test = $actionWithInput({ type: "test" }, () => (payload: string) => {
       if (Math.random() > 0.5) {
         return new Exception({ data: "Server Error" })
       }
@@ -38,7 +38,7 @@ describe("$action", () => {
 
   it("Should work with env", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const test = $action(
+    const test = $actionWithInput(
       {
         type: "test",
         envSchema: z.object({
@@ -66,7 +66,7 @@ describe("$action", () => {
 
   it("Should work without env return", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const test = $action(
+    const test = $actionWithInput(
       {
         type: "test"
       },
@@ -82,7 +82,7 @@ describe("$action", () => {
 
   it("Should work without env return", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const test = $action(
+    const test = $actionWithInput(
       {
         type: "user.app.snake_method",
         envSchema: z.object({ API_KEY: z.string() })

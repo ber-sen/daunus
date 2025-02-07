@@ -1,7 +1,7 @@
-import { $actionWithInput } from "./daunus_action_with_input"
-import { $steps } from "./daunus_steps"
+import { $actionWithInput } from "./daunus-action-with-input"
+import { $steps } from "./daunus-steps"
 
-import { type ValidateName } from "./types_helpers"
+import { type ValidateName } from "./types-helpers"
 import {
   type AbstractStepFactory,
   type resultKey,
@@ -14,8 +14,8 @@ import {
   type StepFactory,
   type Ctx
 } from "./types"
-import { Scope } from "./daunus_scope"
-import { $stepProps, type StepProps } from "./daunus_step_props"
+import { Scope } from "./daunus-scope"
+import { $stepProps, type StepProps } from "./daunus-step-props"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>

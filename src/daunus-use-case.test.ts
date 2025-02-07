@@ -1,8 +1,8 @@
 import { z } from "zod"
-import { $useCase } from "./daunus_use_case"
-import { type Expect, type Equal } from "./types_helpers"
+import { $useCase } from "./daunus-use-case"
+import { type Expect, type Equal } from "./types-helpers"
 import { $input, exit } from "."
-import { Exception } from "./daunus_exception"
+import { Exception } from "./daunus-exception"
 
 describe("$useCase", () => {
   it("should work without input", async () => {

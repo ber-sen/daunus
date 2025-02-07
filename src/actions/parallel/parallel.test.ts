@@ -1,6 +1,6 @@
 import { $query } from "../.."
-import { Exception } from "../../daunus_exception"
-import { $ctx } from "../../daunus_helpers"
+import { Exception } from "../../daunus-exception"
+import { $ctx } from "../../daunus-helpers"
 
 import parallel from "./index"
 

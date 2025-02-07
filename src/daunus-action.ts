@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { v4 } from "@lukeed/uuid"
-import { resolveParams } from "./resolve_params"
+import { resolveParams } from "./resolve-params"
 import {
   type ActionFactory,
   type Action,
@@ -9,7 +9,7 @@ import {
   type ExtractExceptions
 } from "./types"
 import { isException, parseResult } from "./helpers"
-import { Exception } from "./daunus_exception"
+import { Exception } from "./daunus-exception"
 
 export const $action =
   <P, O, E = {}>(

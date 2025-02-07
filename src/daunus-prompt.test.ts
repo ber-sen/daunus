@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai"
-import { $prompt } from "./daunus_prompt"
+import { $prompt } from "./daunus-prompt"
 import { z } from "zod"
-import { type Equal, type Expect } from "./types_helpers"
+import { type Equal, type Expect } from "./types-helpers"
 
 describe("$prompt", () => {
   xit("should return the value", async () => {

@@ -1,10 +1,10 @@
-import { $steps, type StepsFactory } from "./daunus_steps"
-import { $when, type ConditionFactory } from "./daunus_when"
-import { $iterate, type IterateFactory } from "./daunus_iterate"
+import { $steps, type StepsFactory } from "./daunus-steps"
+import { $when, type ConditionFactory } from "./daunus-when"
+import { $iterate, type IterateFactory } from "./daunus-iterate"
 import { type Ctx, type StepOptions } from "./types"
-import { type FormatScope } from "./types_helpers"
+import { type FormatScope } from "./types-helpers"
 
-import { $prompt, type PromptFactory } from "./daunus_prompt"
+import { $prompt, type PromptFactory } from "./daunus-prompt"
 
 export interface StepProps<Global extends Record<string, any> = {}> {
   scope: FormatScope<Global>

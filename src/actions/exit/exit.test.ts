@@ -1,5 +1,5 @@
-import { Exception } from "../../daunus_exception"
-import { type Equal, type Expect } from "../../types_helpers"
+import { Exception } from "../../daunus-exception"
+import { type Equal, type Expect } from "../../types-helpers"
 
 import exit from "./index"
 

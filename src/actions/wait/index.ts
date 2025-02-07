@@ -1,5 +1,5 @@
-import { Wait } from "../../daunus_exception"
-import { $action } from "../../daunus_action"
+import { Wait } from "../../daunus-exception"
+import { $action } from "../../daunus-action"
 
 export type WaitParams =
   | {

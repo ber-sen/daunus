@@ -1,6 +1,6 @@
-import { type Exception } from "./daunus_exception"
-import { type Scope } from "./daunus_scope"
-import { type FormatScope, type ValidateName } from "./types_helpers"
+import { type Exception } from "./daunus-exception"
+import { type Scope } from "./daunus-scope"
+import { type FormatScope, type ValidateName } from "./types-helpers"
 import { type z } from "./zod"
 
 export type Ctx = Map<any, any>

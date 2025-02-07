@@ -16,11 +16,11 @@ import {
   type ValidateName,
   type FormatScope,
   type Overwrite
-} from "./types_helpers"
-import { $actionWithInput } from "./daunus_action_with_input"
+} from "./types-helpers"
+import { $actionWithInput } from "./daunus-action-with-input"
 import { isAction } from "./helpers"
-import { Scope } from "./daunus_scope"
-import { $stepProps, type StepProps } from "./daunus_step_props"
+import { Scope } from "./daunus-scope"
+import { $stepProps, type StepProps } from "./daunus-step-props"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},

@@ -1,5 +1,5 @@
 import { Wait } from "../.."
-import { $ctx } from "../../daunus_helpers"
+import { $ctx } from "../../daunus-helpers"
 
 import wait from "./index"
 

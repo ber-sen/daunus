@@ -1,4 +1,4 @@
-import { $ctx } from "../../daunus_helpers"
+import { $ctx } from "../../daunus-helpers"
 
 import condition from "./index"
 

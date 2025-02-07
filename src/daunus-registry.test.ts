@@ -1,7 +1,7 @@
 import { struct } from "."
-import { $registry } from "./daunus_registry"
+import { $registry } from "./daunus-registry"
 
-import { type Expect, type Equal } from "./types_helpers"
+import { type Expect, type Equal } from "./types-helpers"
 
 describe("$registry", () => {
   it("should be able to add factories and create actions", async () => {

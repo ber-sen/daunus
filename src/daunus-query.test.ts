@@ -1,5 +1,5 @@
-import { resolveParams } from "./resolve_params"
-import { $query } from "./daunus_query"
+import { resolveParams } from "./resolve-params"
+import { $query } from "./daunus-query"
 
 const setContext = (value: object) => {
   const ctx = new Map()

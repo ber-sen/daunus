@@ -1,5 +1,5 @@
-import { runAction } from "../../run_action"
-import { $action } from "../../daunus_action"
+import { runAction } from "../../run-action"
+import { $action } from "../../daunus-action"
 import { type WorkflowAction } from "../../types"
 
 const loop = $action(
