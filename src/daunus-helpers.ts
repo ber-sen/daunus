@@ -2,17 +2,24 @@ import { ReadableStream } from "isomorphic-web-streams"
 import { z } from "./zod"
 
 import { DEFAULT_ACTIONS } from "./default-actions"
+import { ZodFirstPartyTypeKind, ZodNever, ZodObject } from "zod"
 
 export const $ctx = (value?: object): Map<any, any> =>
   new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }))
 
 export const $input = z.object
 
-export const $httpInput = <T extends z.ZodRawShape>(shape: T) =>
-  z.intersection(
-    z.object(shape),
-    z.object({ __type: z.literal("http").catch("http") })
-  )
+export const $httpInput = <T extends z.ZodRawShape>(
+  shape: T
+): ZodObject<{ __type: z.ZodCatch<z.ZodLiteral<"http">> } & T, "strict"> =>
+  z.object({ __type: z.literal("http").catch("http") }).merge(
+    new ZodObject({
+      shape: () => shape,
+      unknownKeys: "strip",
+      catchall: ZodNever.create() as any,
+      typeName: ZodFirstPartyTypeKind.ZodObject
+    })
+  ) as any
 
 export const $stream = <T>(
   generator: () =>
