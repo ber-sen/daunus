@@ -8,8 +8,11 @@ export const $ctx = (value?: object): Map<any, any> =>
 
 export const $input = z.object
 
-export const $httpInput = <T>(shape: T) =>
-  z.object({ __type: z.literal("http").catch("http"), ...shape })
+export const $httpInput = <T extends z.ZodRawShape>(shape: T) =>
+  z.intersection(
+    z.object(shape),
+    z.object({ __type: z.literal("http").catch("http") })
+  )
 
 export const $stream = <T>(
   generator: () =>
