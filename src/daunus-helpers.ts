@@ -1,5 +1,4 @@
 import { ReadableStream } from "isomorphic-web-streams"
-import { type ZodRawShape } from "zod"
 import { z } from "./zod"
 
 import { DEFAULT_ACTIONS } from "./default-actions"
@@ -9,7 +8,7 @@ export const $ctx = (value?: object): Map<any, any> =>
 
 export const $input = z.object
 
-export const $httpInput = <T extends ZodRawShape>(shape: T) =>
+export const $httpInput = <T>(shape: T) =>
   z.object({ __type: z.literal("http").catch("http"), ...shape })
 
 export const $stream = <T>(
