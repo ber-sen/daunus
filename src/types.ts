@@ -2,6 +2,7 @@ import { type Exception } from "./daunus-exception"
 import { type Scope } from "./daunus-scope"
 import { type FormatScope, type ValidateName } from "./types-helpers"
 import { type z } from "./zod"
+import { type LanguageModelV1 } from "@ai-sdk/provider"
 
 export type Ctx = Map<any, any>
 
@@ -130,3 +131,5 @@ export const resultKey: unique symbol = Symbol("resultKey")
 export interface StepOptions {
   stepsType?: "default" | "parallel" | "serial"
 }
+
+export type Model = (ctx: Ctx) => LanguageModelV1
