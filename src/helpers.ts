@@ -1,5 +1,5 @@
 import { get } from "./get"
-import { type NonUndefined, type ToCamelCase } from "./types-helpers"
+import { type Truthy, type NonUndefined, type ToCamelCase } from "./types-helpers"
 
 import { Exception } from "./daunus-exception"
 import {
@@ -151,4 +151,8 @@ export const parseResult = <Return>(
     data: data as any,
     exception: undefined as any
   }
+}
+
+export function truthy<T>(value: T): value is Truthy<T> {
+    return !!value;
 }

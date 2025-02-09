@@ -16,7 +16,32 @@ describe("$prompt", () => {
     expect(text).toEqual("Hola")
   })
 
-  xit("should work with structurd output", async () => {
+  xit("should work as function", async () => {
+    const openai = createOpenAI({ apiKey: "asdasd" })
+
+    const prompt = $prompt({ model: openai("o3-mini") })
+
+    const benefitSchema = z.object({
+      title: z.string(),
+      description: z.string()
+    })
+
+    const recipe = await prompt({
+      system: `You are an AI expert in digital transformation. 
+        Provide clear and professional answers.`,
+
+      assistant: `Automation helps SMEs reduce costs, increase efficiency, 
+        and scale operations with minimal manual effort.`,
+
+      user: "What are the benefits of automation for SMEs?",
+
+      output: benefitSchema
+    })
+
+    expect(recipe).toEqual({})
+  })
+
+  xit("should work with structurd output inside template literals", async () => {
     const openai = createOpenAI({ apiKey: "asdasd" })
 
     const prompt = $prompt({ model: openai("o3-mini") })
@@ -29,7 +54,7 @@ describe("$prompt", () => {
 
     const recipe = await prompt`
       ---
-      schema: "${output}"
+      output: "${output}"
       ---
       Generate a lasagna recipe.
     `

@@ -1,13 +1,36 @@
-import { type LanguageModelV1 } from "@ai-sdk/provider"
-import { type Ctx } from "./types"
+import {
+  type LanguageModelV1Message,
+  type LanguageModelV1
+} from "@ai-sdk/provider"
+import { type Model, type Ctx } from "./types"
+import { truthy } from "./helpers"
 
-export type PromptFactory<> = ReturnType<typeof $prompt>
+type PromptInputs =
+  | {
+      user: string
+    }
+  | {
+      system: string
+      user: string
+    }
+  | {
+      assistant: string
+      user: string
+    }
+  | {
+      system: string
+      assistant: string
+      user: string
+    }
 
-export function $prompt(defaultParams?: {
-  model?: LanguageModelV1
-  ctx?: Ctx
-}) {
-  return async function <T extends unknown[]>(
+type PromptOptions<O> = {
+  model?: Model
+  output?: Zod.ZodType<O>
+} & PromptInputs
+
+export interface PromptFactory {
+  <O = string>(options: PromptOptions<O>): Promise<O>
+  <T extends unknown[]>(
     strings: TemplateStringsArray,
     ...values: T
   ): Promise<
@@ -20,12 +43,47 @@ export function $prompt(defaultParams?: {
           >
         ? U
         : string
-  > {
-    const prompt = strings.reduce(
-      (result, str, i) =>
-        result + str + (typeof values[i] === "string" ? values[i] : ""),
-      ""
-    )
+  >
+}
+
+function isTemplate(options: any): options is TemplateStringsArray {
+  return Array.isArray(options)
+}
+
+export function $prompt(defaultParams?: {
+  model?: LanguageModelV1
+  ctx?: Ctx
+}): PromptFactory {
+  return async function (
+    options: TemplateStringsArray | PromptOptions<any>,
+    ...values: any
+  ) {
+    const prompt: LanguageModelV1Message[] = (() => {
+      if (isTemplate(options)) {
+        const text = options.reduce(
+          (result, str, i) =>
+            result + str + (typeof values[i] === "string" ? values[i] : ""),
+          ""
+        )
+
+        return [{ role: "user", content: [{ type: "text", text }] }]
+      }
+
+      return [
+        "system" in options && {
+          role: "system" as const,
+          content: options.system
+        },
+        "assistant" in options && {
+          role: "assistant" as const,
+          content: [{ type: "text" as const, text: options.assistant }]
+        },
+        {
+          role: "user" as const,
+          content: [{ type: "text" as const, text: options.user }]
+        }
+      ].filter(truthy)
+    })()
 
     const mode = {
       type: "regular" as const,
@@ -40,7 +98,7 @@ export function $prompt(defaultParams?: {
 
     const { text } = await model.doGenerate({
       mode,
-      prompt: [{ role: "user", content: [{ type: "text", text: prompt }] }],
+      prompt,
       inputFormat: "prompt"
     })
 
