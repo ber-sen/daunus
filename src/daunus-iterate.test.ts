@@ -1,4 +1,4 @@
-import { $iterate } from "./daunus-iterate"
+import { $iterate, type Item } from "./daunus-iterate"
 import { type Expect, type Equal } from "./types-helpers"
 
 describe("$iterate", () => {
@@ -133,5 +133,35 @@ describe("$iterate", () => {
         secondStep: 42
       }
     ])
+  })
+
+  it("should retrun global for each step", () => {
+    const loop = $iterate({ list: [1, 2], itemVariable: "i" })
+      .forEachItem()
+
+      .add("first step", ({ $ }) => $.i.value)
+
+      .add("second step", () => 42)
+
+    const stepsMap = loop.scope.stepsMap
+
+    type T = typeof loop.scope.stepsMap
+
+    type stepsMap = Expect<
+      Equal<
+        T,
+        {
+          firstStep: {
+            i: Item<number[]>
+          }
+          secondStep: {
+            i: Item<number[]>
+            firstStep: number
+          }
+        }
+      >
+    >
+
+    expect(stepsMap).not.toBeNull()
   })
 })

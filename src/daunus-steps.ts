@@ -24,8 +24,9 @@ import { $stepProps, type StepProps } from "./daunus-step-props"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<any, any> = Record<typeof resultKey, undefined>
-> extends StepFactory<Global, Local>,
+  Local extends Record<any, any> = Record<typeof resultKey, undefined>,
+  StepsMap extends Record<string, any> = {}
+> extends StepFactory<Global, Local, StepsMap>,
     ActionOrActionWithInput<
       Global["input"],
       ExtractExceptions<Local["exceptions"]> extends undefined
@@ -45,21 +46,6 @@ export interface DefaultStepFactory<
             : never
           : Value
       >,
-    // TODO: add continue on error option
-    // &
-    // (Value extends Action<any, any> | ActionWithInput<any, any, any>
-    //   ? Record<
-    //       "exceptions",
-    //       Record<
-    //         Name,
-    //         Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-    //           infer T
-    //         >
-    //           ? T
-    //           : never
-    //       >
-    //     >
-    //   : {})
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<
@@ -82,42 +68,47 @@ export interface DefaultStepFactory<
                 : never
             >
           >
-        : {})
+        : {}),
+    StepsMap & Record<Name, Global>
   >
 }
 
 export interface ParallelStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
-> extends StepFactory<Global, Local>,
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
+> extends StepFactory<Global, Local, StepsMap>,
     ActionOrActionWithInput<Global["input"], FormatScope<Local>> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ParallelStepFactory<Global, Local & Record<Name, Value>>
+  ): ParallelStepFactory<Global, Local & Record<Name, Value>, StepsMap & Record<Name, Global>>
 }
 
 export type StepsFactory<
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
-> = ReturnType<typeof $steps<Options, Global, Local>>
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
+> = ReturnType<typeof $steps<Options, Global, Local, StepsMap>>
 
 export function $steps<
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 >(
   params?: {
-    $?: Scope<Global, Local> | Global
+    $?: Scope<Global, Local, StepsMap> | Global
     name?: string
   } & Options
 ): Options["stepsType"] extends "parallel"
-  ? ParallelStepFactory<Global, Local>
-  : DefaultStepFactory<Global, Local> {
+  ? ParallelStepFactory<Global, Local, StepsMap>
+  : DefaultStepFactory<Global, Local, StepsMap> {
   const { $, stepsType } = params ?? {}
 
-  const scope = $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ })
+  const scope =
+    $ instanceof Scope ? $ : new Scope<Global, Local, StepsMap>({ global: $ })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,

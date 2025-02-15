@@ -24,6 +24,12 @@ export type FormatScope<T> = {
     : T[K]
 } & {}
 
+export type FormatStepMap<T> = {
+  [K in keyof T as ToCamelCase<Extract<K, string>>]: K extends "exceptions"
+    ? FormatException<T[K]>
+    : FormatScope<T[K]>
+} 
+
 export type Overwrite<G, N> = N extends keyof G ? Omit<G, N> : G
 
 export type ValidateName<N, L> = N extends "input"

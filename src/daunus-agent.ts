@@ -28,8 +28,9 @@ type Task<Output = string> =
 
 export interface DefaultAgentStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<any, any> = Record<typeof resultKey, undefined>
-> extends StepFactory<Global, Local>,
+  Local extends Record<any, any> = Record<typeof resultKey, undefined>,
+  StepsMap extends Record<string, any> = {}
+> extends StepFactory<Global, Local, StepsMap>,
     ActionOrActionWithInput<
       Global["input"],
       ExtractExceptions<Local["exceptions"]> extends undefined
@@ -82,42 +83,47 @@ export interface DefaultAgentStepFactory<
                 : never
             >
           >
-        : {})
+        : {}),
+    StepsMap & Record<Name, Global>
   >
 }
 
 export interface ParallelAgentStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
-> extends StepFactory<Global, Local>,
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
+> extends StepFactory<Global, Local, StepsMap>,
     ActionOrActionWithInput<Global["input"], FormatScope<Local>> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ParallelAgentStepFactory<Global, Local & Record<Name, Value>>
+  ): ParallelAgentStepFactory<Global, Local & Record<Name, Value>, StepsMap & Record<Name, Global>>
 }
 
 export type AgentStepsFactory<
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
-> = ReturnType<typeof $agentSteps<Options, Global, Local>>
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
+> = ReturnType<typeof $agentSteps<Options, Global, Local, StepsMap>>
 
 export function $agentSteps<
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 >(
   params?: {
-    $?: Scope<Global, Local> | Global
+    $?: Scope<Global, Local, StepsMap> | Global
     name?: string
   } & Options
 ): Options["stepsType"] extends "parallel"
-  ? ParallelAgentStepFactory<Global, Local>
-  : DefaultAgentStepFactory<Global, Local> {
+  ? ParallelAgentStepFactory<Global, Local, StepsMap>
+  : DefaultAgentStepFactory<Global, Local, StepsMap> {
   const { $, stepsType } = params ?? {}
 
-  const scope = $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ })
+  const scope =
+    $ instanceof Scope ? $ : new Scope<Global, Local, StepsMap>({ global: $ })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,

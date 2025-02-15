@@ -25,8 +25,9 @@ import { Scope } from "./daunus-scope"
 
 export interface DefaultLoopStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<any, any> = Record<typeof resultKey, undefined>
-> extends StepFactory<Global, Local>,
+  Local extends Record<any, any> = Record<typeof resultKey, undefined>,
+  StepsMap extends Record<string, any> = {}
+> extends StepFactory<Global, Local, StepsMap>,
     ActionOrActionWithInput<
       Global["input"],
       ExtractExceptions<Local["exceptions"]> extends undefined
@@ -48,20 +49,6 @@ export interface DefaultLoopStepFactory<
             : never
           : Value
       >,
-    // &
-    // (Value extends Action<any, any> | ActionWithInput<any, any, any>
-    //   ? Record<
-    //       "exceptions",
-    //       Record<
-    //         Name,
-    //         Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-    //           infer T
-    //         >
-    //           ? T
-    //           : never
-    //       >
-    //     >
-    //   : {}),
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<
@@ -84,22 +71,24 @@ export interface DefaultLoopStepFactory<
                 : never
             >
           >
-        : {})
+        : {}),
+    StepsMap & Record<Name, Global>
   >
 }
 
 export interface ParallelLoopStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local>,
     ActionOrActionWithInput<Global["input"], Array<FormatScope<Local>>> {
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>>
+  ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>, StepsMap & Record<Name, Global>>
 }
 
-type Item<List extends Array<any> | readonly any[]> = {
+export type Item<List extends Array<any> | readonly any[]> = {
   value: List[number]
   index: number
 }
@@ -120,20 +109,21 @@ function $loopSteps<
   ItemVariable extends string = "item",
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 >(
   params: {
     name?: string
     list: List
     itemVariable?: ItemVariable
-    $?: Scope<Global, Local> | Global
+    $?: Scope<Global, Local, StepsMap> | Global
   } & Options
 ): Options["stepsType"] extends "parallel"
-  ? ParallelLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local>
-  : DefaultLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local> {
+  ? ParallelLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local, StepsMap>
+  : DefaultLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local, StepsMap> {
   const { $, list, itemVariable, stepsType } = params ?? {}
 
-  const scope = $ instanceof Scope ? $ : new Scope<Global, Local>({ global: $ })
+  const scope = $ instanceof Scope ? $ : new Scope<Global, Local, StepsMap>({ global: $ })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,

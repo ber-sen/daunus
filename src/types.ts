@@ -110,9 +110,10 @@ export interface StepConfig<N, L> {
 }
 export interface AbstractStepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {},
 > {
-  scope: Scope<FormatScope<Global>, FormatScope<Local>>
+  scope: Scope<FormatScope<Global>, FormatScope<Local>, StepsMap>
 
   get(name: string, scope?: Record<any, any>): any
 
@@ -121,8 +122,9 @@ export interface AbstractStepFactory<
 
 export interface StepFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
-> extends AbstractStepFactory<Global, Local> {
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {},
+> extends AbstractStepFactory<Global, Local, StepsMap> {
   get<N extends keyof Local>(name: N, scope?: Record<any, any>): Local[N]
 }
 

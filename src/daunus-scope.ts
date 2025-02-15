@@ -1,7 +1,7 @@
 import { type StepProps } from "./daunus-step-props"
 import { toCamelCase } from "./helpers"
 import { type Ctx, type StepConfig } from "./types"
-import { type ValidateName } from "./types-helpers"
+import { type FormatStepMap, type ValidateName } from "./types-helpers"
 
 class LazyGlobal<Value> {
   public run: (ctx: Ctx) => Value
@@ -22,13 +22,16 @@ type Steps<R extends Record<string, any>> = {
 
 export class Scope<
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {}
+  Local extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {},
 > {
   public global: Global
+  public stepsMap: FormatStepMap<StepsMap>
   public local: Local
   public steps: Steps<Local>
 
   constructor(options?: {
+    stepsMap?: StepsMap
     global?: Global
     local?: Local
     steps?: Steps<Local>
@@ -36,10 +39,11 @@ export class Scope<
     this.global = options?.global ?? ({} as Global)
     this.local = options?.local ?? ({} as Local)
     this.steps = options?.steps ?? ({} as Steps<Local>)
+    this.stepsMap = options?.stepsMap ?? ({} as FormatStepMap<StepsMap>)
   }
 
   addGlobal<Name extends string, Value>(name: Name, value: Value) {
-    return new Scope<Global & Record<Name, Value>, Local>({
+    return new Scope<Global & Record<Name, Value>, Local, StepsMap>({
       global: { ...this.global, [name]: value },
       local: this.local,
       steps: this.steps
@@ -52,7 +56,7 @@ export class Scope<
   ) {
     this.global = { ...this.global, [name]: new LazyGlobal(fn) }
 
-    return this as Scope<Global & Record<Name, Value>, Local>
+    return this as Scope<Global & Record<Name, Value>, Local, StepsMap>
   }
 
   getGlobal(ctx: Ctx): Global {
@@ -70,7 +74,7 @@ export class Scope<
   addLocal<Name extends string, Value>(name: Name, value: Value) {
     this.local = { ...this.local, [name]: value }
 
-    return this as Scope<Global, Local & Record<Name, Value>>
+    return this as Scope<Global, Local & Record<Name, Value>, StepsMap>
   }
 
   addStep<Name extends string, Value>(
@@ -91,7 +95,11 @@ export class Scope<
 
     this.steps = { ...this.steps, [toCamelCase(name)]: step }
 
-    return this as Scope<Global, Local & Record<Name, Value>>
+    return this as Scope<
+      Global,
+      Local & Record<Name, Value>,
+      StepsMap & Record<Name, Global>
+    >
   }
 
   get<Name extends keyof Local>(

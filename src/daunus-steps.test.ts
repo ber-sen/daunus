@@ -401,6 +401,33 @@ describe("$steps", () => {
     })
   })
 
+  it("should retrun global for each step", () => {
+    const steps = $steps()
+      .add("first step", () => ({ foo: "bar" }))
+
+      .add("second step", ({ $ }) => $.firstStep.foo.toString())
+
+    const stepsMap = steps.scope.stepsMap
+
+    type T = typeof steps.scope.stepsMap
+
+    type stepsMap = Expect<
+      Equal<
+        T,
+        {
+          firstStep: {};
+          secondStep: {
+              firstStep: {
+                  foo: string;
+              };
+          };
+        }
+      >
+    >
+
+    expect(stepsMap).not.toBeNull()
+  })
+
   it("should provide an easy way to extend", () => {
     const nested = $steps() //
       .add("sub", ({ steps }) =>
@@ -410,7 +437,7 @@ describe("$steps", () => {
           .add("second step", ({ $ }) => $.firstStep.foo.toString())
       )
 
-    function toJson(factory: StepFactory<any, any>) {
+    function toJson(factory: StepFactory<any, any, any>) {
       const steps = Object.values(factory.scope.steps).map((value) => {
         const functionValue = value.meta.fn.toString()
 

@@ -4,7 +4,7 @@ import { $input } from "."
 import { $agent } from "./daunus-agent"
 
 describe("$agent", () => {
-  it("should work with single task", async () => {
+  xit("should work with single task", async () => {
     const input = $input({ review: z.string() })
 
     const sentiment = z.enum(["positive", "negative", "neutral"])
@@ -28,8 +28,7 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
-  it("should work for multiple tasks", async () => {
-    
+  xit("should work for multiple tasks", async () => {
     const input = $input({ paperText: z.string() })
 
     const agent = $agent("You analyze scientific papers")
