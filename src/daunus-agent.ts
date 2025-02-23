@@ -202,11 +202,11 @@ export function $agentSteps<
 }
 
 export function $agent<Description extends string, Input>(
-  description: Description,
+  instructions: Description,
   options?: { input?: z.ZodType<Input> }
 ) {
   const scope = new Scope()
-    .addGlobal("agent", { description })
+    .addGlobal("agent", { instructions })
     .addLazyGlobal(
       "input",
       (ctx: Ctx) => options?.input?.parse(ctx.get("input")) as Input
@@ -228,10 +228,10 @@ export function $agent<Description extends string, Input>(
   }
 
   function input<Input>(input: z.ZodType<Input>) {
-    return $agent(description, {
+    return $agent(instructions, {
       input
     })
   }
 
-  return { tasks, task, description, input }
+  return { tasks, task, instructions, input }
 }
