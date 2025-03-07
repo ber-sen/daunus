@@ -1,7 +1,5 @@
 export { default as workflowCondition } from "./condition"
 export { default as workflowSteps } from "./steps"
-export { default as workflowParallel } from "./parallel"
-export { default as workflowSerial } from "./serial"
 export { default as workflowLoop } from "./loop"
 export { default as struct } from "./struct"
 export { default as exit } from "./exit"

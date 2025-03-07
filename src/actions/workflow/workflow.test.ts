@@ -11,7 +11,7 @@ describe("workflow", () => {
       action: {
         type: ["steps"],
         params: {
-          actions: [
+          steps: [
             {
               name: "struct",
               type: ["struct"],
@@ -38,12 +38,13 @@ describe("workflow", () => {
         type: ["steps"],
         params: {
           continueOnError: true,
-          actions: [
+          steps: [
             {
               name: "error",
-              type: ["parallel"],
+              type: ["steps"],
               params: {
-                actions: [
+                stepsType: "parallel",
+                steps: [
                   {
                     name: "fail",
                     type: ["exit"],
@@ -76,7 +77,7 @@ describe("workflow", () => {
       action: {
         type: ["steps"],
         params: {
-          actions: [
+          steps: [
             {
               name: "file",
               type: ["struct"],
@@ -118,7 +119,7 @@ describe("workflow", () => {
       action: {
         type: ["steps"],
         params: {
-          actions: [
+          steps: [
             {
               name: "item",
               type: ["struct"],
@@ -133,7 +134,7 @@ describe("workflow", () => {
                   name: "item2",
                   type: ["steps"],
                   params: {
-                    actions: [
+                    steps: [
                       {
                         name: "item3",
                         type: ["struct"],
@@ -160,7 +161,7 @@ describe("workflow", () => {
       action: {
         type: ["steps"],
         params: {
-          actions: [
+          steps: [
             {
               name: "item",
               type: ["struct"],
