@@ -1,7 +1,7 @@
 import { type StepProps } from "./daunus-step-props"
 import { toCamelCase } from "./helpers"
 import { type Ctx, type StepConfig } from "./types"
-import { type FormatStepMap, type ValidateName } from "./types-helpers"
+import { type FormatStepMap } from "./types-helpers"
 
 class LazyGlobal<Value> {
   public run: (ctx: Ctx) => Value
@@ -23,7 +23,7 @@ type Steps<R extends Record<string, any>> = {
 export class Scope<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {},
-  StepsMap extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 > {
   public global: Global
   public stepsMap: FormatStepMap<StepsMap>
@@ -78,7 +78,7 @@ export class Scope<
   }
 
   addStep<Name extends string, Value>(
-    nameOrConfig: ValidateName<Name, Local> | StepConfig<Name, Local>,
+    nameOrConfig: Name | StepConfig<Name, Local>,
     fn: (props: StepProps) => Value | Promise<Value>
   ) {
     const name =

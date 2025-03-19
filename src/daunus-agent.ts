@@ -3,22 +3,11 @@ import {
   type StepOptions,
   type Ctx,
   type StepFactory,
-  type resultKey,
-  type ActionOrActionWithInput,
-  type ExtractExceptions,
-  type Action,
-  type StepConfig,
-  type ActionWithInput,
-  type DataResponse,
-  type ExceptionReponse
+  type ActionOrActionWithInput
 } from "./types"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
-import {
-  type FormatScope,
-  type Overwrite,
-  type ValidateName
-} from "./types-helpers"
+import { type ValidateName } from "./types-helpers"
 import { $actionWithInput } from "./daunus-action-with-input"
 import { isAction } from "./helpers"
 
@@ -26,100 +15,49 @@ type Task<Output = string> =
   | string
   | { description: string; output?: z.ZodType<Output> }
 
-export interface DefaultAgentStepFactory<
+export interface AgentResourcesFactory<
   Global extends Record<string, any> = {},
-  Local extends Record<any, any> = Record<typeof resultKey, undefined>,
+  Local extends Record<any, any> = {},
   StepsMap extends Record<string, any> = {}
-> extends StepFactory<Global, Local, StepsMap>,
-    ActionOrActionWithInput<
-      Global["input"],
-      ExtractExceptions<Local["exceptions"]> extends undefined
-        ? Local[typeof resultKey]
-        : Local[typeof resultKey] | ExtractExceptions<Local["exceptions"]>
-    > {
-  add<
-    Value extends Task<any> | Action<any, any> | ActionWithInput<any, any, any>,
-    Name extends string
-  >(
-    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: StepProps<Global>) => Value | Promise<Value>
-  ): DefaultAgentStepFactory<
-    Overwrite<Global, Name> &
-      Record<
-        Name,
-        Value extends Task<infer Output>
-          ? Value extends { output?: any }
-            ? Output
-            : string
-          : Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
-              ? T
-              : never
-            : Value
-      >,
-    Omit<Local, typeof resultKey> &
-      Record<Name, Value> &
-      Record<
-        typeof resultKey,
-        Value extends Task<infer Output>
-          ? Value extends { output?: any }
-            ? Output
-            : string
-          : Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
-              ? T
-              : never
-            : Value
-      > &
-      (Value extends Action<any, any> | ActionWithInput<any, any, any>
-        ? Record<
-            "exceptions",
-            Record<
-              Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
-                infer T
-              >
-                ? T
-                : never
-            >
-          >
-        : {}),
+> extends StepFactory<Global, Local, StepsMap> {
+  add<Value, Name extends string>(
+    name: ValidateName<Name, Local>,
+    fn: (props: StepProps<Global>) => Promise<Value> | Value
+  ): AgentResourcesFactory<
+    Global,
+    Local & Record<Name, Value>,
     StepsMap & Record<Name, Global>
   >
-}
 
-export interface ParallelAgentStepFactory<
-  Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {},
-  StepsMap extends Record<string, any> = {}
-> extends StepFactory<Global, Local, StepsMap>,
-    ActionOrActionWithInput<Global["input"], FormatScope<Local>> {
-  add<Value, Name extends string>(
-    name: ValidateName<Name, Local> | StepConfig<Name, Local>,
-    fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ParallelAgentStepFactory<Global, Local & Record<Name, Value>, StepsMap & Record<Name, Global>>
+  task<Value extends Task<any>>(
+    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
+  ): ActionOrActionWithInput<
+    Global["input"],
+    Value extends { output: any } ? z.infer<Value["output"]> : string
+  >
 }
 
 export type AgentStepsFactory<
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {},
+  Local extends Record<any, any> = {},
   StepsMap extends Record<string, any> = {}
-> = ReturnType<typeof $agentSteps<Options, Global, Local, StepsMap>>
+> = ReturnType<typeof $agentResources<Options, Global, Local, StepsMap>>
 
-export function $agentSteps<
+function $agentResources<
+  Value,
   Options extends StepOptions = {},
   Global extends Record<string, any> = {},
-  Local extends Record<string, any> = {},
+  Local extends Record<any, any> = {},
   StepsMap extends Record<string, any> = {}
 >(
   params?: {
     $?: Scope<Global, Local, StepsMap> | Global
+    value?: Value
     name?: string
   } & Options
-): Options["stepsType"] extends "parallel"
-  ? ParallelAgentStepFactory<Global, Local, StepsMap>
-  : DefaultAgentStepFactory<Global, Local, StepsMap> {
+): AgentResourcesFactory<Global, Local, StepsMap> &
+  ActionOrActionWithInput<Global["input"], Value> {
   const { $, stepsType } = params ?? {}
 
   const scope =
@@ -132,77 +70,54 @@ export function $agentSteps<
     return scope.get(name, $stepProps(params))
   }
 
-  function add(
-    nameOrConfig: string | StepConfig<any, any>,
-    fn: (props: any) => any
-  ): any {
-    return $agentSteps({
+  function add(name: string, fn: (props: any) => any): any {
+    return $agentResources({
       stepsType,
-      $: scope.addStep(nameOrConfig, fn)
+      $: scope.addLocal(name, fn)
     })
   }
 
   const action = $actionWithInput<Global["input"], any, any>(
-    { type: "steps" },
+    { type: "agent" },
     ({ ctx }) =>
       async () => {
-        if (!Object.keys(scope.steps)?.at(-1)) {
-          return undefined
-        }
+        // Todo
+        const promises = Object.values(scope.steps).map(async (fn) => {
+          const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
-        if (stepsType === "parallel") {
-          const promises = Object.values(scope.steps).map(async (fn) => {
-            const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
-
-            if (isAction(res)) {
-              return (await res.run(ctx)).data
-            }
-
-            return res
-          })
-
-          const res = await Promise.all(promises)
-
-          return Object.fromEntries(
-            Object.keys(scope.steps).map((key, index) => [key, res[index]])
-          )
-        }
-
-        const res: unknown[] = []
-
-        for (const [name, fn] of Object.entries(scope.steps)) {
-          let value = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
-
-          if (isAction(value)) {
-            const { data, exception } = await value.run(ctx)
-
-            if (exception) {
-              return exception
-            }
-
-            value = data
+          if (isAction(res)) {
+            return (await res.run(ctx)).data
           }
 
-          scope.global = { ...scope.global, [name]: value }
-          scope.local = { ...scope.local, [name]: value }
+          return res
+        })
 
-          res.push(value)
-        }
+        const res = await Promise.all(promises)
 
-        return res.at(-1)
+        return Object.fromEntries(
+          Object.keys(scope.steps).map((key, index) => [key, res[index]])
+        )
       }
   )({})
 
+  function task(fn: any) {
+    return $agentResources({
+      $: scope.addStep("task", fn),
+      value: fn
+    })
+  }
+
   return {
     ...action,
+    task,
     get,
     scope,
     add
   }
 }
 
-export function $agent<Description extends string, Input>(
-  instructions: Description,
+export function $agent<Instructions extends string, Input>(
+  instructions: Instructions,
   options?: { input?: z.ZodType<Input> }
 ) {
   const scope = new Scope()
@@ -212,19 +127,20 @@ export function $agent<Description extends string, Input>(
       (ctx: Ctx) => options?.input?.parse(ctx.get("input")) as Input
     )
 
-  function tasks<Options extends StepOptions>(options?: Options) {
-    return $agentSteps({
-      $: scope,
-      stepsType: options?.stepsType as Options["stepsType"]
+  function resources() {
+    return $agentResources({
+      $: scope
     })
   }
 
-  function task<
-    Value extends Task<any> | Action<any, any> | ActionWithInput<any, any, any>
-  >(fn: (props: StepProps<typeof scope.global>) => Value) {
-    return $agentSteps({
+  function task<Value extends Task<any>>(
+    fn:
+      | ((props: StepProps<typeof scope.global>) => Promise<Value> | Value)
+      | Value
+  ) {
+    return $agentResources({
       $: scope
-    }).add("task", fn)
+    }).task(fn)
   }
 
   function input<Input>(input: z.ZodType<Input>) {
@@ -233,5 +149,5 @@ export function $agent<Description extends string, Input>(
     })
   }
 
-  return { tasks, task, instructions, input }
+  return { task, resources, instructions, input }
 }

@@ -5,6 +5,36 @@ import { $agent } from "./daunus-agent"
 
 describe("$agent", () => {
   xit("should work with single task", async () => {
+    const agent = $agent("You are a greeting agent") //
+      .task("Say hello in Spanish")
+
+    const { data } = await agent.run()
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
+  xit("simple agent with input", async () => {
+    const input = $input({ language: z.string() })
+
+    const agent = $agent("You are a greeting agent")
+      .input(input)
+
+      .task(({ scope }) => `Say hello in ${scope.input.language}`)
+
+    const { data } = await agent.run({ language: "Spanish" })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
+  xit("should work with defined output", async () => {
     const input = $input({ review: z.string() })
 
     const sentiment = z.enum(["positive", "negative", "neutral"])
@@ -34,18 +64,15 @@ describe("$agent", () => {
     const agent = $agent("You analyze scientific papers")
       .input(input)
 
-      .tasks()
+      .resources()
 
-      .add(
-        "Extract Findings",
-        ({ scope }) => `Extract Key findings: ${scope.input.paperText}`
-      )
+      .add("Tool 1", () => ({}))
 
-      .add(
-        "Generate Summary",
-        ({ scope }) =>
-          `Generate summary of the paper: ${scope.input.paperText} based on key findings: ${scope.extractFindings}`
-      )
+      .add("Tool 2", () => ({}))
+
+      .add("Document 1", () => ({}))
+
+      .task("TODO")
 
     const { data } = await agent.run({
       paperText:

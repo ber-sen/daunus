@@ -12,8 +12,8 @@ const steps = $action(
       stepsType = "sequential"
     }: {
       /**
-       * Actions
-       * @ref https://taskwish.ai/schema/actions.json
+       * Steps
+       * @ref https://taskwish.ai/schema/steps.json
        */
       steps: WorkflowAction<any>[]
       continueOnError?: boolean,
