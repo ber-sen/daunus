@@ -144,10 +144,19 @@ export function $agent<Instructions extends string, Input>(
   }
 
   function input<Input>(input: z.ZodType<Input>) {
-    return $agent(instructions, {
+    const { task, resources } = $agent(instructions, {
       input
     })
+
+    return { task, resources }
   }
 
-  return { task, resources, instructions, input }
+  const action = $actionWithInput<{ task: string }, any, string>(
+    { type: "agent" },
+    () => async () => {
+      return "sadad"
+    }
+  )({})
+
+  return { ...action, task, resources, input }
 }

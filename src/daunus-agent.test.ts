@@ -4,7 +4,19 @@ import { $input } from "."
 import { $agent } from "./daunus-agent"
 
 describe("$agent", () => {
-  xit("should work with single task", async () => {
+  xit("should automaticly create input", async () => {
+    const agent = $agent("You are a greeting agent")
+
+    const { data } = await agent.run({ task: "Say hello in Spanish" })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
+  xit("should work with defined task", async () => {
     const agent = $agent("You are a greeting agent") //
       .task("Say hello in Spanish")
 
@@ -17,7 +29,7 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
-  xit("simple agent with input", async () => {
+  xit("should work with input", async () => {
     const input = $input({ language: z.string() })
 
     const agent = $agent("You are a greeting agent")
@@ -58,7 +70,7 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
-  xit("should work for multiple tasks", async () => {
+  xit("should work with resources and input", async () => {
     const input = $input({ paperText: z.string() })
 
     const agent = $agent("You analyze scientific papers")
