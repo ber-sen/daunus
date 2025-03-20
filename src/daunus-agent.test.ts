@@ -7,7 +7,7 @@ describe("$agent", () => {
   xit("should automaticly create input", async () => {
     const agent = $agent("You are a greeting agent")
 
-    const { data } = await agent.run({ task: "Say hello in Spanish" })
+    const { data } = await agent.execute({ task: "Say hello in Spanish" })
 
     type A = typeof data
 
@@ -20,7 +20,7 @@ describe("$agent", () => {
     const agent = $agent("You are a greeting agent") //
       .task("Say hello in Spanish")
 
-    const { data } = await agent.run()
+    const { data } = await agent.execute()
 
     type A = typeof data
 
@@ -37,7 +37,7 @@ describe("$agent", () => {
 
       .task(({ scope }) => `Say hello in ${scope.input.language}`)
 
-    const { data } = await agent.run({ language: "Spanish" })
+    const { data } = await agent.execute({ language: "Spanish" })
 
     type A = typeof data
 
@@ -59,7 +59,7 @@ describe("$agent", () => {
         output: sentiment
       }))
 
-    const { data } = await agent.run({
+    const { data } = await agent.execute({
       review: "This product is amazing! I love using it every day."
     })
 
@@ -86,7 +86,7 @@ describe("$agent", () => {
 
       .task("TODO")
 
-    const { data } = await agent.run({
+    const { data } = await agent.execute({
       paperText:
         "This study finds that AI models improve efficiency by 30% in automated processes."
     })

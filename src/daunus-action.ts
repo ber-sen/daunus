@@ -31,9 +31,9 @@ export const $action =
   ): Action<O, E> => {
     const name: string = actionMeta?.name ?? args.name ?? v4()
 
-    const run = async (ctx: Ctx = new Map()) => {
+    const execute = async (ctx: Ctx = new Map()) => {
       try {
-        const runFn = async () => {
+        const executeFn = async () => {
           const parsedParams =
             args.skipParse || !params
               ? params
@@ -55,7 +55,7 @@ export const $action =
           return value
         }
 
-        const value = parseResult<O>((await runFn()) as O)
+        const value = parseResult<O>((await executeFn()) as O)
 
         ctx.set(name, value.data)
 
@@ -89,7 +89,7 @@ export const $action =
       ...actionMeta,
       name,
       env: args.envSchema?._type ?? ({} as E),
-      run
+      execute
     }
   }
 

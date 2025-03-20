@@ -9,7 +9,7 @@ describe("wait", () => {
       delay: "1d"
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.exception).toStrictEqual(new Wait({ delay: "1d" }))
   })

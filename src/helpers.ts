@@ -46,7 +46,7 @@ export const isMapLike = (value: any): value is Map<any, any> => {
 }
 
 export function isAction(obj: any): obj is Action<any, any> {
-  return obj && typeof obj.run === "function"
+  return obj && typeof obj.execute === "function"
 }
 
 export const isWorkflowAction = <T>(obj: T): obj is T & { type: [string] } => {

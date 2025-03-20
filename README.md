@@ -15,5 +15,5 @@ const useCase = $useCase("Say hello in language")
     `
   )
 
-const { data } = await useCase.run({ language: "Spanish" })
+const { data } = await useCase.execute({ language: "Spanish" })
 ```

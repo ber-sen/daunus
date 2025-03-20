@@ -26,7 +26,7 @@ describe("workflow", () => {
       }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual("Foo Bar")
   })
@@ -65,7 +65,7 @@ describe("workflow", () => {
       }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual(undefined)
     expect(res.exception).toStrictEqual(new Exception({ status: 403 }))
@@ -106,7 +106,7 @@ describe("workflow", () => {
       }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual(
       "Foo\nname,age\r\nAlice,30\r\nBob,25\r\nCharlie,35"
@@ -150,7 +150,7 @@ describe("workflow", () => {
       }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual({ success: true })
   })
@@ -184,7 +184,7 @@ describe("workflow", () => {
       }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual([1, 2])
   })

@@ -1,4 +1,4 @@
-import { runAction } from "../../run-action"
+import { executeAction } from "../../execute-action"
 import { $action } from "../../daunus-action"
 import { type WorkflowAction } from "../../types"
 
@@ -21,7 +21,7 @@ const loop = $action(
       const res = list.map(async (value, index) => {
         ctx.set(itemName, { value, index })
 
-        const res = await runAction(ctx, action)
+        const res = await executeAction(ctx, action)
 
         if (res.exception) {
           return res.exception

@@ -7,7 +7,7 @@ describe("struct", () => {
       success: true
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual({
       success: true

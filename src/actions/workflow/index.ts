@@ -1,4 +1,4 @@
-import { runAction } from "../../run-action"
+import { executeAction } from "../../execute-action"
 import { $action } from "../../daunus-action"
 
 type Action =
@@ -25,7 +25,7 @@ const workflow = $action(
         return undefined
       }
 
-      const res = await runAction(ctx, params.action)
+      const res = await executeAction(ctx, params.action)
 
       return res.data ?? res.exception
     }

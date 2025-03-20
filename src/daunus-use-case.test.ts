@@ -10,7 +10,7 @@ describe("$useCase", () => {
       ({ scope }) => scope.useCase.originalName
     )
 
-    const { data } = await useCase.run()
+    const { data } = await useCase.execute()
 
     type A = typeof data
 
@@ -27,7 +27,7 @@ describe("$useCase", () => {
 
       .handle(({ scope }) => scope.input.name === "lorem")
 
-    const { data } = await useCase.run({ name: "lorem" })
+    const { data } = await useCase.execute({ name: "lorem" })
 
     type A = typeof data
 
@@ -48,7 +48,7 @@ describe("$useCase", () => {
         `
       )
 
-    const { data } = await useCase.run({ language: "Spanish" })
+    const { data } = await useCase.execute({ language: "Spanish" })
 
     type A = typeof data
 
@@ -78,7 +78,7 @@ describe("$useCase", () => {
         `
       )
 
-    const { data } = await useCase.run({ dish: "Lasagna" })
+    const { data } = await useCase.execute({ dish: "Lasagna" })
 
     type A = typeof data
 
@@ -102,7 +102,7 @@ describe("$useCase", () => {
   xit("should work with prompts inside objects", async () => {
     const input = $input({ name: z.string() })
 
-    const route = $useCase("My use case")
+    const useCase = $useCase("My use case")
       .input(input)
 
       .steps()
@@ -115,7 +115,7 @@ describe("$useCase", () => {
 
       .add("second step", ({ scope }) => scope.firstStep.greeting)
 
-    const { data } = await route.run({ name: "Luna" })
+    const { data } = await useCase.execute({ name: "Luna" })
 
     type A = typeof data
 
@@ -127,7 +127,7 @@ describe("$useCase", () => {
   it("should provide expected types for return", async () => {
     const input = $input({ name: z.string() })
 
-    const route = $useCase("My use case")
+    const useCase = $useCase("My use case")
       .input(input)
 
       .steps()
@@ -136,7 +136,7 @@ describe("$useCase", () => {
 
       .add("second step", ({ scope }) => scope.firstStep.name)
 
-    const { data } = await route.run({ name: "Luna" })
+    const { data } = await useCase.execute({ name: "Luna" })
 
     type A = typeof data
 
@@ -148,7 +148,7 @@ describe("$useCase", () => {
   it("should work with parallel steps", async () => {
     const input = $input({ city: z.string() })
 
-    const route = $useCase("Example")
+    const useCase = $useCase("Example")
       .input(input)
 
       .steps({ stepsType: "parallel" })
@@ -157,7 +157,7 @@ describe("$useCase", () => {
 
       .add("second step", () => 42)
 
-    const { data } = await route.run({ city: "London" })
+    const { data } = await useCase.execute({ city: "London" })
 
     type A = typeof data
 
@@ -206,7 +206,7 @@ describe("$useCase", () => {
           )
       )
 
-    const { data } = await useCase.run({ array: [1, 2, 3] })
+    const { data } = await useCase.execute({ array: [1, 2, 3] })
 
     type A = typeof data
 
@@ -230,7 +230,7 @@ describe("$useCase", () => {
           .add("exit", () => exit({ status: 500 }))
       )
 
-    const { exception } = await useCase.run({ array: [1, 2, 3] })
+    const { exception } = await useCase.execute({ array: [1, 2, 3] })
 
     type A = typeof exception
 
@@ -254,7 +254,7 @@ describe("$useCase", () => {
           .add("exit", () => exit({ status: 500 }))
       )
 
-    const { exception } = await useCase.run({ array: [1, 2, 3] })
+    const { exception } = await useCase.execute({ array: [1, 2, 3] })
 
     type A = typeof exception
 
@@ -273,7 +273,7 @@ describe("$useCase", () => {
         $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
       )
 
-    const { data } = await useCase.run({ names: [1, 2, 3] })
+    const { data } = await useCase.execute({ names: [1, 2, 3] })
 
     type A = typeof data
 

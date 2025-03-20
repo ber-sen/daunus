@@ -86,7 +86,7 @@ function $agentResources<
           const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
           if (isAction(res)) {
-            return (await res.run(ctx)).data
+            return (await res.execute(ctx)).data
           }
 
           return res

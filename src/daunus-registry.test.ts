@@ -9,7 +9,7 @@ describe("$registry", () => {
 
     const action = actions("struct")({ name: "Foo" })
 
-    const { data } = await action.run()
+    const { data } = await action.execute()
 
     type A = typeof data
 

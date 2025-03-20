@@ -16,7 +16,7 @@ describe("condition", () => {
       }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual({ error: true })
   })
@@ -27,7 +27,7 @@ describe("condition", () => {
       do: { success: true }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual({ success: true })
   })
@@ -38,7 +38,7 @@ describe("condition", () => {
       else: { error: true }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual({ error: true })
   })
@@ -49,7 +49,7 @@ describe("condition", () => {
       do: { success: true }
     })
 
-    const res = await action.run($ctx())
+    const res = await action.execute($ctx())
 
     expect(res.data).toStrictEqual({
       success: true

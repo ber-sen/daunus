@@ -1,6 +1,6 @@
 import { isException } from "../../helpers"
 import { $action } from "../../daunus-action"
-import { resolveAction } from "../../run-action"
+import { resolveAction } from "../../execute-action"
 
 type ConditionParams<P, T, C> =
   | {

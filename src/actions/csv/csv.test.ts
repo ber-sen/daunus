@@ -14,7 +14,7 @@ describe("encode", () => {
 
     const action = await csv({
       rows
-    }).run($ctx())
+    }).execute($ctx())
 
     expect(await new Response(action.data).text()).toStrictEqual(
       "name,age\r\nAlice,30\r\nBob,25\r\nCharlie,35"

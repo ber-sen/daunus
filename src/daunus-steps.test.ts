@@ -32,9 +32,9 @@ describe("$steps", () => {
   it("should allow actions", async () => {
     const steps = $steps().add("first step", () => struct({ success: true }))
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+    type A = Awaited<ReturnType<(typeof steps)["execute"]>>["data"]
 
     type steps = Expect<
       Equal<
@@ -56,9 +56,9 @@ describe("$steps", () => {
       () => Math.random() > 0.5 && struct({ success: true })
     )
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+    type A = Awaited<ReturnType<(typeof steps)["execute"]>>["data"]
 
     type steps = Expect<
       Equal<
@@ -81,7 +81,7 @@ describe("$steps", () => {
         foo: "bar"
       }))
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual({ foo: "bar" })
   })
@@ -92,9 +92,9 @@ describe("$steps", () => {
 
       .add("second step", ({ $ }) => $.firstStep)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+    type A = Awaited<ReturnType<(typeof steps)["execute"]>>["data"]
 
     type steps = Expect<
       Equal<
@@ -117,7 +117,7 @@ describe("$steps", () => {
         foo: "bar"
       }))
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual({ foo: "bar" })
   })
@@ -130,7 +130,7 @@ describe("$steps", () => {
 
       .add("second step", ({ $ }) => $)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual({ firstStep: { foo: "bar" } })
   })
@@ -148,9 +148,9 @@ describe("$steps", () => {
 
       .add("final", ({ $ }) => $.noExpetion)
 
-    const { data, exception } = await steps.run()
+    const { data, exception } = await steps.execute()
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
+    type A = Awaited<ReturnType<(typeof steps)["execute"]>>["exception"]
 
     type steps = Expect<
       Equal<
@@ -200,9 +200,9 @@ describe("$steps", () => {
     )
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const res = await steps.run()
+    const res = await steps.execute()
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["exception"]
+    type A = Awaited<ReturnType<(typeof steps)["execute"]>>["exception"]
 
     type steps = Expect<
       Equal<
@@ -225,7 +225,7 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.nested)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual("bar")
   })
@@ -245,7 +245,7 @@ describe("$steps", () => {
       )
       .add("return", ({ $ }) => $.parallel)
 
-    type A = Awaited<ReturnType<(typeof steps)["run"]>>["data"]
+    type A = Awaited<ReturnType<(typeof steps)["execute"]>>["data"]
 
     type steps = Expect<
       Equal<
@@ -269,7 +269,7 @@ describe("$steps", () => {
 
       .add("return", () => true)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual(true)
   })
@@ -289,7 +289,7 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.parallel)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual({
       firstStep: { foo: "bar" },
@@ -319,7 +319,7 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.parallel)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual({
       firstStep: { foo: "bar" },
@@ -342,7 +342,7 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.nested)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual("bar")
   })
@@ -360,7 +360,7 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.nested)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual([1, 2, 3])
   })
@@ -393,7 +393,7 @@ describe("$steps", () => {
 
       .add("return", ({ $ }) => $.parallel)
 
-    const { data } = await steps.run()
+    const { data } = await steps.execute()
 
     expect(data).toEqual({
       firstStep: { foo: "bar" },

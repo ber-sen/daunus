@@ -99,7 +99,7 @@ interface ConditionDefaultCaseStepFactory<
         Record<
           Name,
           Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+            ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
               ? T
               : never
             : Value
@@ -111,7 +111,7 @@ interface ConditionDefaultCaseStepFactory<
         //           "exceptions",
         //           Record<
         //             Name,
-        //             Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+        //             Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
         //               infer T
         //             >
         //               ? T
@@ -128,7 +128,7 @@ interface ConditionDefaultCaseStepFactory<
         Record<
           typeof resultKey,
           Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+            ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
               ? T
               : never
             : Value
@@ -138,7 +138,7 @@ interface ConditionDefaultCaseStepFactory<
                 "exceptions",
                 Record<
                   Name,
-                  Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+                  Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
                     infer T
                   >
                     ? T
@@ -271,7 +271,7 @@ function $whenBranch<
 
           const { data, exception } = await $steps({
             $: trueScope
-          }).run(ctx)
+          }).execute(ctx)
 
           if (exception) {
             return exception
@@ -286,7 +286,7 @@ function $whenBranch<
 
         const { data, exception } = await $steps({
           $: falseScope
-        }).run(ctx)
+        }).execute(ctx)
 
         if (exception) {
           return exception

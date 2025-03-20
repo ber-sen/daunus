@@ -44,7 +44,7 @@ export interface DefaultLoopStepFactory<
       Record<
         Name,
         Value extends ActionWithInput<any, any, any> | Action<any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
@@ -54,7 +54,7 @@ export interface DefaultLoopStepFactory<
       Record<
         typeof resultKey,
         Value extends Action<any, any> | ActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
@@ -64,7 +64,7 @@ export interface DefaultLoopStepFactory<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+              Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
                 infer T
               >
                 ? T
@@ -157,7 +157,7 @@ function $loopSteps<
           const { data, exception } = await $steps({
             $: rowScope,
             stepsType
-          }).run(ctx)
+          }).execute(ctx)
 
           if (exception) {
             return exception

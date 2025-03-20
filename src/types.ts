@@ -35,7 +35,7 @@ export type ActionResponse<Data, Exception> = DataResponse<Data> &
 export type Action<Return, Env = {}> = {
   name: string
   env: Env
-  run: (ctx?: Ctx) => Promise<{
+  execute: (ctx?: Ctx) => Promise<{
     data: ExtractData<Return>
     exception: ExtractExceptions<Return>
   }>
@@ -51,7 +51,7 @@ export type ActionFactory<Params, Return, Env = {}> = (
 export type ActionWithInput<Input, Return, Env = {}> = {
   name: string
   env: Env
-  run: (
+  execute: (
     input: Input,
     ctx?: Ctx
   ) => Promise<{
@@ -64,9 +64,9 @@ export type ActionWithInput<Input, Return, Env = {}> = {
 export type ActionOrActionWithInput<Input, Return, Env = {}> = {
   name: string
   env: Env
-  run: Input extends object
-    ? ActionWithInput<Input, Return, Env>["run"]
-    : Action<Return, Env>["run"]
+  execute: Input extends object
+    ? ActionWithInput<Input, Return, Env>["execute"]
+    : Action<Return, Env>["execute"]
   input: Input extends object ? (input: Input) => Action<Return, Env> : never
 }
 
@@ -85,7 +85,7 @@ export type ExcludeException<T> = T extends Exception<any, any> ? never : T
 
 export type InferReturn<
   T extends Action<any, any> | ActionWithInput<any, any, any>
-> = T extends Action<any, any> ? Awaited<ReturnType<T["run"]>> : never
+> = T extends Action<any, any> ? Awaited<ReturnType<T["execute"]>> : never
 
 export type InferInput<
   T extends

@@ -1,4 +1,4 @@
-import { runAction } from "../../run-action"
+import { executeAction } from "../../execute-action"
 import { $action } from "../../daunus-action"
 import { type WorkflowAction } from "../../types"
 import { Exception } from "../../daunus-exception"
@@ -21,7 +21,7 @@ const steps = $action(
     }) => {
       if (stepsType === "parallel") {
         const promises = steps.map((item) =>
-          runAction(ctx, item).then((item) => {
+          executeAction(ctx, item).then((item) => {
             return [item.data, item.exception]
           })
         )
@@ -56,7 +56,7 @@ const steps = $action(
         const errorResults: Array<any> = []
 
         for (const action of steps) {
-          const { data, exception } = await runAction(ctx, action)
+          const { data, exception } = await executeAction(ctx, action)
 
           successResuts.push([action.name, data])
 
@@ -78,7 +78,7 @@ const steps = $action(
       let res: any = null
 
       for (const action of steps) {
-        res = await runAction(ctx, action)
+        res = await executeAction(ctx, action)
 
         if (res.exception && !continueOnError) {
           return res.exception

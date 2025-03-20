@@ -41,7 +41,7 @@ export interface DefaultStepFactory<
       Record<
         Name,
         Value extends Action<any, any> | ActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
@@ -51,7 +51,7 @@ export interface DefaultStepFactory<
       Record<
         typeof resultKey,
         Value extends Action<any, any> | ActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["run"]>> extends DataResponse<infer T>
+          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
             ? T
             : never
           : Value
@@ -61,7 +61,7 @@ export interface DefaultStepFactory<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["run"]>> extends ExceptionReponse<
+              Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
                 infer T
               >
                 ? T
@@ -140,7 +140,7 @@ export function $steps<
             const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
             if (isAction(res)) {
-              return (await res.run(ctx)).data
+              return (await res.execute(ctx)).data
             }
 
             return res
@@ -159,7 +159,7 @@ export function $steps<
           let value = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
           if (isAction(value)) {
-            const { data, exception } = await value.run(ctx)
+            const { data, exception } = await value.execute(ctx)
 
             if (exception) {
               return exception

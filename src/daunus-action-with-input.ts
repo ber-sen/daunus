@@ -32,28 +32,28 @@ export const $actionWithInput =
 
     const action = factory(params, actionCtx)
 
-    const run = ((
+    const execute = ((
       ...args: [ctx?: Map<string, any>] | [input: I, ctx?: Map<string, any>]
     ) => {
       const ctx = getContext(...args)
 
-      return action.run(ctx)
+      return action.execute(ctx)
     }) as I extends object
-      ? ActionWithInput<I, O, E>["run"]
-      : Action<O, E>["run"]
+      ? ActionWithInput<I, O, E>["execute"]
+      : Action<O, E>["execute"]
 
     const input = ((input: I) => {
       return {
         ...action,
-        run: (ctx: Ctx = $ctx()) => {
+        execute: (ctx: Ctx = $ctx()) => {
           ctx.set("input", input)
 
-          return action.run(ctx)
+          return action.execute(ctx)
         }
       }
     }) as I extends object ? typeof input : never
 
-    return { ...action, input, run }
+    return { ...action, input, execute }
   }
 
 export const getContext = <I>(

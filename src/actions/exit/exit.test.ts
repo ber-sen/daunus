@@ -9,7 +9,7 @@ describe("wait", () => {
       status: 500
     })
 
-    const res = await action.run()
+    const res = await action.execute()
 
     expect(res.exception).toBeInstanceOf(Exception)
     expect(res.exception).toHaveProperty("status", 500)
@@ -27,7 +27,7 @@ describe("wait", () => {
       }
     })
 
-    const res = await action.run()
+    const res = await action.execute()
 
     expect(res.exception).toBeInstanceOf(Exception)
     expect(res.exception).toHaveProperty("status", 200)

@@ -4,10 +4,10 @@ import { type Ctx, type StepConfig } from "./types"
 import { type FormatStepMap } from "./types-helpers"
 
 class LazyGlobal<Value> {
-  public run: (ctx: Ctx) => Value
+  public execute: (ctx: Ctx) => Value
 
   constructor(fn: (ctx: Ctx) => Value) {
-    this.run = fn
+    this.execute = fn
   }
 }
 
@@ -63,7 +63,7 @@ export class Scope<
     return Object.fromEntries(
       Object.entries(this.global).map(([key, value]) => {
         if (value instanceof LazyGlobal) {
-          return [key, value.run(ctx)]
+          return [key, value.execute(ctx)]
         }
 
         return [key, value]

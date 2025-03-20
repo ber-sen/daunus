@@ -13,7 +13,7 @@ const getParent = (path: string) => path.split(".").slice(0, -1).join(".")
 
 export const resolveAction = async <T>(ctx: Ctx, action: T, name?: string) => {
   if (isWorkflowAction(action)) {
-    const { data, exception } = await runAction(
+    const { data, exception } = await executeAction(
       ctx,
       name ? { ...action, name } : action
     )
@@ -24,7 +24,7 @@ export const resolveAction = async <T>(ctx: Ctx, action: T, name?: string) => {
   return action
 }
 
-export const runAction = async (
+export const executeAction = async (
   ctx: Ctx,
   { type, params, name }: { type: string[]; name?: string; params?: any }
 ) => {
@@ -46,5 +46,5 @@ export const runAction = async (
     )
   }
 
-  return await action(params, { name }).run(ctx)
+  return await action(params, { name }).execute(ctx)
 }
