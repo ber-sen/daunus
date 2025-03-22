@@ -70,6 +70,48 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
+  xit("should work with resources without input", async () => {
+    const agent = $agent("You analyze scientific papers")
+      .resources()
+
+      .add("Tool 1", () => ({}))
+
+      .add("Tool 2", () => ({}))
+
+      .add("Document 1", () => ({}))
+
+    const { data } = await agent.execute({
+      task: "This study finds that AI models improve efficiency by 30% in automated processes."
+    })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
+  xit("should work with resources without input and with task", async () => {
+    const agent = $agent("You analyze scientific papers")
+      .resources()
+
+      .add("Tool 1", () => ({}))
+
+      .add("Tool 2", () => ({}))
+
+      .add("Document 1", () => ({}))
+
+      .task("asdasdas")
+
+    const { data } = await agent.execute()
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
   xit("should work with resources and input", async () => {
     const input = $input({ paperText: z.string() })
 

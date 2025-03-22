@@ -23,11 +23,18 @@ export interface AgentResourcesFactory<
   add<Value, Name extends string>(
     name: ValidateName<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): AgentResourcesFactory<
-    Global,
-    Local & Record<Name, Value>,
-    StepsMap & Record<Name, Global>
-  >
+  ): Global["input"] extends object
+    ? AgentResourcesFactory<
+        Global,
+        Local & Record<Name, Value>,
+        StepsMap & Record<Name, Global>
+      >
+    : AgentResourcesFactory<
+        Global,
+        Local & Record<Name, Value>,
+        StepsMap & Record<Name, Global>
+      > &
+        ActionOrActionWithInput<{ task: string }, string>
 
   task<Value extends Task<any>>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
