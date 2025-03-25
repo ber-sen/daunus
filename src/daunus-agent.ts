@@ -15,6 +15,21 @@ type Task<Output = string> =
   | string
   | { description: string; output?: z.ZodType<Output> }
 
+type Goal<Output = string> =
+  | string
+  | {
+      desiredOutcome: string
+      output?: z.ZodType<Output>
+      maxAttempts?: number
+      reflect?: (
+        previousResults: Array<{
+          desiredOutcome: string
+          result: Output
+          reason?: string
+        }>
+      ) => Goal<Output> | null
+    }
+
 export interface AgentResourcesFactory<
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = {},
@@ -37,6 +52,13 @@ export interface AgentResourcesFactory<
         ActionOrActionWithInput<{ task: string }, string>
 
   task<Value extends Task<any>>(
+    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
+  ): ActionOrActionWithInput<
+    Global["input"],
+    Value extends { output: any } ? z.infer<Value["output"]> : string
+  >
+
+  goal<Value extends Goal<any>>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
   ): ActionOrActionWithInput<
     Global["input"],
@@ -114,9 +136,17 @@ function $agentResources<
     })
   }
 
+  function goal(fn: any) {
+    return $agentResources({
+      $: scope.addStep("goal", fn),
+      value: fn
+    })
+  }
+
   return {
     ...action,
     task,
+    goal,
     get,
     scope,
     add
@@ -150,6 +180,16 @@ export function $agent<Instructions extends string, Input>(
     }).task(fn)
   }
 
+  function goal<Value extends Goal<any>>(
+    fn:
+      | ((props: StepProps<typeof scope.global>) => Promise<Value> | Value)
+      | Value
+  ) {
+    return $agentResources({
+      $: scope
+    }).goal(fn)
+  }
+
   function input<Input>(input: z.ZodType<Input>) {
     const { task, resources } = $agent(instructions, {
       input
@@ -165,5 +205,5 @@ export function $agent<Instructions extends string, Input>(
     }
   )({})
 
-  return { ...action, task, resources, input }
+  return { ...action, task, goal, resources, input }
 }

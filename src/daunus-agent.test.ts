@@ -112,6 +112,32 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
+  xit("should work with resources without input and with goal", async () => {
+    const agent = $agent(
+      "You are a marketing strategist focused on increasing user signups."
+    )
+      .resources()
+
+      .add("Ad Campaign Manager", () => ({}))
+
+      .add("Email Outreach Tool", () => ({}))
+
+      .add("Website Optimizer", () => ({}))
+
+      .goal(() => ({
+        desiredOutcome: "Increase user signups by 20%",
+        maxAttempts: 3
+      }))
+
+    const { data } = await agent.execute()
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
   xit("should work with resources and input", async () => {
     const input = $input({ paperText: z.string() })
 
