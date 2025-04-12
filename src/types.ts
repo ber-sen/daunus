@@ -134,4 +134,4 @@ export interface StepOptions {
   stepsType?: "default" | "parallel" | "serial"
 }
 
-export type Model = (ctx: Ctx) => LanguageModelV1
+export type Model = LanguageModelV1 | ((ctx: Ctx) => LanguageModelV1)

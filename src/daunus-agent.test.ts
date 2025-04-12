@@ -16,6 +16,38 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
+  xit("should automaticly create input", async () => {
+    const agent = $agent("You are a michelin star chef")
+
+    const output = z.object({
+      name: z.string(),
+      ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
+      steps: z.array(z.string())
+    })
+
+    const { data } = await agent.execute({
+      task: { description: "Generate a lasagna recipe.", output }
+    })
+
+    type A = typeof data
+
+    type data = Expect<
+      Equal<
+        A,
+        {
+          name: string
+          ingredients: {
+            name: string
+            amount: string
+          }[]
+          steps: string[]
+        }
+      >
+    >
+
+    expect(data).toEqual(true)
+  })
+
   xit("should work with defined task", async () => {
     const agent = $agent("You are a greeting agent") //
       .task("Say hello in Spanish")

@@ -3,13 +3,15 @@ import {
   type StepOptions,
   type Ctx,
   type StepFactory,
-  type ActionOrActionWithInput
+  type ActionOrActionWithInput,
+  type ActionResponse
 } from "./types"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
 import { type ValidateName } from "./types-helpers"
 import { $actionWithInput } from "./daunus-action-with-input"
 import { isAction } from "./helpers"
+import { type CoreMessage, type Message } from "ai"
 
 type Task<Output = string> =
   | string
@@ -29,6 +31,38 @@ type Goal<Output = string> =
         }>
       ) => Goal<Output> | null
     }
+
+type Response = {
+  messages: Array<CoreMessage> | Array<Omit<Message, "id">>
+}
+
+type AgentDefaultInput<Output> =
+  | { task: Task<Output> }
+  | { goal: Goal<Output> }
+  | { response: Response }
+
+export interface AgentActionsFactory<Global extends Record<string, any> = {}> {
+  task<Value extends Task<any>>(
+    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
+  ): ActionOrActionWithInput<
+    Global["input"],
+    Value extends { output: any } ? z.infer<Value["output"]> : string
+  >
+
+  goal<Value extends Goal<any>>(
+    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
+  ): ActionOrActionWithInput<
+    Global["input"],
+    Value extends { output: any } ? z.infer<Value["output"]> : string
+  >
+
+  response<Value extends Response>(
+    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
+  ): ActionOrActionWithInput<
+    Global["input"],
+    Value extends { output: any } ? z.infer<Value["output"]> : string
+  >
+}
 
 export interface AgentResourcesFactory<
   Global extends Record<string, any> = {},
@@ -50,20 +84,6 @@ export interface AgentResourcesFactory<
         StepsMap & Record<Name, Global>
       > &
         ActionOrActionWithInput<{ task: string }, string>
-
-  task<Value extends Task<any>>(
-    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionOrActionWithInput<
-    Global["input"],
-    Value extends { output: any } ? z.infer<Value["output"]> : string
-  >
-
-  goal<Value extends Goal<any>>(
-    fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionOrActionWithInput<
-    Global["input"],
-    Value extends { output: any } ? z.infer<Value["output"]> : string
-  >
 }
 
 export type AgentStepsFactory<
@@ -143,6 +163,13 @@ function $agentResources<
     })
   }
 
+  function response(fn: any) {
+    return $agentResources({
+      $: scope.addStep("response", fn),
+      value: fn
+    })
+  }
+
   return {
     ...action,
     task,
@@ -153,7 +180,7 @@ function $agentResources<
   }
 }
 
-export function $agent<Instructions extends string, Input>(
+export function $agent<Instructions extends string, Input, Output>(
   instructions: Instructions,
   options?: { input?: z.ZodType<Input> }
 ) {
@@ -198,12 +225,19 @@ export function $agent<Instructions extends string, Input>(
     return { task, resources }
   }
 
-  const action = $actionWithInput<{ task: string }, any, string>(
+  const action = $actionWithInput<any, any, any>(
     { type: "agent" },
     () => async () => {
       return "sadad"
     }
   )({})
 
-  return { ...action, task, goal, resources, input }
+  const { execute: actionRun } = action
+
+  const execute = <Output = string>(
+    input: AgentDefaultInput<Output>,
+    ctx?: Ctx
+  ): Promise<ActionResponse<Output, never>> => actionRun(input, ctx) as any
+
+  return { ...action, task, execute, goal, resources, input }
 }
