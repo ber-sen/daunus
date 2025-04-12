@@ -33,9 +33,13 @@ type Goal<Output = string> =
       ) => Goal<Output> | null
     }
 
-type Response = Array<CoreMessage> | Array<Omit<Message, "id">> | {
-  messages: Array<CoreMessage> | Array<Omit<Message, "id">>
-}
+type Messages = Array<CoreMessage> | Array<Omit<Message, "id">>
+
+type Response =
+  | Messages
+  | {
+      messages: Messages
+    }
 
 type AgentDefaultInput<Output> =
   | { task: Task<Output> }
