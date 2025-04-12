@@ -87,6 +87,41 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
+  xit("should work with a response as input", async () => {
+    const agent = $agent(
+      "You are an AI customer support agent for a fashion e-commerce store."
+    )
+
+    const { data } = await agent.execute({
+      response: [
+        {
+          role: "user",
+          content: "Where's my order #84923? I was expecting it two days ago."
+        },
+        {
+          role: "assistant",
+          content:
+            "Hi there! Let me check the status of your order #84923. One moment please..."
+        },
+        {
+          role: "assistant",
+          content:
+            "Your order #84923 is currently in transit and is expected to be delivered by tomorrow. I'm really sorry about the delay! If you need help with anything else, I'm here for you."
+        },
+        {
+          role: "user",
+          content: "I want to return a pair of jeans I bought. They don't fit."
+        }
+      ]
+    })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
   xit("should work with defined task", async () => {
     const agent = $agent("You are a greeting agent") //
       .task("Say hello in Spanish")

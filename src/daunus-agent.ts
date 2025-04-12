@@ -33,7 +33,7 @@ type Goal<Output = string> =
       ) => Goal<Output> | null
     }
 
-type Response = {
+type Response = Array<CoreMessage> | Array<Omit<Message, "id">> | {
   messages: Array<CoreMessage> | Array<Omit<Message, "id">>
 }
 
