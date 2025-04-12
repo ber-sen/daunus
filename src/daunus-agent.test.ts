@@ -2,6 +2,7 @@ import { z } from "zod"
 import { type Expect, type Equal } from "./types-helpers"
 import { $input } from "."
 import { $agent } from "./daunus-agent"
+import { type } from "arktype"
 
 describe("$agent", () => {
   xit("should automaticly create input", async () => {
@@ -19,21 +20,24 @@ describe("$agent", () => {
   xit("should automaticly create input", async () => {
     const agent = $agent("You are a michelin star chef")
 
-    const output = z.object({
-      name: z.string(),
-      ingredients: z.array(z.object({ name: z.string(), amount: z.string() })),
-      steps: z.array(z.string())
+    const ingredients = type({
+      name: "string",
+      amount: "string"
+    })
+
+    const output = type({
+      name: "string",
+      ingredients: ingredients.array(),
+      steps: "string[]"
     })
 
     const { data } = await agent.execute({
       task: { description: "Generate a lasagna recipe.", output }
     })
 
-    type A = typeof data
-
     type data = Expect<
       Equal<
-        A,
+        typeof data,
         {
           name: string
           ingredients: {

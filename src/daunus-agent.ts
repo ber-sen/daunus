@@ -12,10 +12,11 @@ import { type ValidateName } from "./types-helpers"
 import { $actionWithInput } from "./daunus-action-with-input"
 import { isAction } from "./helpers"
 import { type CoreMessage, type Message } from "ai"
+import { type Type } from "arktype"
 
 type Task<Output = string> =
   | string
-  | { description: string; output?: z.ZodType<Output> }
+  | { description: string; output?: z.ZodType<Output> | Type<Output> }
 
 type Goal<Output = string> =
   | string
