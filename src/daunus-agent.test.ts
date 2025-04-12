@@ -5,7 +5,7 @@ import { $agent } from "./daunus-agent"
 import { type } from "arktype"
 
 describe("$agent", () => {
-  xit("should automaticly create input", async () => {
+  xit("should work with a task as input", async () => {
     const agent = $agent("You are a greeting agent")
 
     const { data } = await agent.execute({ task: "Say hello in Spanish" })
@@ -17,7 +17,7 @@ describe("$agent", () => {
     expect(data).toEqual(true)
   })
 
-  xit("should automaticly create input", async () => {
+  xit("should work with different output on task", async () => {
     const agent = $agent("You are a michelin star chef")
 
     const ingredients = type({
@@ -48,6 +48,41 @@ describe("$agent", () => {
         }
       >
     >
+
+    expect(data).toEqual(true)
+  })
+
+  xit("should work with a goal as input", async () => {
+    const agent = $agent(
+      "You are a marketing strategist focused on increasing user signups."
+    )
+
+    const { data } = await agent.execute({
+      goal: "Increase user signups by 20%"
+    })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
+
+    expect(data).toEqual(true)
+  })
+
+  xit("should work with a with goal properties as input", async () => {
+    const agent = $agent(
+      "You are a marketing strategist focused on increasing user signups."
+    )
+
+    const { data } = await agent.execute({
+      goal: {
+        desiredOutcome: "Increase user signups by 20%",
+        maxAttempts: 4
+      }
+    })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, string>>
 
     expect(data).toEqual(true)
   })
