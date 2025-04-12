@@ -22,7 +22,7 @@ type Goal<Output = string> =
   | string
   | {
       desiredOutcome: string
-      output?: z.ZodType<Output>
+      output?: z.ZodType<Output> | Type<Output>
       maxAttempts?: number
       reflect?: (
         previousAttempts: Array<{
