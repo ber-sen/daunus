@@ -3,21 +3,7 @@ import { z } from "./zod"
 
 import { DEFAULT_ACTIONS } from "./default-actions"
 import { ZodFirstPartyTypeKind, ZodNever, ZodObject } from "zod"
-import { type distill, type } from "arktype"
-import { type TypeParser } from "arktype/internal/type.ts"
-import { type Constructor, type array, type conform } from "@ark/util"
-import {
-  type baseGenericConstraints,
-  type Generic,
-  type ParameterString,
-  type parseValidGenericParams,
-  type validateParameterString
-} from "arktype/internal/generic.ts"
-import {
-  type ArgTwoOperator,
-  type TupleInfixOperator
-} from "arktype/internal/parser/tupleExpressions.ts"
-import { type Morph, type Predicate, type TypeMeta } from "@ark/schema"
+import { type } from "arktype"
 
 export const $ctx = (value?: object): Map<any, any> =>
   new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }))
@@ -25,60 +11,16 @@ export const $ctx = (value?: object): Map<any, any> =>
 // TODO: extend input
 // $input().http().get("/api/lorem/:id")
 
-export interface ObjectOnlyTypeParser<$ = {}> extends TypeParser<$> {
-  <const def extends object, r = type.instantiate<def, $>>(
-    def: type.validate<def, $>
-  ): r extends infer _ ? _ : never
-
-  <
-    const params extends ParameterString,
-    const def extends object,
-    r = Generic<parseValidGenericParams<params, $>, def, $>
-  >(
-    params: validateParameterString<params, $>,
-    def: type.validate<
-      def,
-      $,
-      baseGenericConstraints<parseValidGenericParams<params, $>>
-    >
-  ): r extends infer _ ? _ : never
-
-  <
-    const zero,
-    const one,
-    const rest extends array<object>,
-    r = type.instantiate<[zero, one, ...rest], $>
-  >(
-    _0: zero extends object ? zero : type.validate<zero, $>,
-    _1: zero extends "keyof"
-      ? type.validate<one, $>
-      : zero extends "instanceof"
-        ? conform<one, Constructor>
-        : zero extends "==="
-          ? conform<one, unknown>
-          : conform<one, ArgTwoOperator>,
-    ..._2: zero extends "==="
-      ? rest
-      : zero extends "instanceof"
-        ? conform<rest, readonly Constructor[]>
-        : one extends TupleInfixOperator
-          ? one extends ":"
-            ? [Predicate<distill.In<type.infer<zero, $>>>]
-            : one extends "=>"
-              ? [Morph<distill.Out<type.infer<zero, $>>, unknown>]
-              : one extends "|>"
-                ? [type.validate<rest[0], $>]
-                : one extends "@"
-                  ? [TypeMeta.MappableInput]
-                  : [type.validate<rest[0], $>]
-          : []
-  ): r extends infer _ ? _ : never
-}
-
-export const $input = ((shape: any) => {
+export const $input = <const T>(
+  shape: T extends z.ZodRawShape
+    ? T
+    : T extends object
+      ? type.validate<T>
+      : object
+): T extends z.ZodRawShape ? ZodObject<T, "strict"> : type.instantiate<T> => {
   const isZodInput = (input: any): input is z.ZodRawShape => {
     return Boolean(
-      Object.values(input).find((property) => property instanceof z.ZodAny)
+      Object.values(input).find((property) => property instanceof z.ZodType)
     )
   }
 
@@ -86,14 +28,13 @@ export const $input = ((shape: any) => {
     return new ZodObject({
       shape: () => shape,
       unknownKeys: "strip",
-      catchall: ZodNever.create(),
+      catchall: ZodNever.create() as any,
       typeName: ZodFirstPartyTypeKind.ZodObject
-    })
+    }) as any
   }
 
-  return type(shape)
-}) as ObjectOnlyTypeParser<{}> &
-  (<T extends z.ZodRawShape>(shape: T) => ZodObject<T, "strict">)
+  return type(shape as any) as any
+}
 
 export const $stream = <T>(
   generator: () =>

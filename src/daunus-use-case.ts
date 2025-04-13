@@ -19,7 +19,7 @@ export function $useCase<
       (
         ctx: Ctx
       ): InputSchema extends Input<infer Schema> ? Schema : undefined => {
-        if (options?.input && options.input instanceof z.ZodAny) {
+        if (options?.input && options.input instanceof z.ZodType) {
           return options?.input?.parse(ctx.get("input"))
         }
 

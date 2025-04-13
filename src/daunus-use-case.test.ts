@@ -48,7 +48,7 @@ describe("$useCase", () => {
 
     type data = Expect<Equal<typeof data, string[]>>
 
-    expect(data).toEqual(true)
+    expect(data).toEqual(["lorem"])
   })
 
   xit("should work with prompts", async () => {
