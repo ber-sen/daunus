@@ -36,6 +36,23 @@ describe("$useCase", () => {
     expect(data).toEqual(true)
   })
 
+  it("should work for single step with arkType input", async () => {
+    const input = $input({ messages: "string[]" })
+    
+    const useCase = $useCase("name")
+      .input(input)
+
+      .handle(({ scope }) => scope.input)
+
+    const { data } = await useCase.execute({ messages: "lorem" })
+
+    type A = typeof data
+
+    type data = Expect<Equal<A, boolean>>
+
+    expect(data).toEqual(true)
+  })
+
   xit("should work with prompts", async () => {
     const input = $input({ language: z.string() })
 

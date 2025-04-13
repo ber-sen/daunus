@@ -1,8 +1,9 @@
 import { ReadableStream } from "isomorphic-web-streams"
-import { type z } from "./zod"
+import { z } from "./zod"
 
 import { DEFAULT_ACTIONS } from "./default-actions"
 import { ZodFirstPartyTypeKind, ZodNever, ZodObject } from "zod"
+import { type, type Type } from "arktype"
 
 export const $ctx = (value?: object): Map<any, any> =>
   new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }))
@@ -10,15 +11,26 @@ export const $ctx = (value?: object): Map<any, any> =>
 // TODO: extend input
 // $input().http().get("/api/lorem/:id")
 
-export const $input = <T extends z.ZodRawShape>(
+export const $input = <T extends z.ZodRawShape | object>(
   shape: T
-): ZodObject<T, "strict"> =>
-  new ZodObject({
-    shape: () => shape,
-    unknownKeys: "strip",
-    catchall: ZodNever.create() as any,
-    typeName: ZodFirstPartyTypeKind.ZodObject
-  }) as any
+): T extends z.ZodRawShape ? ZodObject<T, "strict"> : Type<T> => {
+  const isZodInput = (input: any): input is z.ZodRawShape => {
+    return Boolean(
+      Object.values(input).find((property) => property instanceof z.ZodAny)
+    )
+  }
+
+  if (isZodInput(shape)) {
+    return new ZodObject({
+      shape: () => shape,
+      unknownKeys: "strip",
+      catchall: ZodNever.create() as any,
+      typeName: ZodFirstPartyTypeKind.ZodObject
+    }) as any
+  }
+
+  return type(shape as any) as any
+}
 
 export const $stream = <T>(
   generator: () =>

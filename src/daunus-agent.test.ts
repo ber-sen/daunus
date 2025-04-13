@@ -20,14 +20,14 @@ describe("$agent", () => {
   xit("should work with different output on task", async () => {
     const agent = $agent("You are a michelin star chef")
 
-    const ingredients = type({
+    const ingredient = type({
       name: "string",
       amount: "string"
     })
 
     const output = type({
       name: "string",
-      ingredients: ingredients.array(),
+      ingredients: ingredient.array(),
       steps: "string[]"
     })
 
