@@ -1,3 +1,4 @@
+import { type Type } from "arktype"
 import { type Exception } from "./daunus-exception"
 import { type Scope } from "./daunus-scope"
 import { type FormatScope, type ValidateName } from "./types-helpers"
@@ -8,7 +9,7 @@ export type Ctx = Map<any, any>
 
 export type Query<T> = T & ((ctx: Ctx) => Promise<T>)
 
-export type Input<T> = z.ZodType<T>
+export type Input<T> = Type<T> | z.ZodType<T>
 
 export type ExtractExceptions<T> =
   T extends Exception<any, any>
@@ -111,7 +112,7 @@ export interface StepConfig<N, L> {
 export interface AbstractStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {},
-  StepsMap extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 > {
   scope: Scope<FormatScope<Global>, FormatScope<Local>, StepsMap>
 
@@ -123,7 +124,7 @@ export interface AbstractStepFactory<
 export interface StepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {},
-  StepsMap extends Record<string, any> = {},
+  StepsMap extends Record<string, any> = {}
 > extends AbstractStepFactory<Global, Local, StepsMap> {
   get<N extends keyof Local>(name: N, scope?: Record<any, any>): Local[N]
 }
@@ -134,4 +135,4 @@ export interface StepOptions {
   stepsType?: "default" | "parallel" | "serial"
 }
 
-export type Model = LanguageModelV1 | ((ctx: Ctx) => LanguageModelV1)
+export type Model = ((ctx: Ctx) => LanguageModelV1)
