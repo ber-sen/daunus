@@ -20,7 +20,7 @@ describe("$useCase", () => {
   })
 
   it("should work for single step", async () => {
-    const input = $input({ name: z.string() })
+    const input = $input({ name: "string" })
 
     const useCase = $useCase("name")
       .input(input)
@@ -38,17 +38,15 @@ describe("$useCase", () => {
 
   it("should work for single step with arkType input", async () => {
     const input = $input({ messages: "string[]" })
-    
+
     const useCase = $useCase("name")
       .input(input)
 
-      .handle(({ scope }) => scope.input)
+      .handle(({ scope }) => scope.input.messages)
 
-    const { data } = await useCase.execute({ messages: "lorem" })
+    const { data } = await useCase.execute({ messages: ["lorem"] })
 
-    type A = typeof data
-
-    type data = Expect<Equal<A, boolean>>
+    type data = Expect<Equal<typeof data, string[]>>
 
     expect(data).toEqual(true)
   })

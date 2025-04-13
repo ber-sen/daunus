@@ -3,7 +3,8 @@ import { z } from "./zod"
 
 import { DEFAULT_ACTIONS } from "./default-actions"
 import { ZodFirstPartyTypeKind, ZodNever, ZodObject } from "zod"
-import { type, type Type } from "arktype"
+import { type } from "arktype"
+import { type TypeParser } from "arktype/internal/type.ts"
 
 export const $ctx = (value?: object): Map<any, any> =>
   new Map(Object.entries({ ".defaultActions": DEFAULT_ACTIONS, ...value }))
@@ -11,9 +12,7 @@ export const $ctx = (value?: object): Map<any, any> =>
 // TODO: extend input
 // $input().http().get("/api/lorem/:id")
 
-export const $input = <T extends z.ZodRawShape | object>(
-  shape: T
-): T extends z.ZodRawShape ? ZodObject<T, "strict"> : Type<T> => {
+export const $input = ((shape: any) => {
   const isZodInput = (input: any): input is z.ZodRawShape => {
     return Boolean(
       Object.values(input).find((property) => property instanceof z.ZodAny)
@@ -24,13 +23,14 @@ export const $input = <T extends z.ZodRawShape | object>(
     return new ZodObject({
       shape: () => shape,
       unknownKeys: "strip",
-      catchall: ZodNever.create() as any,
+      catchall: ZodNever.create(),
       typeName: ZodFirstPartyTypeKind.ZodObject
-    }) as any
+    })
   }
 
-  return type(shape as any) as any
-}
+  return type(shape)
+}) as TypeParser<{}> &
+  (<T extends z.ZodRawShape>(shape: T) => ZodObject<T, "strict">)
 
 export const $stream = <T>(
   generator: () =>
