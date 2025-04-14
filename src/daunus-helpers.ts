@@ -10,6 +10,9 @@ export const $ctx = (value?: object): Map<any, any> =>
 
 // TODO: extend input
 // $input().http().get("/api/lorem/:id")
+// $input().http().post("/api/lorem/:id", {
+//   query: ["q"]
+// })
 
 export const $input = <const T>(
   shape: T extends z.ZodRawShape
