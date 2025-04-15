@@ -2,14 +2,12 @@ import { z } from "zod"
 import { v4 } from "@lukeed/uuid"
 import { resolveParams } from "./resolve-params"
 import {
-  type ActionFactory,
   type Action,
   type Ctx,
-  type ExtractData,
-  type ExtractExceptions
 } from "./types"
 import { isException, parseResult } from "./helpers"
 import { Exception } from "./daunus-exception"
+import { type ExtractData, type ExtractExceptions } from "./types-helpers"
 
 export const $action =
   <P, O, E = {}>(
@@ -22,13 +20,13 @@ export const $action =
       envSchema?: z.Schema<E>
     },
     fn: ({ ctx, env }: { ctx: Ctx; env: E }) => (params: P) => Promise<O> | O
-  ): ActionFactory<P, O, E> =>
+  ) =>
   (
     params: P,
     actionMeta?: {
       name?: string
     }
-  ): Action<O, E> => {
+  ): Action<O, undefined, E> => {
     const name: string = actionMeta?.name ?? args.name ?? v4()
 
     const execute = async (ctx: Ctx = new Map()) => {
@@ -85,12 +83,13 @@ export const $action =
       }
     }
 
-    return {
-      ...actionMeta,
-      name,
-      env: args.envSchema?._type ?? ({} as E),
-      execute
-    }
+    return Object.assign(execute, {
+      meta: {
+        name,
+        env: args.envSchema?._type ?? ({} as E),
+        ...actionMeta
+      }
+    })
   }
 
 export const parseParams = async <T>(

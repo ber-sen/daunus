@@ -18,7 +18,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.data).toStrictEqual({ foo: "bar" })
   })
@@ -41,7 +41,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.data).toStrictEqual("bar")
   })
@@ -71,7 +71,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.exception).toStrictEqual(new Exception({ status: 404 }))
   })
@@ -109,7 +109,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute(ctx)
+    const res = await action(ctx)
 
     expect(res.data).toStrictEqual({ foo: "barasd" })
   })
@@ -133,7 +133,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.data).toStrictEqual({ sub1: { foo: "bar" }, sub2: undefined })
   })
@@ -169,7 +169,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.data).toStrictEqual({
       test: { nested1: "action.1.1", nested2: "action.1.2" },
@@ -208,7 +208,7 @@ describe("steps", () => {
       ]
     })
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.data).toStrictEqual({
       test: { nested1: "action.1.1", nested2: "action.1.2" },

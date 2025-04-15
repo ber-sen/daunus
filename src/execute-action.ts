@@ -46,5 +46,5 @@ export const executeAction = async (
     )
   }
 
-  return await action(params, { name }).execute(ctx)
+  return await action(params, { name })(ctx)
 }

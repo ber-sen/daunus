@@ -1,5 +1,6 @@
 export * from "./zod"
 export * from "./types"
+export * from "./types-helpers"
 export * from "./daunus-exception"
 export * from "./daunus-helpers"
 export * from "./daunus-action"

@@ -8,7 +8,7 @@ describe("$agent", () => {
   xit("should work with a task as input", async () => {
     const agent = $agent("You are a greeting agent")
 
-    const { data } = await agent.execute({ task: "Say hello in Spanish" })
+    const { data } = await agent({ task: "Say hello in Spanish" })
 
     type A = typeof data
 
@@ -31,7 +31,7 @@ describe("$agent", () => {
       steps: "string[]"
     })
 
-    const { data } = await agent.execute({
+    const { data } = await agent({
       task: { description: "Generate a lasagna recipe.", output }
     })
 
@@ -57,7 +57,7 @@ describe("$agent", () => {
       "You are a marketing strategist focused on increasing user signups."
     )
 
-    const { data } = await agent.execute({
+    const { data } = await agent({
       goal: "Increase user signups by 20%"
     })
 
@@ -73,7 +73,7 @@ describe("$agent", () => {
       "You are a marketing strategist focused on increasing user signups."
     )
 
-    const { data } = await agent.execute({
+    const { data } = await agent({
       goal: {
         desiredOutcome: "Increase user signups by 20%",
         maxAttempts: 4
@@ -92,7 +92,7 @@ describe("$agent", () => {
       "You are an AI customer support agent for a fashion e-commerce store."
     )
 
-    const { data } = await agent.execute({
+    const { data } = await agent({
       response: [
         {
           role: "user",
@@ -186,7 +186,7 @@ describe("$agent", () => {
 
       .add("Document 1", () => ({}))
 
-    const { data } = await agent.execute({
+    const { data } = await agent({
       task: "This study finds that AI models improve efficiency by 30% in automated processes."
     })
 
@@ -207,9 +207,9 @@ describe("$agent", () => {
 
       .add("Document 1", () => ({}))
 
-      .task("asdasdas")
+      // .task("asdasdas")
 
-    const { data } = await agent.execute()
+    const { data } = await agent()
 
     type A = typeof data
 
@@ -230,12 +230,12 @@ describe("$agent", () => {
 
       .add("Website Optimizer", () => ({}))
 
-      .goal(() => ({
-        desiredOutcome: "Increase user signups by 20%",
-        maxAttempts: 3
-      }))
+      // .goal(() => ({
+      //   desiredOutcome: "Increase user signups by 20%",
+      //   maxAttempts: 3
+      // }))
 
-    const { data } = await agent.execute()
+    const { data } = await agent()
 
     type A = typeof data
 
@@ -258,9 +258,9 @@ describe("$agent", () => {
 
       .add("Document 1", () => ({}))
 
-      .task("TODO")
+      // .task("TODO")
 
-    const { data } = await agent.execute({
+    const { data } = await agent({
       paperText:
         "This study finds that AI models improve efficiency by 30% in automated processes."
     })

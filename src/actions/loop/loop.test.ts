@@ -18,7 +18,7 @@ describe("loop", () => {
       { name: "items" }
     )
 
-    const res = await action.execute($ctx())
+    const res = await action($ctx())
 
     expect(res.data).toStrictEqual([1, 2])
   })

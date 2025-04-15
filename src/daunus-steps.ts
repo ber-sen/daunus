@@ -1,21 +1,20 @@
 import {
   type DataResponse,
   type ExceptionReponse,
-  type ExtractExceptions,
   type Action,
-  type ActionWithInput,
   type StepFactory,
   type resultKey,
   type StepConfig,
-  type ActionOrActionWithInput,
   type StepOptions,
-  type Ctx
+  type Ctx,
+  type ActionWithInput
 } from "./types"
 
 import {
   type ValidateName,
   type FormatScope,
-  type Overwrite
+  type Overwrite,
+  type ExtractExceptions
 } from "./types-helpers"
 import { $actionWithInput } from "./daunus-action-with-input"
 import { isAction } from "./helpers"
@@ -27,45 +26,36 @@ export interface DefaultStepFactory<
   Local extends Record<any, any> = Record<typeof resultKey, undefined>,
   StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local, StepsMap>,
-    ActionOrActionWithInput<
-      Global["input"],
+    ActionWithInput<
       ExtractExceptions<Local["exceptions"]> extends undefined
         ? Local[typeof resultKey]
-        : Local[typeof resultKey] | ExtractExceptions<Local["exceptions"]>
+        : Local[typeof resultKey] | ExtractExceptions<Local["exceptions"]>,
+      Global["input"]
     > {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Value | Promise<Value>
   ): DefaultStepFactory<
     Overwrite<Global, Name> &
-      Record<
-        Name,
-        Value extends Action<any, any> | ActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
-            ? T
-            : never
-          : Value
-      >,
+      Record<Name, Value extends Action<infer D, any, any> ? D : Value>,
     Omit<Local, typeof resultKey> &
       Record<Name, Value> &
       Record<
         typeof resultKey,
-        Value extends Action<any, any> | ActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
+        Value extends Action<any, any, any>
+          ? Awaited<ReturnType<Value>> extends DataResponse<infer T>
             ? T
-            : never
+            : Value
           : Value
       > &
-      (Value extends Action<any, any> | ActionWithInput<any, any, any>
+      (Value extends Action<any, any, any>
         ? Record<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
-                infer T
-              >
+              Awaited<ReturnType<Value>> extends ExceptionReponse<infer T>
                 ? T
-                : never
+                : Value
             >
           >
         : {}),
@@ -78,11 +68,15 @@ export interface ParallelStepFactory<
   Local extends Record<string, any> = {},
   StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local, StepsMap>,
-    ActionOrActionWithInput<Global["input"], FormatScope<Local>> {
+    ActionWithInput<FormatScope<Local>, Global["input"]> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ParallelStepFactory<Global, Local & Record<Name, Value>, StepsMap & Record<Name, Global>>
+  ): ParallelStepFactory<
+    Global,
+    Local & Record<Name, Value>,
+    StepsMap & Record<Name, Global>
+  >
 }
 
 export type StepsFactory<
@@ -140,7 +134,7 @@ export function $steps<
             const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
             if (isAction(res)) {
-              return (await res.execute(ctx)).data
+              return (await res(ctx)).data
             }
 
             return res
@@ -159,7 +153,7 @@ export function $steps<
           let value = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
           if (isAction(value)) {
-            const { data, exception } = await value.execute(ctx)
+            const { data, exception } = await value(ctx)
 
             if (exception) {
               return exception
@@ -178,10 +172,5 @@ export function $steps<
       }
   )({})
 
-  return {
-    ...action,
-    get,
-    scope,
-    add
-  }
+  return Object.assign(action, { get, scope, add })
 }

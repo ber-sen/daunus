@@ -1,11 +1,10 @@
 import { get } from "./get"
-import { type Truthy, type NonUndefined, type ToCamelCase } from "./types-helpers"
+import { type Truthy, type NonUndefined, type ToCamelCase, type ExtractExceptions } from "./types-helpers"
 
 import { Exception } from "./daunus-exception"
 import {
   type Action,
   type Ctx,
-  type ExtractExceptions,
   type Query
 } from "./types"
 
@@ -46,7 +45,7 @@ export const isMapLike = (value: any): value is Map<any, any> => {
 }
 
 export function isAction(obj: any): obj is Action<any, any> {
-  return obj && typeof obj.execute === "function"
+  return obj && typeof obj === "function" && obj.meta
 }
 
 export const isWorkflowAction = <T>(obj: T): obj is T & { type: [string] } => {

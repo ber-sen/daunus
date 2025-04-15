@@ -1,3 +1,5 @@
+import { type Exception } from "./daunus-exception"
+
 export type CamelCase<T extends string> =
   T extends `${infer Left}${infer Delimiter}${infer Right}`
     ? Delimiter extends " " | "_" | "-" | "." | "," | "!"
@@ -50,3 +52,18 @@ export type Equal<X, Y> =
 export type NonUndefined<T> = T extends undefined ? never : T
 
 export type Truthy<T> = T extends false | "" | 0 | null | undefined ? never : T
+
+export type ExtractExceptions<T> =
+  T extends Exception<any, any>
+    ? T
+    : T extends Array<infer A>
+      ? ExtractExceptions<A>
+      : T extends object
+        ? {
+            [K in keyof T]: T[K] extends Exception<any, any>
+              ? T[K]
+              : ExtractExceptions<T[K]>
+          }[keyof T]
+        : never
+
+export type ExtractData<Return> = Exclude<Return, Exception<any, any>>

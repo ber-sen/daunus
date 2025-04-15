@@ -1,22 +1,21 @@
 import {
   type StepFactory,
   type DataResponse,
-  type ActionOrActionWithInput,
-  type ExtractExceptions,
   type resultKey,
-  type ActionWithInput,
   type Action,
   type ExceptionReponse,
   type StepConfig,
   type StepOptions,
-  type Ctx
+  type Ctx,
+  type ActionWithInput
 } from "./types"
 import { $steps } from "./daunus-steps"
 
 import {
   type ValidateName,
   type FormatScope,
-  type Overwrite
+  type Overwrite,
+  type ExtractExceptions
 } from "./types-helpers"
 import { $actionWithInput } from "./daunus-action-with-input"
 import { isException } from "./helpers"
@@ -28,13 +27,13 @@ export interface DefaultLoopStepFactory<
   Local extends Record<any, any> = Record<typeof resultKey, undefined>,
   StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local, StepsMap>,
-    ActionOrActionWithInput<
-      Global["input"],
+    ActionWithInput<
       ExtractExceptions<Local["exceptions"]> extends undefined
         ? Array<Local[typeof resultKey]>
         :
             | Array<Local[typeof resultKey]>
-            | ExtractExceptions<Local["exceptions"]>
+            | ExtractExceptions<Local["exceptions"]>,
+      Global["input"]
     > {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
@@ -43,8 +42,8 @@ export interface DefaultLoopStepFactory<
     Overwrite<Global, Name> &
       Record<
         Name,
-        Value extends ActionWithInput<any, any, any> | Action<any, any>
-          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
+        Value extends Action<any, any, any>
+          ? Awaited<ReturnType<Value>> extends DataResponse<infer T>
             ? T
             : never
           : Value
@@ -53,20 +52,18 @@ export interface DefaultLoopStepFactory<
       Record<Name, Value> &
       Record<
         typeof resultKey,
-        Value extends Action<any, any> | ActionWithInput<any, any, any>
-          ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
+        Value extends Action<any, any, any>
+          ? Awaited<ReturnType<Value>> extends DataResponse<infer T>
             ? T
             : never
           : Value
       > &
-      (Value extends Action<any, any> | ActionWithInput<any, any, any>
+      (Value extends Action<any, any, any>
         ? Record<
             "exceptions",
             Record<
               Name,
-              Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
-                infer T
-              >
+              Awaited<ReturnType<Value>> extends ExceptionReponse<infer T>
                 ? T
                 : never
             >
@@ -81,11 +78,15 @@ export interface ParallelLoopStepFactory<
   Local extends Record<string, any> = {},
   StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local>,
-    ActionOrActionWithInput<Global["input"], Array<FormatScope<Local>>> {
+    ActionWithInput<Array<FormatScope<Local>>, Global["input"]> {
   add<Name extends string, Value>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
-  ): ParallelLoopStepFactory<Global, Local & Record<Name, Value>, StepsMap & Record<Name, Global>>
+  ): ParallelLoopStepFactory<
+    Global,
+    Local & Record<Name, Value>,
+    StepsMap & Record<Name, Global>
+  >
 }
 
 export type Item<List extends Array<any> | readonly any[]> = {
@@ -119,11 +120,20 @@ function $loopSteps<
     $?: Scope<Global, Local, StepsMap> | Global
   } & Options
 ): Options["stepsType"] extends "parallel"
-  ? ParallelLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local, StepsMap>
-  : DefaultLoopStepFactory<Global & Record<ItemVariable, Item<List>>, Local, StepsMap> {
+  ? ParallelLoopStepFactory<
+      Global & Record<ItemVariable, Item<List>>,
+      Local,
+      StepsMap
+    >
+  : DefaultLoopStepFactory<
+      Global & Record<ItemVariable, Item<List>>,
+      Local,
+      StepsMap
+    > {
   const { $, list, itemVariable, stepsType } = params ?? {}
 
-  const scope = $ instanceof Scope ? $ : new Scope<Global, Local, StepsMap>({ global: $ })
+  const scope =
+    $ instanceof Scope ? $ : new Scope<Global, Local, StepsMap>({ global: $ })
 
   function get<Name extends keyof Local>(
     name: Extract<Name, string>,
@@ -157,7 +167,7 @@ function $loopSteps<
           const { data, exception } = await $steps({
             $: rowScope,
             stepsType
-          }).execute(ctx)
+          })(ctx as any)
 
           if (exception) {
             return exception
@@ -178,7 +188,7 @@ function $loopSteps<
       }
   )({})
 
-  return { ...action, get, scope, add }
+  return Object.assign(action, { get, scope, add })
 }
 
 export type IterateFactory<

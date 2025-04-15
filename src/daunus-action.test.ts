@@ -75,7 +75,7 @@ describe("$action", () => {
       }
     )
 
-    type A = ReturnType<typeof test>["env"]
+    type A = ReturnType<typeof test>["meta"]["env"]
 
     type test = Expect<Equal<A, {}>>
   })
@@ -92,7 +92,7 @@ describe("$action", () => {
       }
     )
 
-    type A = ReturnType<typeof test>["env"]
+    type A = ReturnType<typeof test>["meta"]["env"]
 
     type test = Expect<
       Equal<

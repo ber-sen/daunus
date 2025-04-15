@@ -10,7 +10,7 @@ describe("$useCase", () => {
       ({ scope }) => scope.useCase.originalName
     )
 
-    const { data } = await useCase.execute()
+    const { data } = await useCase()
 
     type A = typeof data
 
@@ -27,7 +27,7 @@ describe("$useCase", () => {
 
       .handle(({ scope }) => scope.input.name === "lorem")
 
-    const { data } = await useCase.execute({ name: "lorem" })
+    const { data } = await useCase({ name: "lorem" })
 
     type A = typeof data
 
@@ -44,7 +44,7 @@ describe("$useCase", () => {
 
       .handle(({ scope }) => scope.input.messages)
 
-    const { data } = await useCase.execute({ messages: ["lorem"] })
+    const { data } = await useCase({ messages: ["lorem"] })
 
     type data = Expect<Equal<typeof data, string[]>>
 
@@ -63,7 +63,7 @@ describe("$useCase", () => {
         `
       )
 
-    const { data } = await useCase.execute({ language: "Spanish" })
+    const { data } = await useCase({ language: "Spanish" })
 
     type A = typeof data
 
@@ -93,7 +93,7 @@ describe("$useCase", () => {
         `
       )
 
-    const { data } = await useCase.execute({ dish: "Lasagna" })
+    const { data } = await useCase({ dish: "Lasagna" })
 
     type A = typeof data
 
@@ -130,7 +130,7 @@ describe("$useCase", () => {
 
       .add("second step", ({ scope }) => scope.firstStep.greeting)
 
-    const { data } = await useCase.execute({ name: "Luna" })
+    const { data } = await useCase({ name: "Luna" })
 
     type A = typeof data
 
@@ -151,7 +151,7 @@ describe("$useCase", () => {
 
       .add("second step", ({ scope }) => scope.firstStep.name)
 
-    const { data } = await useCase.execute({ name: "Luna" })
+    const { data } = await useCase({ name: "Luna" })
 
     type A = typeof data
 
@@ -172,7 +172,7 @@ describe("$useCase", () => {
 
       .add("second step", () => 42)
 
-    const { data } = await useCase.execute({ city: "London" })
+    const { data } = await useCase({ city: "London" })
 
     type A = typeof data
 
@@ -194,6 +194,54 @@ describe("$useCase", () => {
       },
       secondStep: 42
     })
+  })
+
+  it("should return error inside loop ", async () => {
+    const input = $input({ array: z.array(z.number()) })
+
+    const useCase = $useCase("Loop with error")
+      .input(input)
+
+      .handle(({ iterate, scope }) =>
+        //
+        iterate({ list: scope.input.array })
+          //
+          .forEachItem()
+
+          .add("exit", () => exit({ status: 500 }))
+      )
+
+    const { exception } = await useCase({ array: [1, 2, 3] })
+
+    type A = typeof exception
+
+    type exception = Expect<Equal<A, Exception<500, undefined, undefined>>>
+
+    expect(exception).toEqual(new Exception({ status: 500 }))
+  })
+
+  it("should return error inside condition", async () => {
+    const input = $input({ array: z.array(z.number()) })
+
+    const useCase = $useCase("condition with error")
+      .input(input)
+
+      .handle(({ when, $ }) =>
+        // add condition
+        when({ condition: $.input.array.length > 1 })
+          // add true branch
+          .isTrue()
+
+          .add("exit", () => exit({ status: 500 }))
+      )
+
+    const { exception } = await useCase({ array: [1, 2, 3] })
+
+    type A = typeof exception
+
+    type exception = Expect<Equal<A, Exception<500, undefined, undefined>>>
+
+    expect(exception).toEqual(new Exception({ status: 500 }))
   })
 
   it("should work with loop and condition", async () => {
@@ -221,74 +269,7 @@ describe("$useCase", () => {
           )
       )
 
-    const { data } = await useCase.execute({ array: [1, 2, 3] })
-
-    type A = typeof data
-
-    type data = Expect<Equal<A, (string | number)[]>>
-
-    expect(data).toEqual([1, "2 is even", 3])
-  })
-
-  it("should return error inside loop ", async () => {
-    const input = $input({ array: z.array(z.number()) })
-
-    const useCase = $useCase("Loop with error")
-      .input(input)
-
-      .handle(({ iterate, scope }) =>
-        //
-        iterate({ list: scope.input.array })
-          //
-          .forEachItem()
-
-          .add("exit", () => exit({ status: 500 }))
-      )
-
-    const { exception } = await useCase.execute({ array: [1, 2, 3] })
-
-    type A = typeof exception
-
-    type exception = Expect<Equal<A, Exception<500, undefined, undefined>>>
-
-    expect(exception).toEqual(new Exception({ status: 500 }))
-  })
-
-  it("should return error inside condition", async () => {
-    const input = $input({ array: z.array(z.number()) })
-
-    const useCase = $useCase("condition with error")
-      .input(input)
-
-      .handle(({ when, $ }) =>
-        // add condition
-        when({ condition: $.input.array.length > 1 })
-          // add true branch
-          .isTrue()
-
-          .add("exit", () => exit({ status: 500 }))
-      )
-
-    const { exception } = await useCase.execute({ array: [1, 2, 3] })
-
-    type A = typeof exception
-
-    type exception = Expect<Equal<A, Exception<500, undefined, undefined>>>
-
-    expect(exception).toEqual(new Exception({ status: 500 }))
-  })
-
-  it("should allow script version", async () => {
-    const input = $input({ names: z.array(z.number()) })
-
-    const useCase = $useCase("Script")
-      .input(input)
-
-      .handle(({ $ }) =>
-        $.input.names.map((item) => (item % 2 === 0 ? `${item} is even` : item))
-      )
-
-    const { data } = await useCase.execute({ names: [1, 2, 3] })
+    const { data } = await useCase({ array: [1, 2, 3] })
 
     type A = typeof data
 

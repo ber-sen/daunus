@@ -2,12 +2,7 @@ import { type z } from "zod"
 
 import { $action } from "./daunus-action"
 import { $ctx } from "./daunus-helpers"
-import {
-  type Action,
-  type ActionOrActionWithInput,
-  type ActionWithInput,
-  type Ctx
-} from "./types"
+import { type ActionWithInput, type Ctx } from "./types"
 
 export const $actionWithInput =
   <I, P, O, E = {}>(
@@ -27,20 +22,18 @@ export const $actionWithInput =
     actionCtx?: {
       name?: string
     }
-  ): ActionOrActionWithInput<I, O, E> => {
+  ): ActionWithInput<O, I, E> => {
     const factory = $action<P, O, E>(args, (options) => fn(options))
 
     const action = factory(params, actionCtx)
 
-    const execute = ((
+    const execute = (
       ...args: [ctx?: Map<string, any>] | [input: I, ctx?: Map<string, any>]
     ) => {
       const ctx = getContext(...args)
 
-      return action.execute(ctx)
-    }) as I extends object
-      ? ActionWithInput<I, O, E>["execute"]
-      : Action<O, E>["execute"]
+      return action(ctx)
+    }
 
     const input = ((input: I) => {
       return {
@@ -48,12 +41,15 @@ export const $actionWithInput =
         execute: (ctx: Ctx = $ctx()) => {
           ctx.set("input", input)
 
-          return action.execute(ctx)
+          return action(ctx)
         }
       }
     }) as I extends object ? typeof input : never
 
-    return { ...action, input, execute }
+    return Object.assign(execute, {
+      ...action,
+      input
+    })
   }
 
 export const getContext = <I>(

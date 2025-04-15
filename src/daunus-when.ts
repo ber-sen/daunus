@@ -6,13 +6,12 @@ import {
   type AbstractStepFactory,
   type resultKey,
   type DataResponse,
-  type ActionOrActionWithInput,
   type ExceptionReponse,
   type StepConfig,
-  type ActionWithInput,
   type Action,
   type StepFactory,
-  type Ctx
+  type Ctx,
+  type ActionWithInput
 } from "./types"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
@@ -52,7 +51,10 @@ type ConditionDefaultCaseStepFactoryWithout<
     Without
   >,
   Without
->
+> &  ActionWithInput<
+      ExtractValuesByKey<Local, typeof resultKey>,
+      Global["input"]
+    >
 
 interface ConditionDefaultCaseStepFactory<
   Condition,
@@ -62,9 +64,9 @@ interface ConditionDefaultCaseStepFactory<
   CurrentKey extends Key = "",
   Without extends string = ""
 > extends AbstractStepFactory<Global, Local>,
-    ActionOrActionWithInput<
-      Global["input"],
-      ExtractValuesByKey<Local, typeof resultKey>
+    ActionWithInput<
+      ExtractValuesByKey<Local, typeof resultKey>,
+      Global["input"]
     > {
   isTrue(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
@@ -98,8 +100,8 @@ interface ConditionDefaultCaseStepFactory<
         CurrentKey,
         Record<
           Name,
-          Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
+          Value extends Action<any, any, any>
+            ? Awaited<ReturnType<Value>> extends DataResponse<infer T>
               ? T
               : never
             : Value
@@ -127,20 +129,18 @@ interface ConditionDefaultCaseStepFactory<
         CurrentKey,
         Record<
           typeof resultKey,
-          Value extends Action<any, any> | ActionWithInput<any, any, any>
-            ? Awaited<ReturnType<Value["execute"]>> extends DataResponse<infer T>
+          Value extends Action<any, any, any>
+            ? Awaited<ReturnType<Value>> extends DataResponse<infer T>
               ? T
               : never
             : Value
         > &
-          (Value extends Action<any, any> | ActionWithInput<any, any, any>
+          (Value extends Action<any, any, any>
             ? Record<
                 "exceptions",
                 Record<
                   Name,
-                  Awaited<ReturnType<Value["execute"]>> extends ExceptionReponse<
-                    infer T
-                  >
+                  Awaited<ReturnType<Value>> extends ExceptionReponse<infer T>
                     ? T
                     : never
                 >
@@ -171,7 +171,7 @@ export interface ConditionFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
-> extends ActionOrActionWithInput<Global["input"], Condition> {
+> extends ActionWithInput<Condition, Global["input"]> {
   isTrue(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Global,
@@ -271,7 +271,7 @@ function $whenBranch<
 
           const { data, exception } = await $steps({
             $: trueScope
-          }).execute(ctx)
+          })(ctx)
 
           if (exception) {
             return exception
@@ -286,7 +286,7 @@ function $whenBranch<
 
         const { data, exception } = await $steps({
           $: falseScope
-        }).execute(ctx)
+        })(ctx)
 
         if (exception) {
           return exception
@@ -296,7 +296,7 @@ function $whenBranch<
       }
   )({})
 
-  return { ...action, get, add, isTrue, isFalse, scope }
+  return Object.assign(action, { get, add, isTrue, isFalse, scope })
 }
 
 export function $when<
@@ -351,5 +351,5 @@ export function $when<
     })
   }
 
-  return { ...action, isTrue, isFalse }
+  return Object.assign(action, { isTrue, isFalse })
 }

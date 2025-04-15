@@ -1,7 +1,7 @@
 import { type Type } from "arktype"
 import { type Exception } from "./daunus-exception"
 import { type Scope } from "./daunus-scope"
-import { type FormatScope, type ValidateName } from "./types-helpers"
+import { type ExtractData, type ExtractExceptions, type FormatScope, type ValidateName } from "./types-helpers"
 import { type z } from "./zod"
 import { type LanguageModelV1 } from "@ai-sdk/provider"
 
@@ -11,64 +11,40 @@ export type Query<T> = T & ((ctx: Ctx) => Promise<T>)
 
 export type Input<T> = Type<T> | z.ZodType<T>
 
-export type ExtractExceptions<T> =
-  T extends Exception<any, any>
-    ? T
-    : T extends Array<infer A>
-      ? ExtractExceptions<A>
-      : T extends object
-        ? {
-            [K in keyof T]: T[K] extends Exception<any, any>
-              ? T[K]
-              : ExtractExceptions<T[K]>
-          }[keyof T]
-        : never
-
-export type ExtractData<Return> = Exclude<Return, Exception<any, any>>
-
 export type DataResponse<Data> = { data: Data }
 
 export type ExceptionReponse<Exception> = { exception: Exception }
 
-export type ActionResponse<Data, Exception> = DataResponse<Data> &
-  ExceptionReponse<Exception>
-
-export type Action<Return, Env = {}> = {
-  name: string
-  env: Env
-  execute: (ctx?: Ctx) => Promise<{
-    data: ExtractData<Return>
-    exception: ExtractExceptions<Return>
-  }>
+export type ActionResponse<Return> = {
+  data: ExtractData<Return>
+  exception: ExtractExceptions<Return>
 }
 
-export type ActionFactory<Params, Return, Env = {}> = (
-  params: Params,
-  actionMeta?: {
-    name?: string
-  }
-) => Action<Return, Env>
-
-export type ActionWithInput<Input, Return, Env = {}> = {
+export type ActionMeta<Env> = {
   name: string
   env: Env
-  execute: (
-    input: Input,
+}
+
+export type Action<Return, Input = void, Env = {}> = Input extends object
+  ? {
+      (input: Input, ctx?: Ctx): Promise<ActionResponse<Return>>
+      meta: ActionMeta<Env>
+    }
+  : {
+      (ctx?: Ctx): Promise<ActionResponse<Return>>
+      meta: ActionMeta<Env>
+    }
+
+export type ActionWithInput<Return, Input, Env = {}> = {
+  (
+    input: Input extends object ? Input : never,
     ctx?: Ctx
-  ) => Promise<{
-    data: ExtractData<Return>
-    exception: ExtractExceptions<Return>
-  }>
-  input: (input: Input) => Action<Return, Env>
-}
-
-export type ActionOrActionWithInput<Input, Return, Env = {}> = {
-  name: string
-  env: Env
-  execute: Input extends object
-    ? ActionWithInput<Input, Return, Env>["execute"]
-    : Action<Return, Env>["execute"]
-  input: Input extends object ? (input: Input) => Action<Return, Env> : never
+  ): Promise<ActionResponse<Return>>
+  (ctx?: Input extends object ? never : Ctx): Promise<ActionResponse<Return>>
+  meta: {
+    name: string
+    env: Env
+  }
 }
 
 export type Event<Type, Params> = {
@@ -84,19 +60,11 @@ export type WorkflowAction<T> = {
 
 export type ExcludeException<T> = T extends Exception<any, any> ? never : T
 
-export type InferReturn<
-  T extends Action<any, any> | ActionWithInput<any, any, any>
-> = T extends Action<any, any> ? Awaited<ReturnType<T["execute"]>> : never
+export type InferReturn<T extends Action<any, any, any>> =
+  T extends Action<any, any, any> ? Awaited<ReturnType<T>> : never
 
-export type InferInput<
-  T extends
-    | ActionWithInput<any, any, any>
-    | ActionOrActionWithInput<any, any, any>
-> = T extends
-  | ActionWithInput<any, any, any>
-  | ActionOrActionWithInput<any, any, any>
-  ? Parameters<T["input"]>[0]
-  : never
+export type InferInput<T extends Action<any, any, any>> =
+  T extends Action<any, infer I, any> ? I : never
 
 type WorkflowBackoff = "constant" | "linear" | "exponential"
 
@@ -135,4 +103,4 @@ export interface StepOptions {
   stepsType?: "default" | "parallel" | "serial"
 }
 
-export type Model = ((ctx: Ctx) => LanguageModelV1)
+export type Model = (ctx: Ctx) => LanguageModelV1

@@ -3,8 +3,8 @@ import {
   type StepOptions,
   type Ctx,
   type StepFactory,
-  type ActionOrActionWithInput,
-  type ActionResponse
+  type ActionResponse,
+  type ActionWithInput
 } from "./types"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
@@ -49,23 +49,23 @@ type AgentDefaultInput<Output> =
 export interface AgentActionsFactory<Global extends Record<string, any> = {}> {
   task<Value extends Task<any>>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionOrActionWithInput<
-    Global["input"],
-    Value extends { output: any } ? z.infer<Value["output"]> : string
+  ): ActionWithInput<
+    Value extends { output: any } ? z.infer<Value["output"]> : string,
+    Global["input"]
   >
 
   goal<Value extends Goal<any>>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionOrActionWithInput<
-    Global["input"],
-    Value extends { output: any } ? z.infer<Value["output"]> : string
+  ): ActionWithInput<
+    Value extends { output: any } ? z.infer<Value["output"]> : string,
+    Global["input"]
   >
 
   response<Value extends Response>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionOrActionWithInput<
-    Global["input"],
-    Value extends { output: any } ? z.infer<Value["output"]> : string
+  ): ActionWithInput<
+    Value extends { output: any } ? z.infer<Value["output"]> : string,
+    Global["input"]
   >
 }
 
@@ -88,7 +88,7 @@ export interface AgentResourcesFactory<
         Local & Record<Name, Value>,
         StepsMap & Record<Name, Global>
       > &
-        ActionOrActionWithInput<{ task: string }, string>
+        Action<string, { task: string }>
 }
 
 export type AgentStepsFactory<
@@ -111,7 +111,7 @@ function $agentResources<
     name?: string
   } & Options
 ): AgentResourcesFactory<Global, Local, StepsMap> &
-  ActionOrActionWithInput<Global["input"], Value> {
+  ActionWithInput<Value, Global["input"]> {
   const { $, stepsType } = params ?? {}
 
   const scope =
@@ -140,7 +140,7 @@ function $agentResources<
           const res = await fn($stepProps({ $: scope.getGlobal(ctx), ctx }))
 
           if (isAction(res)) {
-            return (await res.execute(ctx)).data
+            return (await res(ctx)).data
           }
 
           return res
@@ -237,12 +237,10 @@ export function $agent<Instructions extends string, Input, Output>(
     }
   )({})
 
-  const { execute: actionRun } = action
-
   const execute = <Output = string>(
     input: AgentDefaultInput<Output>,
     ctx?: Ctx
-  ): Promise<ActionResponse<Output, never>> => actionRun(input, ctx) as any
+  ): Promise<ActionResponse<Output>> => action(input, ctx) as any
 
-  return { ...action, task, execute, goal, resources, input }
+  return Object.assign(execute, { ...action, task, goal, resources, input })
 }

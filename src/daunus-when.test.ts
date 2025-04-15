@@ -5,7 +5,7 @@ describe("when", () => {
   it("should work without steps", async () => {
     const condition = $when({ condition: true })
 
-    const { data } = await condition.execute()
+    const { data } = await condition()
 
     type A = typeof data
 
@@ -20,7 +20,7 @@ describe("when", () => {
 
       .add("first step", ({ $ }) => $.condition)
 
-    const { data } = await condition.execute()
+    const { data } = await condition()
 
     type A = typeof data
 
@@ -41,7 +41,7 @@ describe("when", () => {
 
       .add("false step", () => ({ foo: "bar" }))
 
-    const { data } = await condition.execute()
+    const { data } = await condition()
 
     type A = typeof data
 
@@ -102,7 +102,7 @@ describe("when", () => {
       .add("false resukts", ({ $ }) => $)
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { data } = await condition.execute()
+    const { data } = await condition()
 
     type A = typeof data
 

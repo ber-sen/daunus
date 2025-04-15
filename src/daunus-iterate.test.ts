@@ -10,7 +10,7 @@ describe("$iterate", () => {
 
       .add("second step", ({ $ }) => $.firstStep.value)
 
-    const { data } = await loop.execute()
+    const { data } = await loop()
 
     type A = typeof data
 
@@ -27,7 +27,7 @@ describe("$iterate", () => {
 
       .add("second step", ({ $ }) => $.firstStep.value)
 
-    const { data } = await loop.execute()
+    const { data } = await loop()
 
     type A = typeof data
 
@@ -44,7 +44,7 @@ describe("$iterate", () => {
 
       .add("second step", ({ $ }) => $.firstStep.value)
 
-    const { data } = await loop.execute()
+    const { data } = await loop()
 
     type A = typeof data
 
@@ -61,7 +61,7 @@ describe("$iterate", () => {
 
       .add("second step", ({ $ }) => $.firstStep.value)
 
-    const { data } = await loop.execute()
+    const { data } = await loop()
 
     type A = typeof data
 
@@ -76,7 +76,7 @@ describe("$iterate", () => {
 
       .add("first step", ({ $ }) => $.i.value)
 
-    const { data } = await loop.execute()
+    const { data } = await loop()
 
     type A = typeof data
 
@@ -93,7 +93,7 @@ describe("$iterate", () => {
 
       .add("second step", () => 42)
 
-    const { data } = await loop.execute()
+    const { data } = await loop()
 
     type A = typeof data
 
