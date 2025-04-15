@@ -1,4 +1,3 @@
-import { $actionWithInput } from "./daunus-action-with-input"
 import { $steps } from "./daunus-steps"
 
 import { type ValidateName } from "./types-helpers"
@@ -11,10 +10,11 @@ import {
   type Action,
   type StepFactory,
   type Ctx,
-  type ActionWithInput
+  type ComposedAction
 } from "./types"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
+import { $composedAction } from "./daunus-composed-action"
 
 export type ExtractValuesByKey<T, K extends keyof any> =
   T extends Record<string, any>
@@ -51,10 +51,8 @@ type ConditionDefaultCaseStepFactoryWithout<
     Without
   >,
   Without
-> &  ActionWithInput<
-      ExtractValuesByKey<Local, typeof resultKey>,
-      Global["input"]
-    >
+> &
+  ComposedAction<ExtractValuesByKey<Local, typeof resultKey>, Global["input"]>
 
 interface ConditionDefaultCaseStepFactory<
   Condition,
@@ -64,7 +62,7 @@ interface ConditionDefaultCaseStepFactory<
   CurrentKey extends Key = "",
   Without extends string = ""
 > extends AbstractStepFactory<Global, Local>,
-    ActionWithInput<
+    ComposedAction<
       ExtractValuesByKey<Local, typeof resultKey>,
       Global["input"]
     > {
@@ -108,7 +106,7 @@ interface ConditionDefaultCaseStepFactory<
         >
         // TODO: add continue on error option
         //   &
-        //     (Value extends Action<any, any> | ActionWithInput<any, any, any>
+        //     (Value extends Action<any, any> | ComposedAction<any, any, any>
         //       ? Record<
         //           "exceptions",
         //           Record<
@@ -171,7 +169,7 @@ export interface ConditionFactory<
   Condition,
   Global extends Record<string, any> = {},
   Local extends Record<string, any> = {}
-> extends ActionWithInput<Condition, Global["input"]> {
+> extends ComposedAction<Condition, Global["input"]> {
   isTrue(): ConditionDefaultCaseStepFactoryWithout<
     Condition,
     Global,
@@ -260,7 +258,7 @@ function $whenBranch<
     })
   }
 
-  const action = $actionWithInput<Global["input"], any, any>(
+  const action = $composedAction<Global["input"], any, any>(
     { type: "condition" },
     ({ ctx }) =>
       async () => {
@@ -328,7 +326,7 @@ export function $when<
       scope: new Scope({ global: $ })
     })
 
-  const action = $actionWithInput<Global["input"], any, any>(
+  const action = $composedAction<Global["input"], any, any>(
     { type: "condition" },
     () => async () => {
       return condition

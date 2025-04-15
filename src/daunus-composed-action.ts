@@ -2,9 +2,9 @@ import { type z } from "zod"
 
 import { $action } from "./daunus-action"
 import { $ctx } from "./daunus-helpers"
-import { type ActionWithInput, type Ctx } from "./types"
+import { type ComposedAction, type Ctx } from "./types"
 
-export const $actionWithInput =
+export const $composedAction =
   <I, P, O, E = {}>(
     args: {
       type: string
@@ -22,7 +22,7 @@ export const $actionWithInput =
     actionCtx?: {
       name?: string
     }
-  ): ActionWithInput<O, I, E> => {
+  ): ComposedAction<O, I, E> => {
     const factory = $action<P, O, E>(args, (options) => fn(options))
 
     const action = factory(params, actionCtx)
@@ -35,21 +35,15 @@ export const $actionWithInput =
       return action(ctx)
     }
 
-    const input = ((input: I) => {
-      return {
-        ...action,
-        execute: (ctx: Ctx = $ctx()) => {
-          ctx.set("input", input)
+    const toAction = ((input: I) => {
+      Object.assign((ctx: Ctx = $ctx()) => {
+        ctx.set("input", input)
 
-          return action(ctx)
-        }
-      }
-    }) as I extends object ? typeof input : never
+        return action(ctx)
+      }, action)
+    }) as I extends object ? typeof toAction : never
 
-    return Object.assign(execute, {
-      ...action,
-      input
-    })
+    return Object.assign(execute, { ...action, toAction })
   }
 
 export const getContext = <I>(

@@ -1,7 +1,12 @@
 import { type Type } from "arktype"
 import { type Exception } from "./daunus-exception"
 import { type Scope } from "./daunus-scope"
-import { type ExtractData, type ExtractExceptions, type FormatScope, type ValidateName } from "./types-helpers"
+import {
+  type ExtractData,
+  type ExtractExceptions,
+  type FormatScope,
+  type ValidateName
+} from "./types-helpers"
 import { type z } from "./zod"
 import { type LanguageModelV1 } from "@ai-sdk/provider"
 
@@ -35,12 +40,18 @@ export type Action<Return, Input = void, Env = {}> = Input extends object
       meta: ActionMeta<Env>
     }
 
-export type ActionWithInput<Return, Input, Env = {}> = {
+export type ComposedAction<Return, Input, Env = {}> = {
   (
     input: Input extends object ? Input : never,
     ctx?: Ctx
   ): Promise<ActionResponse<Return>>
+  
   (ctx?: Input extends object ? never : Ctx): Promise<ActionResponse<Return>>
+
+  toAction: (
+    input: Input extends object ? Input : never
+  ) => Action<Return, void, Env>
+  
   meta: {
     name: string
     env: Env

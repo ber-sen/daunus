@@ -7,7 +7,7 @@ import {
   type StepConfig,
   type StepOptions,
   type Ctx,
-  type ActionWithInput
+  type ComposedAction
 } from "./types"
 
 import {
@@ -16,17 +16,17 @@ import {
   type Overwrite,
   type ExtractExceptions
 } from "./types-helpers"
-import { $actionWithInput } from "./daunus-action-with-input"
 import { isAction } from "./helpers"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
+import { $composedAction } from "./daunus-composed-action"
 
 export interface DefaultStepFactory<
   Global extends Record<string, any> = {},
   Local extends Record<any, any> = Record<typeof resultKey, undefined>,
   StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local, StepsMap>,
-    ActionWithInput<
+    ComposedAction<
       ExtractExceptions<Local["exceptions"]> extends undefined
         ? Local[typeof resultKey]
         : Local[typeof resultKey] | ExtractExceptions<Local["exceptions"]>,
@@ -68,7 +68,7 @@ export interface ParallelStepFactory<
   Local extends Record<string, any> = {},
   StepsMap extends Record<string, any> = {}
 > extends StepFactory<Global, Local, StepsMap>,
-    ActionWithInput<FormatScope<Local>, Global["input"]> {
+    ComposedAction<FormatScope<Local>, Global["input"]> {
   add<Value, Name extends string>(
     name: ValidateName<Name, Local> | StepConfig<Name, Local>,
     fn: (props: StepProps<Global>) => Promise<Value> | Value
@@ -121,7 +121,7 @@ export function $steps<
     })
   }
 
-  const action = $actionWithInput<Global["input"], any, any>(
+  const action = $composedAction<Global["input"], any, any>(
     { type: "steps" },
     ({ ctx }) =>
       async () => {

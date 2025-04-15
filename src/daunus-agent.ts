@@ -4,12 +4,13 @@ import {
   type Ctx,
   type StepFactory,
   type ActionResponse,
-  type ActionWithInput
+  type ComposedAction,
+  type Action
 } from "./types"
 import { Scope } from "./daunus-scope"
 import { $stepProps, type StepProps } from "./daunus-step-props"
 import { type ValidateName } from "./types-helpers"
-import { $actionWithInput } from "./daunus-action-with-input"
+import { $composedAction } from "./daunus-composed-action"
 import { isAction } from "./helpers"
 import { type CoreMessage, type Message } from "ai"
 import { type Type } from "arktype"
@@ -49,21 +50,21 @@ type AgentDefaultInput<Output> =
 export interface AgentActionsFactory<Global extends Record<string, any> = {}> {
   task<Value extends Task<any>>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionWithInput<
+  ): ComposedAction<
     Value extends { output: any } ? z.infer<Value["output"]> : string,
     Global["input"]
   >
 
   goal<Value extends Goal<any>>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionWithInput<
+  ): ComposedAction<
     Value extends { output: any } ? z.infer<Value["output"]> : string,
     Global["input"]
   >
 
   response<Value extends Response>(
     fn: ((props: StepProps<Global>) => Promise<Value> | Value) | Value
-  ): ActionWithInput<
+  ): ComposedAction<
     Value extends { output: any } ? z.infer<Value["output"]> : string,
     Global["input"]
   >
@@ -111,7 +112,7 @@ function $agentResources<
     name?: string
   } & Options
 ): AgentResourcesFactory<Global, Local, StepsMap> &
-  ActionWithInput<Value, Global["input"]> {
+  ComposedAction<Value, Global["input"]> {
   const { $, stepsType } = params ?? {}
 
   const scope =
@@ -131,7 +132,7 @@ function $agentResources<
     })
   }
 
-  const action = $actionWithInput<Global["input"], any, any>(
+  const action = $composedAction<Global["input"], any, any>(
     { type: "agent" },
     ({ ctx }) =>
       async () => {
@@ -230,7 +231,7 @@ export function $agent<Instructions extends string, Input, Output>(
     return { task, resources }
   }
 
-  const action = $actionWithInput<any, any, any>(
+  const action = $composedAction<any, any, any>(
     { type: "agent" },
     () => async () => {
       return "sadad"

@@ -150,6 +150,8 @@ describe("$useCase", () => {
       .add("First step", ({ scope }) => scope.input)
 
       .add("second step", ({ scope }) => scope.firstStep.name)
+      
+      
 
     const { data } = await useCase({ name: "Luna" })
 
