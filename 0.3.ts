@@ -2,7 +2,7 @@ type Trumpet<Name, Scope> = [Name, (props: { scope: Scope }) => any]
 
 class Steps<const T0, const T1, const T2, const T3> {
   constructor(
-    trumpets: [
+   ...trumpets: [
       Trumpet<T0, {}>,
       Trumpet<T1, T0>,
       Trumpet<T2, T1>,
@@ -11,12 +11,17 @@ class Steps<const T0, const T1, const T2, const T3> {
   ) {}
 }
 
-const cw = new Steps([
+const cw = new Steps(
   ["greet", () => `Hello`],
 
-  ["double", ({ scope }) => scope],
+  [
+    "double",
+    () => ({
+      asd: "asdad"
+    })
+  ],
 
   ["greet2", ({ scope }) => scope],
 
   ["greet4", ({ scope }) => scope]
-])
+)
